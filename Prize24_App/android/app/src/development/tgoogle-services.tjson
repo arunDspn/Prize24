@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "658213032436",
+    "project_id": "prize24-dev",
+    "storage_bucket": "prize24-dev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:658213032436:android:5c86400e0826589fbea9a1",
+        "android_client_info": {
+          "package_name": "com.kintlearn.prize24_app.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbO975O_549DvdcWOiPq0V9q6-WohGIdU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

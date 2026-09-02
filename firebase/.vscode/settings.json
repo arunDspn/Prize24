@@ -1,0 +1,7 @@
+{
+    "[javascript]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnType": false,
+        "editor.formatOnPaste": false
+    }
+}

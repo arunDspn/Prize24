@@ -1,0 +1,59 @@
+{
+  "version": "0.2",
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "dictionaries": [
+    "vgv_allowed",
+    "vgv_forbidden"
+  ],
+  "dictionaryDefinitions": [
+    {
+      "name": "vgv_allowed",
+      "path": "https://raw.githubusercontent.com/verygoodopensource/very_good_dictionaries/main/allowed.txt",
+      "description": "Allowed VGV Spellings"
+    },
+    {
+      "name": "vgv_forbidden",
+      "path": "https://raw.githubusercontent.com/verygoodopensource/very_good_dictionaries/main/forbidden.txt",
+      "description": "Forbidden VGV Spellings"
+    }
+  ],
+  "useGitignore": true,
+  "words": [
+    "Autovalidate",
+    "CKGL",
+    "Contador",
+    "Dtos",
+    "Hais",
+    "Riverpod",
+    "Texto",
+    "autovalidate",
+    "checkmarks",
+    "dtos",
+    "giftcard",
+    "localizable",
+    "mostrado",
+    "página",
+    "Texto",
+    "Riverpod",
+    "riverpod",
+    "observor",
+    "CKGL",
+    "Hais",
+    "autovalidate",
+    "Autovalidate",
+    "snackbars",
+    "checkmarks",
+    "giftcard",
+    "usecase",
+    "dtos",
+    "Dtos",
+    "mocktail",
+    "pubspec",
+    "xcworkspace",
+    "xcassets",
+    "Firestore",
+    "firestore",
+    "genhtml",
+    "contador"
+  ]
+}

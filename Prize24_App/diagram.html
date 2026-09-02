@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prize24 App Flow</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        slate: { 50: '#F8FAFC', 900: '#0F172A' },
+                        brand: { start: '#FF5F6D', end: '#FFC371' } 
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0, 0, 0, 0.08)',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center py-10 px-4">
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-400 to-red-500 text-white mb-4 shadow-lg">
+            <i class="ph-fill ph-git-branch text-2xl"></i>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 mb-2">App Workflow</h1>
+        <p class="text-slate-500 font-medium">Campaign Creation • Loyalty Check-in • Redemption</p>
+    </div>
+
+    <!-- Chart Container -->
+    <div class="w-full max-w-5xl bg-white rounded-[32px] shadow-soft border border-slate-100 p-8 overflow-hidden relative">
+        
+        <!-- Legend -->
+        <div class="absolute top-6 right-6 flex flex-col gap-2 text-xs font-bold uppercase tracking-wide bg-slate-50 p-3 rounded-xl border border-slate-100 z-10">
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-blue-100 border-2 border-blue-500"></div>
+                <span class="text-slate-600">Vendor / Staff</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-green-100 border-2 border-green-500"></div>
+                <span class="text-slate-600">User Action</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-orange-100 border-2 border-orange-500"></div>
+                <span class="text-slate-600">System Logic</span>
+            </div>
+        </div>
+
+        <!-- Mermaid Chart -->
+        <div class="mermaid flex justify-center">
+            %%{init: {'theme': 'base', 'securityLevel': 'loose', 'themeVariables': { 'primaryColor': '#F1F5F9', 'primaryTextColor': '#0F172A', 'lineColor': '#94A3B8', 'fontFamily': 'Plus Jakarta Sans' }}}%%
+            flowchart TD
+                
+                %% --- SETUP PHASE ---
+                subgraph Setup ["📦 Vendor Setup Phase"]
+                    direction TB
+                    Start((Start)) --> V_CreateShop["Vendor Creates Shop"]
+                    V_CreateShop --> V_CreateCamp["Create Campaign"]
+                    V_CreateCamp --> V_AddGifts["Add Gift Inventory<br/><i>(Auto or Code)</i>"]
+                    V_AddGifts --> V_Ready{"Campaign Ready"}
+                end
+
+                %% --- CHECK-IN PHASE ---
+                subgraph CheckIn ["📍 Loyalty Check-In Phase"]
+                    direction TB
+                    U_Visit["User Visits Shop"]
+                    U_ShowQR["User Shows<br/><b>Profile QR</b>"]
+                    S_ScanUser["Staff Scans QR<br/><i>(Check-in)</i>"]
+                    Sys_Update["System Updates<br/>Streak/Points"]
+                    
+                    V_Ready --> U_Visit
+                    U_Visit --> U_ShowQR
+                    U_ShowQR --> S_ScanUser
+                    S_ScanUser --> Sys_Update
+                end
+
+                %% --- REWARD LOGIC ---
+                subgraph Logic ["⚙️ System Logic"]
+                    direction TB
+                    Sys_Milestone{"Milestone<br/>Reached?"}
+                    Sys_Award["System Awards Gift<br/>to User Wallet"]
+                    Sys_Cont["Continue Streak"]
+                    
+                    Sys_Update --> Sys_Milestone
+                    Sys_Milestone -- Yes --> Sys_Award
+                    Sys_Milestone -- No --> Sys_Cont
+                    Sys_Cont -.-> U_Visit
+                end
+
+                %% --- REDEMPTION PHASE ---
+                subgraph Redeem ["🎁 Redemption Phase"]
+                    direction TB
+                    U_OpenWallet["User Opens App<br/>Views Wallet"]
+                    U_SelectGift["Selects Gift"]
+                    U_ShowGiftQR["Shows <b>Gift QR</b>"]
+                    S_ScanGift["Staff Scans<br/><b>Gift QR</b>"]
+                    Sys_Validate{"Valid?"}
+                    Sys_Done["Mark Redeemed<br/>and Close"]
+                    
+                    Sys_Award --> U_OpenWallet
+                    U_OpenWallet --> U_SelectGift
+                    U_SelectGift --> U_ShowGiftQR
+                    U_ShowGiftQR --> S_ScanGift
+                    S_ScanGift --> Sys_Validate
+                    Sys_Validate -- Yes --> Sys_Done
+                    Sys_Validate -- No --> S_Error["Show Error"]
+                end
+
+                %% Styles
+                classDef vendor fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1E3A8A,rx:10,ry:10;
+                classDef user fill:#F0FDF4,stroke:#22C55E,stroke-width:2px,color:#14532D,rx:10,ry:10;
+                classDef system fill:#FFF7ED,stroke:#F97316,stroke-width:2px,color:#7C2D12,rx:10,ry:10,stroke-dasharray: 5 5;
+                classDef startEnd fill:#1E293B,stroke:#0F172A,color:#fff,rx:50,ry:50;
+
+                class V_CreateShop,V_CreateCamp,V_AddGifts,S_ScanUser,S_ScanGift vendor;
+                class U_Visit,U_ShowQR,U_OpenWallet,U_SelectGift,U_ShowGiftQR user;
+                class Sys_Update,Sys_Milestone,Sys_Award,Sys_Cont,Sys_Validate,Sys_Done,V_Ready system;
+                class Start,S_Error startEnd;
+
+        </div>
+    </div>
+
+    <!-- Instructions Footer -->
+    <div class="mt-8 text-center max-w-2xl text-slate-500 text-sm leading-relaxed">
+        This flowchart illustrates the core loop of Prize24. Vendors set up campaigns with milestones. Users interact physically via QR codes for both <b>Check-in</b> (to build streak) and <b>Redemption</b> (to claim rewards).
+    </div>
+
+    <!-- Load Mermaid -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'base',
+            securityLevel: 'loose',
+            flowchart: {
+                curve: 'basis', // Smooth curves
+                padding: 20
+            }
+        });
+    </script>
+</body>
+</html>

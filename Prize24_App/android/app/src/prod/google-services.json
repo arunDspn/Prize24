@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "667868429256",
+    "project_id": "prize24",
+    "storage_bucket": "prize24.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:667868429256:android:d62b1af553eaaee7e4defd",
+        "android_client_info": {
+          "package_name": "com.kintlearn.prize24_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "667868429256-kpg6is8gfpjkg4l6tkclbjl9skhfhh7o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kintlearn.prize24_app",
+            "certificate_hash": "6b47541e1be69d323393422540ae9e294fe1dfb1"
+          }
+        },
+        {
+          "client_id": "667868429256-k41nhl5j10akcij1u0pggm40221ul5id.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2RUJI9XJS-ljJ3z_ZclyticNDtlyOUcA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "667868429256-k41nhl5j10akcij1u0pggm40221ul5id.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "667868429256-1lvj2hkasc8qsg2rtpj4qs42emqmrhs4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.kintlearn.prize24-app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

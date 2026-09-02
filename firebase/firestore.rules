@@ -1,0 +1,381 @@
+rules_version = '2';
+
+service cloud.firestore {
+	match /databases/{database}/documents {
+		// ==========================================
+		// 🧰 GLOBAL HELPER FUNCTIONS
+		// ==========================================
+
+		function isAuthenticated() {
+			return request.auth != null;
+		}
+
+		function uid() {
+			return request.auth.uid;
+		}
+
+		function getUserRole() {
+			return isAuthenticated()
+				? get(/databases/$(database)/documents/users/$(uid())).data.role
+				: null;
+		}
+
+		function isSuperAdmin() {
+			return isAuthenticated() && getUserRole() == 'super_admin';
+		}
+
+		function isAdmin() {
+			return isAuthenticated() && getUserRole() == 'admin';
+		}
+
+		function isDashboardAdmin() {
+			return isSuperAdmin() || isAdmin();
+		}
+
+		function isSupervisor() {
+			return isAuthenticated() && getUserRole() == 'supervisor';
+		}
+
+		// Base authenticated app user.
+		// Vendor/Customer are resource-scoped permissions, not global roles.
+		function isAppUser() {
+			return isAuthenticated() && getUserRole() == 'user';
+		}
+
+		function hasHierarchicalReadAccess(resourceData) {
+			return isSuperAdmin() ||
+				(isAdmin() && resourceData.adminId == uid()) ||
+				(isSupervisor() && resourceData.supervisorId == uid());
+		}
+
+		// --------------------------
+		// Shop helpers
+		// --------------------------
+		function getShop(shopId) {
+			return get(/databases/$(database)/documents/shops/$(shopId));
+		}
+
+		function isShopOwnerFromData(shopData) {
+			return uid() == shopData.shopOwnerId || uid() == shopData.partnerId;
+		}
+
+		function isShopOwner(shopId) {
+			return isAuthenticated() && isShopOwnerFromData(getShop(shopId).data);
+		}
+
+		function isShopStaff(shopId) {
+			return isAuthenticated() &&
+				exists(/databases/$(database)/documents/shops/$(shopId)/staffs/$(uid()));
+		}
+
+		// Admin/Supervisor/Super Admin + Shop owner only (no end-user/staff)
+		function canManageShop(shopId) {
+			let shopData = getShop(shopId).data;
+			return isSuperAdmin() ||
+				isShopOwnerFromData(shopData) ||
+				hasHierarchicalReadAccess(shopData);
+		}
+
+		function canReadShopDoc(shopData, shopId) {
+			return isAppUser() ||
+				isShopOwnerFromData(shopData) ||
+				hasHierarchicalReadAccess(shopData) ||
+				isShopStaff(shopId);
+		}
+
+		// --------------------------
+		// Campaign helpers
+		// --------------------------
+		function getCampaign(campaignId) {
+			return get(/databases/$(database)/documents/campaigns/$(campaignId));
+		}
+
+		// Supports legacy and current campaign ownership fields.
+        // Todo: no need for partnerId and shopOwnerId
+		function isCampaignOwnerFromData(campaignData) {
+			// return uid() == campaignData.vendorId ||
+			// 	uid() == campaignData.partnerId ||
+			// 	uid() == campaignData.shopOwnerId;
+            return uid() == campaignData.vendorId;
+		}
+
+		function isCampaignOwner(campaignId) {
+			return isAuthenticated() &&
+				isCampaignOwnerFromData(getCampaign(campaignId).data);
+		}
+
+		function isCampaignSharedVendor(campaignId) {
+			return isAuthenticated() &&
+				exists(/databases/$(database)/documents/campaigns/$(campaignId)/sharedVendors/$(uid()));
+		}
+
+		// Campaign managers are owner + hierarchy observers + super admin
+		function canManageCampaign(campaignId) {
+			let campaignData = getCampaign(campaignId).data;
+			return isSuperAdmin() ||
+				isCampaignOwnerFromData(campaignData) ||
+				hasHierarchicalReadAccess(campaignData);
+		}
+
+		function canReadCampaignDoc(campaignData, campaignId) {
+			return isAppUser() ||
+				isCampaignOwnerFromData(campaignData) ||
+				isCampaignSharedVendor(campaignId) ||
+				hasHierarchicalReadAccess(campaignData);
+		}
+
+		// ==========================================
+		// 👤 USERS COLLECTION
+		// ==========================================
+		match /users/{userId} {
+			// Required for FirebaseShopService list enrichment and request receiver lookup.
+			allow read: if isAuthenticated();
+
+			allow create: if isAuthenticated() && (uid() == userId || isSuperAdmin());
+			allow update: if isAuthenticated() && (uid() == userId || isSuperAdmin());
+			allow delete: if isSuperAdmin();
+
+			// /users/{userId}/followedShops/{shopId}
+			match /followedShops/{shopId} {
+				allow read, write: if isAuthenticated() && (uid() == userId || isSuperAdmin());
+			}
+
+			// /users/{userId}/referees/{refereeUserId}
+			match /referees/{refereeUserId} {
+				// Referrer can read/manage their referees; referee can read their own entry
+				allow read: if isAuthenticated() && (uid() == userId || uid() == refereeUserId || isDashboardAdmin());
+
+				// Referee creates their own entry, or referrer creates it, or super admin
+				allow create: if isAuthenticated() && (uid() == refereeUserId || uid() == userId || isSuperAdmin());
+
+				allow update, delete: if isSuperAdmin() || uid() == userId;
+			}
+
+			// /users/{userId}/commissions/{commissionId}
+			match /commissions/{commissionId} {
+				allow read: if isAuthenticated() && (uid() == userId || isDashboardAdmin());
+
+				// Commission records are maintained by backend services.
+				allow create, update, delete: if isSuperAdmin();
+			}
+		}
+
+		// ==========================================
+		// 🏪 SHOPS COLLECTION
+		// ==========================================
+		match /shops/{shopId} {
+			allow read: if canReadShopDoc(resource.data, shopId);
+
+			allow create: if isSuperAdmin() ||
+				(isAppUser() && request.resource.data.shopOwnerId == uid());
+
+			allow update: if isSuperAdmin() || isShopOwnerFromData(resource.data);
+
+			allow delete: if isSuperAdmin();
+
+			// shops/{shopId}/staffs/{staffUserId}
+			match /staffs/{staffUserId} {
+				allow read: if canManageShop(shopId) || isShopStaff(shopId);
+
+				// Receiver accepts invite from client and creates own staff doc.
+				allow create: if isSuperAdmin() ||
+					isShopOwner(shopId) ||
+					uid() == staffUserId;
+
+				allow update, delete: if isSuperAdmin() || isShopOwner(shopId);
+			}
+
+			// shops/{shopId}/followers/{followerUserId}
+			match /followers/{followerUserId} {
+				allow read: if isSuperAdmin() ||
+					canManageShop(shopId) ||
+					isShopStaff(shopId) ||
+					uid() == followerUserId ||
+					resource.data.userId == uid();
+
+				// Normally maintained by Cloud Functions (Admin SDK bypasses rules).
+				allow create, update, delete: if isSuperAdmin();
+			}
+
+			// shops/{shopId}/offers/{offerId}
+			match /offers/{offerId} {
+				allow read: if canReadShopDoc(getShop(shopId).data, shopId);
+				allow create, update, delete: if isSuperAdmin() || isShopOwner(shopId);
+			}
+
+			// shops/{shopId}/activityLogs/{logId}
+			match /activityLogs/{logId} {
+				allow read: if isSuperAdmin() ||
+					canManageShop(shopId) ||
+					isShopStaff(shopId) ||
+					resource.data.customerId == uid();
+
+				// Written by backend functions.
+				allow create, update, delete: if isSuperAdmin();
+			}
+		}
+
+		// ==========================================
+		// 🎯 CAMPAIGNS COLLECTION
+		// ==========================================
+		match /campaigns/{campaignId} {
+			allow read: if canReadCampaignDoc(resource.data, campaignId);
+
+			allow create: if isSuperAdmin() ||
+				(isAppUser() && (
+					request.resource.data.vendorId == uid() ||
+					request.resource.data.partnerId == uid() ||
+					request.resource.data.shopOwnerId == uid()
+				));
+
+			allow update: if isSuperAdmin() || isCampaignOwnerFromData(resource.data);
+
+			allow delete: if isSuperAdmin();
+
+			// campaigns/{campaignId}/sharedVendors/{vendorUserId}
+			match /sharedVendors/{vendorUserId} {
+				allow read: if isSuperAdmin() ||
+					canManageCampaign(campaignId) ||
+					uid() == vendorUserId;
+
+				allow create, update, delete: if isSuperAdmin() || isCampaignOwner(campaignId);
+			}
+
+			// campaigns/{campaignId}/gifts/{giftId}
+			// Used by FirebaseGiftService (fetch / create / edit).
+			match /gifts/{giftId} {
+				allow read: if canReadCampaignDoc(getCampaign(campaignId).data, campaignId);
+				allow create, update, delete: if isSuperAdmin() || isCampaignOwner(campaignId);
+
+				// Optional future nested resources.
+				match /autoGiftPayloads/{payloadId} {
+					allow read: if canReadCampaignDoc(getCampaign(campaignId).data, campaignId);
+					allow create, update, delete: if isSuperAdmin() || isCampaignOwner(campaignId);
+				}
+
+				match /codeGiftCodes/{codeId} {
+					allow read: if canReadCampaignDoc(getCampaign(campaignId).data, campaignId);
+					allow create, update, delete: if isSuperAdmin() || isCampaignOwner(campaignId);
+				}
+			}
+
+			// campaigns/{campaignId}/redemptionLogs/{logId}
+			match /redemptionLogs/{logId} {
+				allow read: if isSuperAdmin() ||
+					canManageCampaign(campaignId) ||
+					resource.data.customerId == uid();
+
+				// Written by backend functions.
+				allow create, update, delete: if isSuperAdmin();
+			}
+
+			// campaigns/{campaignId}/activityLogs/{logId}
+			match /activityLogs/{logId} {
+				allow read: if isSuperAdmin() ||
+					canManageCampaign(campaignId) ||
+					resource.data.customerId == uid();
+
+				// Written by backend functions.
+				allow create, update, delete: if isSuperAdmin();
+			}
+		}
+
+		// ==========================================
+		// 🎁 USER GIFTS / REDEMPTIONS
+		// ==========================================
+		match /user_gifts/{redemptionId} {
+			// FirebaseGiftService.fetchUsersAllGifts
+			allow read: if uid() == resource.data.userId ||
+				uid() == resource.data.partnerId ||
+				uid() == resource.data.shopOwnerId ||
+				hasHierarchicalReadAccess(resource.data);
+
+			allow create: if isAuthenticated();
+
+			// FirebaseGiftService.redeemGift allows user-driven redeem write.
+			allow update: if isSuperAdmin() ||
+				uid() == resource.data.partnerId ||
+				uid() == resource.data.shopOwnerId ||
+				uid() == resource.data.userId;
+
+			allow delete: if isSuperAdmin();
+		}
+
+		// ==========================================
+		// 🤝 FRIENDSHIPS & REQUESTS
+		// ==========================================
+		match /friendships/{friendshipId} {
+			allow read: if uid() in resource.data.participants || isSuperAdmin();
+			allow write: if isAuthenticated() || isSuperAdmin();
+		}
+
+		// FirebaseShopService uses: /staffRequests/{requestId}
+		match /staffRequests/{requestId} {
+			allow read: if isSuperAdmin() ||
+				uid() == resource.data.receiverId ||
+				canManageShop(resource.data.shopId);
+
+			allow create: if isSuperAdmin() ||
+				(isAuthenticated() && canManageShop(request.resource.data.shopId));
+
+			allow update: if isSuperAdmin() ||
+				uid() == resource.data.receiverId ||
+				canManageShop(resource.data.shopId);
+
+			allow delete: if isSuperAdmin() || canManageShop(resource.data.shopId);
+		}
+
+		// FirebaseCampaignService uses: /campaignShareRequest/{requestId}
+		match /campaignShareRequest/{requestId} {
+			allow read: if isSuperAdmin() ||
+				uid() == resource.data.recipientId ||
+				uid() == resource.data.ownerVendorId ||
+				hasHierarchicalReadAccess(resource.data);
+
+			// Normally maintained by Cloud Functions.
+			allow create, update, delete: if isSuperAdmin();
+		}
+
+		// ==========================================
+		// 🎟️ REFERRAL CODES
+		// ==========================================
+		match /invites/{inviteId} {
+			// Invite validation happens before login, so unused invites must be readable.
+			allow read: if isAuthenticated() || resource.data.used == false;
+
+			// Only authenticated users or backend jobs should mutate invite state.
+			allow create: if isSuperAdmin();
+			allow update: if isSuperAdmin() || (
+				isAuthenticated() &&
+				resource.data.used == false &&
+				request.resource.data.used == true &&
+				request.resource.data.usedBy == uid() &&
+				request.resource.data.code == resource.data.code &&
+				request.resource.data.role == resource.data.role
+			);
+			allow delete: if isSuperAdmin();
+		}
+
+		match /referralCodes/{codeId} {
+			// Needed when users validate referral codes in-app.
+			allow read: if isAuthenticated() || isSuperAdmin();
+
+			// Allow authenticated users to create a referral code document.
+			allow create: if isAuthenticated();
+
+			// Owners can manage their own code when owner field is present.
+			allow update, delete: if isSuperAdmin() ||
+				(uid() == resource.data.userId) ||
+				(uid() == resource.data.ownerId) ||
+				(uid() == resource.data.createdBy);
+		}
+
+		// ==========================================
+		// 💳 SUBSCRIPTION PLANS COLLECTION
+		// ==========================================
+		match /subscription_plans/{planId} {
+			allow read: if isAuthenticated();
+			allow create, update, delete: if isSuperAdmin();
+		}
+	}
+}
