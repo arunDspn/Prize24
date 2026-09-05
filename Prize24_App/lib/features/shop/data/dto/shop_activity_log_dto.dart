@@ -176,6 +176,11 @@ const _kCheckInSuccessKeys = <String>{
   'campaignId',
   'wasAutoFollowed',
   'previousStreak',
+  'billNumber',
+  'billAmount',
+  'cycleBillSum',
+  'previousCycleBillSum',
+  'cumulativeBillSum',
 };
 
 final class CheckInSuccessLogDto extends ShopActivityLogDto {
@@ -200,6 +205,11 @@ final class CheckInSuccessLogDto extends ShopActivityLogDto {
     this.campaignId,
     required this.wasAutoFollowed,
     required this.previousStreak,
+    required this.billNumber,
+    required this.billAmount,
+    required this.cycleBillSum,
+    required this.previousCycleBillSum,
+    required this.cumulativeBillSum,
     super.phoneNumber,
   });
 
@@ -213,6 +223,11 @@ final class CheckInSuccessLogDto extends ShopActivityLogDto {
   final String? campaignId;
   final bool wasAutoFollowed;
   final int previousStreak;
+  final String billNumber;
+  final double billAmount;
+  final double cycleBillSum;
+  final double previousCycleBillSum;
+  final double cumulativeBillSum;
 
   factory CheckInSuccessLogDto._fromMap(String docId, Map<String, dynamic> d) =>
       CheckInSuccessLogDto._(
@@ -236,6 +251,12 @@ final class CheckInSuccessLogDto extends ShopActivityLogDto {
         campaignId: d['campaignId'] as String?,
         wasAutoFollowed: d['wasAutoFollowed'] as bool? ?? false,
         previousStreak: (d['previousStreak'] as num?)?.toInt() ?? 0,
+        billNumber: d['billNumber'] as String? ?? '',
+        billAmount: (d['billAmount'] as num?)?.toDouble() ?? 0,
+        cycleBillSum: (d['cycleBillSum'] as num?)?.toDouble() ?? 0,
+        previousCycleBillSum:
+            (d['previousCycleBillSum'] as num?)?.toDouble() ?? 0,
+        cumulativeBillSum: (d['cumulativeBillSum'] as num?)?.toDouble() ?? 0,
         phoneNumber: d['phoneNumber'] as String?,
       );
 }

@@ -448,12 +448,16 @@ class FirebaseShopService implements IShopService {
     required String shopId,
     required String userId,
     required String staffUserId,
+    required String billNumber,
+    required double billAmount,
   }) async {
     final callable = FirebaseFunctions.instance.httpsCallable('checkInUser');
 
     final result = await callable.call<dynamic>({
       'shopId': shopId,
       'userId': userId,
+      'billNumber': billNumber,
+      'billAmount': billAmount,
     });
 
     final mapData = CFSpecificConvertors.convertCFMapToStringDynamic(
@@ -466,12 +470,16 @@ class FirebaseShopService implements IShopService {
   Future<CheckInResponseDto> checkInUserToShopByVendor({
     required String shopId,
     required String userId,
+    required String billNumber,
+    required double billAmount,
   }) async {
     final callable = FirebaseFunctions.instance.httpsCallable('checkInUser');
 
     final response = await callable.call<dynamic>({
       'shopId': shopId,
       'userId': userId,
+      'billNumber': billNumber,
+      'billAmount': billAmount,
     });
 
     final mapData = CFSpecificConvertors.convertCFMapToStringDynamic(

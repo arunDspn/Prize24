@@ -18,6 +18,8 @@ class UserCheckinByStaffController extends _$UserCheckinByStaffController {
   Future<void> checkInUser({
     required String userId,
     required String shopId,
+    required String billNumber,
+    required double billAmount,
   }) async {
     state = const AsyncValue.loading();
 
@@ -30,6 +32,8 @@ class UserCheckinByStaffController extends _$UserCheckinByStaffController {
             userId: userId,
             shopId: shopId,
             staffUserId: vendor.userId,
+            billNumber: billNumber,
+            billAmount: billAmount,
           );
 
       if (data.success) {

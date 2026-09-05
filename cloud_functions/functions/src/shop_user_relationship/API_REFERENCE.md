@@ -116,8 +116,10 @@ https://<region>-<project-id>.cloudfunctions.net/
 ```typescript
 // Request
 {
-  userId: "user123",     // From scanned QR code
-  shopId: "shop456"      // Your shop ID
+  userId: "user123",       // From scanned QR code
+  shopId: "shop456",       // Your shop ID
+  billNumber: "INV-42",    // Unique within this shop (case-insensitive)
+  billAmount: 123.45        // Positive value with at most two decimals
 }
 
 // Success Response (Regular Check-in)
@@ -219,6 +221,9 @@ https://<region>-<project-id>.cloudfunctions.net/
 | `NOT_SHOP_OWNER` | Caller doesn't own this shop |
 | `SCANNER_NOT_AUTHORIZED` | Not authorized to check in users |
 | `ALREADY_CHECKED_IN_TODAY` | Already checked in today |
+| `BILL_NUMBER_ALREADY_USED` | Bill number was already used in this shop |
+| `INVALID_BILL_NUMBER` | Bill number is missing or exceeds 64 characters |
+| `INVALID_BILL_AMOUNT` | Bill amount is invalid or has more than two decimals |
 | `OFFER_INVALID_DATES` | End date must be after start date |
 | `INVALID_FCM_TOKEN` | Invalid FCM token format |
 | `TRANSACTION_FAILED` | Database operation failed |
@@ -244,7 +249,9 @@ const result = await followShopByVendor({
 const checkInUser = httpsCallable(functions, 'checkInUser');
 const checkInResult = await checkInUser({
   userId: scannedUserId,
-  shopId: myShopId
+  shopId: myShopId,
+  billNumber: 'INV-42',
+  billAmount: 123.45
 });
 
 if (checkInResult.data.isGiftDay) {
@@ -281,7 +288,9 @@ curl -X POST \
   -d '{
     "data": {
       "userId": "user123",
-      "shopId": "shop456"
+      "shopId": "shop456",
+      "billNumber": "INV-42",
+      "billAmount": 123.45
     }
   }'
 ```

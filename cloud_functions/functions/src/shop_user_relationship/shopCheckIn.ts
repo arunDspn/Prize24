@@ -1,5 +1,6 @@
-import {onCall, HttpsError} from "firebase-functions/v2/https";
-import {getFirestore, Timestamp} from "firebase-admin/firestore";
+import {CallableRequest, onCall, HttpsError} from "firebase-functions/v2/https";
+import {createHash} from "node:crypto";
+import {FieldValue, getFirestore, Timestamp} from "firebase-admin/firestore";
 import {getMessaging} from "firebase-admin/messaging";
 import * as logger from "firebase-functions/logger";
 import {
@@ -9,11 +10,149 @@ import {
   ShopFollowApiResponse,
   SHOP_FOLLOW_ERROR_CODES,
 } from "../types";
-import {followUserToShop} from "./shopFollow";
 import {createActivityLog, resolvePhoneNumber} from "../activityLog";
 
 const db = getFirestore();
 const messaging = getMessaging();
+const BILL_NUMBER_MAX_LENGTH = 64;
+
+type BillAmount = {
+  amount: number;
+  minorUnits: number;
+};
+
+/**
+ * Validates and normalizes a bill number for storage and comparison.
+ * @param {unknown} value Raw bill number
+ * @return {{billNumber: string, normalizedBillNumber: string}} Validated bill number values
+ */
+export function validateBillNumber(value: unknown): {billNumber: string; normalizedBillNumber: string} {
+  if (typeof value !== "string") {
+    throw new HttpsError(
+      "invalid-argument",
+      "billNumber is required",
+      SHOP_FOLLOW_ERROR_CODES.INVALID_BILL_NUMBER
+    );
+  }
+
+  const billNumber = value.trim();
+  if (billNumber.length === 0 || billNumber.length > BILL_NUMBER_MAX_LENGTH) {
+    throw new HttpsError(
+      "invalid-argument",
+      `billNumber must contain between 1 and ${BILL_NUMBER_MAX_LENGTH} characters`,
+      SHOP_FOLLOW_ERROR_CODES.INVALID_BILL_NUMBER
+    );
+  }
+
+  return {
+    billNumber,
+    normalizedBillNumber: billNumber.normalize("NFKC").toUpperCase(),
+  };
+}
+
+/**
+ * Validates an amount and converts it to exact integer minor units.
+ * @param {unknown} value Raw bill amount
+ * @return {BillAmount} Validated decimal and minor-unit amount
+ */
+export function validateBillAmount(value: unknown): BillAmount {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+    throw new HttpsError(
+      "invalid-argument",
+      "billAmount must be a finite number greater than zero",
+      SHOP_FOLLOW_ERROR_CODES.INVALID_BILL_AMOUNT
+    );
+  }
+
+  const scaledAmount = value * 100;
+  const minorUnits = Math.round(scaledAmount);
+  if (!Number.isSafeInteger(minorUnits) || Math.abs(scaledAmount - minorUnits) > 1e-7) {
+    throw new HttpsError(
+      "invalid-argument",
+      "billAmount must have at most two decimal places",
+      SHOP_FOLLOW_ERROR_CODES.INVALID_BILL_AMOUNT
+    );
+  }
+
+  return {amount: minorUnits / 100, minorUnits};
+}
+
+/**
+ * Converts a persisted decimal amount to minor units, defaulting missing values to zero.
+ * @param {unknown} value Persisted decimal amount
+ * @return {number} Integer minor-unit amount
+ */
+function persistedAmountToMinorUnits(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return 0;
+  }
+  const minorUnits = Math.round(value * 100);
+  return Number.isSafeInteger(minorUnits) ? minorUnits : 0;
+}
+
+/**
+ * Returns the highest gift milestone crossed by this check-in, or null.
+ * @param {number} previousStreak Streak before this check-in
+ * @param {number} newStreak Streak after this check-in
+ * @param {number | null} giftCycleDay Configured gift interval
+ * @param {number | null} lastGiftDayStreak Last awarded gift milestone
+ * @return {number | null} Highest crossed, unawarded milestone
+ */
+export function crossedGiftMilestone(
+  previousStreak: number,
+  newStreak: number,
+  giftCycleDay: number | null,
+  lastGiftDayStreak: number | null
+): number | null {
+  if (!giftCycleDay || giftCycleDay <= 0 || newStreak <= previousStreak) {
+    return null;
+  }
+
+  const highestCrossedMilestone = Math.floor(newStreak / giftCycleDay) * giftCycleDay;
+  const nextMilestone = (Math.floor(previousStreak / giftCycleDay) + 1) * giftCycleDay;
+  if (
+    highestCrossedMilestone < nextMilestone ||
+    (lastGiftDayStreak !== null && highestCrossedMilestone <= lastGiftDayStreak)
+  ) {
+    return null;
+  }
+
+  return highestCrossedMilestone;
+}
+
+type BillTotals = {
+  cycleBillSum: number;
+  previousCycleBillSum: number;
+  cumulativeBillSum: number;
+};
+
+/**
+ * Calculates the post-check-in bill totals using integer minor units.
+ * @param {unknown} cycleBillSum Current open-cycle sum
+ * @param {unknown} previousCycleBillSum Most recently completed cycle sum
+ * @param {unknown} cumulativeBillSum Lifetime sum
+ * @param {number} billMinorUnits New bill amount in minor units
+ * @param {boolean} closesCycle Whether this check-in closes the current cycle
+ * @return {BillTotals} Normalized post-check-in totals
+ */
+export function calculateBillTotals(
+  cycleBillSum: unknown,
+  previousCycleBillSum: unknown,
+  cumulativeBillSum: unknown,
+  billMinorUnits: number,
+  closesCycle: boolean
+): BillTotals {
+  const currentCycleMinor = persistedAmountToMinorUnits(cycleBillSum);
+  const previousCycleMinor = persistedAmountToMinorUnits(previousCycleBillSum);
+  const cumulativeMinor = persistedAmountToMinorUnits(cumulativeBillSum);
+  const closingCycleMinor = currentCycleMinor + billMinorUnits;
+
+  return {
+    cycleBillSum: (closesCycle ? 0 : closingCycleMinor) / 100,
+    previousCycleBillSum: (closesCycle ? closingCycleMinor : previousCycleMinor) / 100,
+    cumulativeBillSum: (cumulativeMinor + billMinorUnits) / 100,
+  };
+}
 
 /**
  * Helper function to check if scanner is authorized (vendor or staff)
@@ -112,194 +251,109 @@ function wasCheckedInYesterday(lastCheckInDate: Timestamp | null): boolean {
   );
 }
 
+type CheckInTransactionResult = {
+  cumulativeStreak: number;
+  consecutiveDays: number;
+  bonusApplied: boolean;
+  isGiftDay: boolean;
+  crossedMilestone: number | null;
+  wasAutoFollowed: boolean;
+};
+
 /**
- * Check In User
- * Vendor or staff scans user QR code for daily check-in
- * Handles cumulative streak, consecutive days, multiplier bonus, and gift day detection
+ * Handles the bill-aware check-in callable.
+ * @param {CallableRequest<CheckInUserRequest>} request Callable request
+ * @return {Promise<CheckInResponse>} Check-in response
  */
-export const checkInUser = onCall<CheckInUserRequest, Promise<CheckInResponse>>(
-  async (request) => {
-    // Verify authentication
-    if (!request.auth) {
+async function handleCheckInUser(
+  request: CallableRequest<CheckInUserRequest>
+): Promise<CheckInResponse> {
+  if (!request.auth) {
+    throw new HttpsError(
+      "unauthenticated",
+      "User must be authenticated",
+      SHOP_FOLLOW_ERROR_CODES.UNAUTHORIZED
+    );
+  }
+
+  const scannerId = request.auth.uid;
+  const {userId, shopId} = request.data;
+  const {billNumber, normalizedBillNumber} = validateBillNumber(request.data.billNumber);
+  const validatedBillAmount = validateBillAmount(request.data.billAmount);
+  let customerPhoneNumber: string | null = null;
+
+  if (!userId || !shopId) {
+    throw new HttpsError(
+      "invalid-argument",
+      "userId, shopId, billNumber, and billAmount are required"
+    );
+  }
+
+  try {
+    const {isOwner, isStaff} = await validateScanner(scannerId, shopId);
+    if (!isOwner && !isStaff) {
       throw new HttpsError(
-        "unauthenticated",
-        "User must be authenticated",
-        SHOP_FOLLOW_ERROR_CODES.UNAUTHORIZED
+        "permission-denied",
+        "You are not authorized to check in users at this shop",
+        SHOP_FOLLOW_ERROR_CODES.SCANNER_NOT_AUTHORIZED
       );
     }
 
-    const scannerId = request.auth.uid;
-    const {userId, shopId} = request.data;
-    // Resolved once the customer doc is fetched; stays null if that never happens (e.g. early failure)
-    let customerPhoneNumber: string | null = null;
+    const [scannerDoc, userDoc, shopDoc] = await Promise.all([
+      db.collection("users").doc(scannerId).get(),
+      db.collection("users").doc(userId).get(),
+      db.collection("shops").doc(shopId).get(),
+    ]);
 
-    // Validate input
-    if (!userId || !shopId) {
+    if (!userDoc.exists) {
       throw new HttpsError(
-        "invalid-argument",
-        "userId and shopId are required"
+        "not-found",
+        "User not found",
+        SHOP_FOLLOW_ERROR_CODES.USER_NOT_FOUND
+      );
+    }
+    if (!shopDoc.exists) {
+      throw new HttpsError(
+        "not-found",
+        "Shop not found",
+        SHOP_FOLLOW_ERROR_CODES.SHOP_NOT_FOUND
       );
     }
 
-    try {
-      // 1. Validate scanner authorization (vendor or staff)
-      const {isOwner, isStaff} = await validateScanner(scannerId, shopId);
+    const scannerData = scannerDoc.data();
+    const scannerName = scannerData?.userName || scannerData?.displayName || "Unknown";
+    const scannerType = isOwner ? "owner" : "staff";
+    const userData = userDoc.data();
+    const userName = userData?.name || userData?.userName || "Anonymous User";
+    const userProfilePic = userData?.userAvatar || userData?.photoURL || null;
+    const fcmToken = userData?.fcmToken;
+    customerPhoneNumber = resolvePhoneNumber(userData);
 
-      if (!isOwner && !isStaff) {
-        throw new HttpsError(
-          "permission-denied",
-          "You are not authorized to check in users at this shop",
-          SHOP_FOLLOW_ERROR_CODES.SCANNER_NOT_AUTHORIZED
-        );
-      }
+    const shopData = shopDoc.data();
+    const associatedCampaignId = shopData?.associatedCampaignId || null;
+    const campaignName = shopData?.campaignName || "";
+    const giftCycleDay = shopData?.giftCycleDay || null;
+    const bonusIncrementDaysRequired = shopData?.bonusIncrementDaysRequired || null;
+    const bonusIncrementValue = shopData?.bonusIncrementValue || null;
+    const shopName = shopData?.name || shopData?.shopName || "Shop";
+    const shopDescription = shopData?.description || shopData?.shopDescription || "";
+    const shopAddress = shopData?.address || shopData?.shopAddress || "";
+    const shopPhone = shopData?.phone || shopData?.shopPhone || "";
+    const now = Timestamp.now();
 
-      // Get scanner details for logging
-      const scannerDoc = await db.collection("users").doc(scannerId).get();
-      const scannerData = scannerDoc.data();
-      const scannerName = scannerData?.userName || scannerData?.displayName || "Unknown";
-      const scannerType = isOwner ? "owner" : "staff";
+    const followerRef = db.collection("shops").doc(shopId).collection("followers").doc(userId);
+    const userFollowingRef = db.collection("users").doc(userId).collection("followedShops").doc(shopId);
+    const billHash = createHash("sha256").update(normalizedBillNumber).digest("hex");
+    const processedBillRef = db.collection("shops").doc(shopId).collection("processedBills").doc(billHash);
+    const checkInLogRef = followerRef.collection("checkInLogs").doc();
+    const activityLogRef = db.collection("shops").doc(shopId).collection("activityLogs").doc();
+    const followerAddedLogRef = db.collection("shops").doc(shopId).collection("activityLogs").doc();
 
-      // Get customer details for FCM and audit logging (phone number)
-      const userDoc = await db.collection("users").doc(userId).get();
-      const userData = userDoc.data();
-      const fcmToken = userData?.fcmToken;
-      customerPhoneNumber = resolvePhoneNumber(userData);
+    const result = await db.runTransaction<CheckInTransactionResult>(async (transaction) => {
+      const [followerDoc, processedBillDoc] = await transaction.getAll(followerRef, processedBillRef);
+      const followerData = followerDoc.data();
+      const lastCheckInDate = (followerData?.lastCheckInDate as Timestamp | null | undefined) || null;
 
-      // 2. Get shop data for gift configuration
-      const shopDoc = await db.collection("shops").doc(shopId).get();
-      const shopData = shopDoc.data();
-
-      const associatedCampaignId = shopData?.associatedCampaignId || null;
-      const campaignName = shopData?.campaignName || "";
-      const giftCycleDay = shopData?.giftCycleDay || null;
-      const bonusIncrementDaysRequired = shopData?.bonusIncrementDaysRequired || null;
-      const bonusIncrementValue = shopData?.bonusIncrementValue || null;
-      const shopName = shopData?.name || shopData?.shopName || "Shop";
-
-      // 3. Get follower document - check if user is following
-      const followerRef = db.collection("shops").doc(shopId).collection("followers").doc(userId);
-      const followerDoc = await followerRef.get();
-
-      let wasAutoFollowed = false;
-
-      if (!followerDoc.exists) {
-        // User is not following - auto-follow them first
-        logger.info("User not following shop, auto-following before check-in", {
-          scannerId,
-          userId,
-          shopId,
-          scannerType,
-        });
-
-        try {
-          // Auto-follow with initial streak of 1 and consecutive days of 1
-          await followUserToShop(userId, shopId, 1, 1);
-          wasAutoFollowed = true;
-        } catch (followError: any) {
-          // If already following error, continue (race condition)
-          if (followError.code !== "already-exists") {
-            throw followError;
-          }
-        }
-      }
-
-      // Re-fetch follower document after potential auto-follow
-      const updatedFollowerDoc = await followerRef.get();
-
-      if (!updatedFollowerDoc.exists) {
-        throw new HttpsError(
-          "internal",
-          "Failed to create follower relationship",
-          SHOP_FOLLOW_ERROR_CODES.TRANSACTION_FAILED
-        );
-      }
-
-      const followerData = updatedFollowerDoc.data();
-      const lastCheckInDate = followerData?.lastCheckInDate || null;
-
-      // If user was auto-followed, they already have streak of 1, so return success immediately
-      if (wasAutoFollowed) {
-        logger.info("User auto-followed and checked in", {
-          scannerId,
-          userId,
-          shopId,
-          isOwner,
-          isStaff,
-        });
-
-        // Log follower_added activity
-        await createActivityLog(`shops/${shopId}/activityLogs`, {
-          action: "follower_added",
-          success: true,
-          actorId: scannerId,
-          actorRole: isOwner ? "owner" : "staff",
-          functionName: "checkInUser",
-          customerId: userId,
-          addedMethod: "auto_check_in",
-          initialStreak: 1,
-          shopId,
-        });
-
-        // Log check_in_success activity
-        await createActivityLog(`shops/${shopId}/activityLogs`, {
-          action: "check_in_success",
-          success: true,
-          actorId: scannerId,
-          actorRole: isOwner ? "owner" : "staff",
-          functionName: "checkInUser",
-          customerId: userId,
-          shopId,
-          cumulativeStreak: 1,
-          consecutiveDays: 1,
-          bonusApplied: false,
-          bonusValue: null,
-          isGiftDay: false,
-          campaignId: null,
-          wasAutoFollowed: true,
-          previousStreak: 0,
-          phoneNumber: customerPhoneNumber,
-        });
-
-        // 7. Send FCM notification to the user
-        try {
-          if (fcmToken) {
-            const message = {
-              data: {
-                type: "check_in",
-                shopId: shopId,
-                shopName: shopName,
-                currentStreak: "1",
-                isGiftDay: "false",
-                bonusApplied: "false",
-              },
-              token: fcmToken,
-            };
-
-            await messaging.send(message);
-            logger.info("FCM data message sent successfully", {userId, shopId, isGiftDay: false});
-          } else {
-            logger.warn("User does not have FCM token, skipping notification", {userId});
-          }
-        } catch (fcmError) {
-          logger.error("FCM notification failed, continuing with check-in success:", fcmError);
-        }
-
-        return {
-          success: true,
-          message: "User was added as follower and checked in successfully",
-          data: {
-            cumulativeStreak: 1,
-            consecutiveDays: 1,
-            bonusApplied: false,
-            isGiftDay: false,
-            isNewUser: true,
-            wasAutoFollowed: true,
-            giftInfo: undefined,
-          },
-        };
-      }
-
-      // 4. Check if already checked in today
       if (isCheckedInToday(lastCheckInDate)) {
         throw new HttpsError(
           "already-exists",
@@ -307,131 +361,153 @@ export const checkInUser = onCall<CheckInUserRequest, Promise<CheckInResponse>>(
           SHOP_FOLLOW_ERROR_CODES.ALREADY_CHECKED_IN_TODAY
         );
       }
+      if (processedBillDoc.exists) {
+        throw new HttpsError(
+          "already-exists",
+          "This bill number has already been used for this shop",
+          SHOP_FOLLOW_ERROR_CODES.BILL_NUMBER_ALREADY_USED
+        );
+      }
 
-      // 5. Calculate streak updates
-      const currentCumulativeStreak = followerData?.cumulativeStreak || 0;
-      const currentConsecutiveDays = followerData?.consecutiveDays || 0;
-      const lastGiftDayStreak = followerData?.lastGiftDayStreak || null;
-      const lastBonusDate = followerData?.lastBonusDate || null;
-
-      // Determine if consecutive streak continues
+      const wasAutoFollowed = !followerDoc.exists;
+      const currentCumulativeStreak = Number(followerData?.cumulativeStreak) || 0;
+      const currentConsecutiveDays = Number(followerData?.consecutiveDays) || 0;
+      const lastGiftDayStreak = (followerData?.lastGiftDayStreak as number | null | undefined) ?? null;
+      const lastBonusDate = (followerData?.lastBonusDate as Timestamp | null | undefined) || null;
       const consecutiveContinues = wasCheckedInYesterday(lastCheckInDate);
       const newConsecutiveDays = consecutiveContinues ? currentConsecutiveDays + 1 : 1;
 
-      // Check if eligible for multiplier bonus
       let bonusApplied = false;
       let streakIncrement = 1;
-
       if (
         bonusIncrementDaysRequired &&
         bonusIncrementValue &&
         consecutiveContinues &&
-        newConsecutiveDays % bonusIncrementDaysRequired === 0
+        newConsecutiveDays % bonusIncrementDaysRequired === 0 &&
+        (!lastBonusDate || !isCheckedInToday(lastBonusDate))
       ) {
-        // Check if bonus wasn't applied today already (shouldn't happen, but safety check)
-        if (!lastBonusDate || !isCheckedInToday(lastBonusDate)) {
-          streakIncrement = bonusIncrementValue;
-          bonusApplied = true;
-        }
+        streakIncrement = bonusIncrementValue;
+        bonusApplied = true;
       }
 
       const newCumulativeStreak = currentCumulativeStreak + streakIncrement;
+      const milestone = associatedCampaignId ? crossedGiftMilestone(
+        currentCumulativeStreak,
+        newCumulativeStreak,
+        giftCycleDay,
+        lastGiftDayStreak
+      ) : null;
+      const isGiftDay = milestone !== null;
 
-      // Check if it's a gift day
-      let isGiftDay = false;
-      let giftInfo = undefined;
+      const billTotals = calculateBillTotals(
+        followerData?.cycleBillSum,
+        followerData?.previousCycleBillSum,
+        followerData?.cumulativeBillSum,
+        validatedBillAmount.minorUnits,
+        isGiftDay
+      );
+      const {
+        cycleBillSum: newCycleBillSum,
+        previousCycleBillSum: newPreviousCycleBillSum,
+        cumulativeBillSum: newCumulativeBillSum,
+      } = billTotals;
 
-      if (
-        associatedCampaignId &&
-        giftCycleDay &&
-        newCumulativeStreak % giftCycleDay === 0 &&
-        (!lastGiftDayStreak || lastGiftDayStreak < newCumulativeStreak)
-      ) {
-        isGiftDay = true;
-        giftInfo = {
-          campaignId: associatedCampaignId,
-          campaignName: campaignName,
-          message: `Congratulations! You've reached ${newCumulativeStreak} check-ins. It's gift day!`,
-        };
+      const relationshipUpdate = {
+        cumulativeStreak: newCumulativeStreak,
+        consecutiveDays: newConsecutiveDays,
+        lastCheckInDate: now,
+        cycleBillSum: newCycleBillSum,
+        previousCycleBillSum: newPreviousCycleBillSum,
+        cumulativeBillSum: newCumulativeBillSum,
+        updatedAt: now,
+        ...(bonusApplied ? {lastBonusDate: now} : {}),
+        ...(isGiftDay ? {lastGiftDayStreak: milestone} : {}),
+      };
+
+      if (wasAutoFollowed) {
+        transaction.set(followerRef, {
+          userId,
+          userName,
+          userProfilePic,
+          notificationEnabled: true,
+          lastGiftDayStreak: isGiftDay ? milestone : null,
+          lastBonusDate: bonusApplied ? now : null,
+          followedAt: now,
+          createdAt: now,
+          ...relationshipUpdate,
+        });
+        transaction.set(userFollowingRef, {
+          shopId,
+          shopName,
+          shopDescription,
+          shopAddress,
+          shopPhone,
+          notificationEnabled: true,
+          followedAt: now,
+          ...relationshipUpdate,
+        });
+        transaction.set(db.collection("users").doc(userId), {
+          totalFollowing: FieldValue.increment(1),
+          subscribedShopTopics: FieldValue.arrayUnion(shopId),
+        }, {merge: true});
+        transaction.set(db.collection("shops").doc(shopId), {
+          totalFollowers: FieldValue.increment(1),
+        }, {merge: true});
+        transaction.set(followerAddedLogRef, {
+          logId: followerAddedLogRef.id,
+          timestamp: now,
+          action: "follower_added",
+          success: true,
+          actorId: scannerId,
+          actorRole: scannerType,
+          functionName: "checkInUser",
+          customerId: userId,
+          addedMethod: "auto_check_in",
+          initialStreak: newCumulativeStreak,
+          shopId,
+        });
+      } else {
+        transaction.update(followerRef, relationshipUpdate);
+        transaction.set(userFollowingRef, relationshipUpdate, {merge: true});
       }
 
-      const now = Timestamp.now();
-
-      // 6. Run transaction to update streak data
-      await db.runTransaction(async (transaction) => {
-        // Update follower document with new streak data
-        const updateData: any = {
-          cumulativeStreak: newCumulativeStreak,
-          consecutiveDays: newConsecutiveDays,
-          lastCheckInDate: now,
-          updatedAt: now,
-        };
-
-        if (bonusApplied) {
-          updateData.lastBonusDate = now;
-        }
-
-        if (isGiftDay) {
-          updateData.lastGiftDayStreak = newCumulativeStreak;
-        }
-
-        transaction.update(followerRef, updateData);
-
-        // Update user's following document (read-only copy)
-        const userFollowingRef = db
-          .collection("users")
-          .doc(userId)
-          .collection("followedShops")
-          .doc(shopId);
-
-        transaction.update(userFollowingRef, {
-          cumulativeStreak: newCumulativeStreak,
-          consecutiveDays: newConsecutiveDays,
-          lastCheckInDate: now,
-          updatedAt: now,
-        });
-
-        // Create check-in log entry
-        const checkInLogRef = db
-          .collection("shops")
-          .doc(shopId)
-          .collection("followers")
-          .doc(userId)
-          .collection("checkInLogs")
-          .doc();
-
-        const checkInLogData = {
-          scannerId: scannerId,
-          scannerName: scannerName,
-          scannerType: scannerType,
-          scanTime: now,
-          isGiftDay: isGiftDay,
-          cumulativeStreak: newCumulativeStreak,
-          consecutiveDays: newConsecutiveDays,
-          comment: "",
-        };
-
-        transaction.set(checkInLogRef, checkInLogData);
-      });
-
-      logger.info("User checked in successfully", {
+      transaction.create(processedBillRef, {
+        billNumber,
+        normalizedBillNumber,
+        billAmount: validatedBillAmount.amount,
+        customerId: userId,
         scannerId,
-        userId,
-        shopId,
-        isOwner,
-        isStaff,
-        newCumulativeStreak,
-        newConsecutiveDays,
-        bonusApplied,
-        isGiftDay,
+        checkInLogId: checkInLogRef.id,
+        activityLogId: activityLogRef.id,
+        processedAt: now,
       });
 
-      // Activity log — written outside transaction
-      await createActivityLog(`shops/${shopId}/activityLogs`, {
+      const billLogData = {
+        billNumber,
+        billAmount: validatedBillAmount.amount,
+        cycleBillSum: newCycleBillSum,
+        previousCycleBillSum: newPreviousCycleBillSum,
+        cumulativeBillSum: newCumulativeBillSum,
+      };
+      transaction.set(checkInLogRef, {
+        scannerId,
+        scannerName,
+        scannerType,
+        scanTime: now,
+        isGiftDay,
+        cumulativeStreak: newCumulativeStreak,
+        consecutiveDays: newConsecutiveDays,
+        bonusApplied,
+        comment: "",
+        ...billLogData,
+      });
+      transaction.set(activityLogRef, {
+        logId: activityLogRef.id,
+        timestamp: now,
         action: "check_in_success",
         success: true,
         actorId: scannerId,
-        actorRole: isOwner ? "owner" : "staff",
+        actorRole: scannerType,
         functionName: "checkInUser",
         customerId: userId,
         shopId,
@@ -441,81 +517,120 @@ export const checkInUser = onCall<CheckInUserRequest, Promise<CheckInResponse>>(
         bonusValue: bonusApplied ? streakIncrement : null,
         isGiftDay,
         campaignId: isGiftDay ? associatedCampaignId : null,
-        wasAutoFollowed: false,
+        wasAutoFollowed,
         previousStreak: currentCumulativeStreak,
         phoneNumber: customerPhoneNumber,
+        crossedMilestone: milestone,
+        ...billLogData,
       });
 
-      // 7. Send FCM notification to the user
-      try {
-        if (fcmToken) {
-          const message = {
-            data: {
-              type: "check_in",
-              shopId: shopId,
-              shopName: shopName,
-              currentStreak: newCumulativeStreak.toString(),
-              isGiftDay: isGiftDay.toString(),
-              bonusApplied: bonusApplied.toString(),
-            },
-            token: fcmToken,
-          };
-
-          await messaging.send(message);
-          logger.info("FCM data message sent successfully", {userId, shopId, isGiftDay});
-        } else {
-          logger.warn("User does not have FCM token, skipping notification", {userId});
-        }
-      } catch (fcmError) {
-        logger.error("FCM notification failed, continuing with check-in success:", fcmError);
-        // Continue even if notification fails - check-in was successful
-      }
-
-      // 8. Return response
       return {
-        success: true,
-        message: isGiftDay ? "Check-in successful! It's gift day!" : "Check-in successful",
-        data: {
-          cumulativeStreak: newCumulativeStreak,
-          consecutiveDays: newConsecutiveDays,
-          bonusApplied,
-          isGiftDay,
-          isNewUser: false,
-          wasAutoFollowed: false,
-          giftInfo,
-        },
+        cumulativeStreak: newCumulativeStreak,
+        consecutiveDays: newConsecutiveDays,
+        bonusApplied,
+        isGiftDay,
+        crossedMilestone: milestone,
+        wasAutoFollowed,
       };
-    } catch (error: any) {
-      if (error instanceof HttpsError) {
-        throw error;
+    });
+
+    if (result.wasAutoFollowed && typeof fcmToken === "string" && fcmToken.trim().length > 0) {
+      try {
+        await messaging.subscribeToTopic([fcmToken], shopId);
+      } catch (fcmError) {
+        logger.error("FCM subscription failed after check-in:", fcmError);
       }
-
-      logger.error("Error in checkInUser:", error);
-
-      const errorCode = error instanceof HttpsError ? error.code : "unknown";
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      await createActivityLog(`shops/${shopId}/activityLogs`, {
-        action: "check_in_failed",
-        success: false,
-        actorId: scannerId,
-        actorRole: "system",
-        functionName: "checkInUser",
-        customerId: userId,
-        shopId,
-        failureReason: errorCode,
-        errorCode,
-        errorMessage,
-        phoneNumber: customerPhoneNumber,
-      });
-
-      throw new HttpsError(
-        "internal",
-        "Failed to check in user",
-        SHOP_FOLLOW_ERROR_CODES.TRANSACTION_FAILED
-      );
     }
+
+    try {
+      if (typeof fcmToken === "string" && fcmToken.trim().length > 0) {
+        await messaging.send({
+          data: {
+            type: "check_in",
+            shopId,
+            shopName,
+            currentStreak: result.cumulativeStreak.toString(),
+            isGiftDay: result.isGiftDay.toString(),
+            bonusApplied: result.bonusApplied.toString(),
+          },
+          token: fcmToken,
+        });
+      } else {
+        logger.warn("User does not have FCM token, skipping notification", {userId});
+      }
+    } catch (fcmError) {
+      logger.error("FCM notification failed, continuing with check-in success:", fcmError);
+    }
+
+    logger.info("User checked in successfully", {
+      scannerId,
+      userId,
+      shopId,
+      isOwner,
+      isStaff,
+      newCumulativeStreak: result.cumulativeStreak,
+      newConsecutiveDays: result.consecutiveDays,
+      bonusApplied: result.bonusApplied,
+      isGiftDay: result.isGiftDay,
+      crossedMilestone: result.crossedMilestone,
+    });
+
+    const giftInfo = result.isGiftDay && associatedCampaignId ? {
+      campaignId: associatedCampaignId,
+      campaignName,
+      message: `Congratulations! You've reached ${result.crossedMilestone} check-ins. It's gift day!`,
+    } : undefined;
+
+    return {
+      success: true,
+      message: result.wasAutoFollowed ?
+        "User was added as follower and checked in successfully" :
+        result.isGiftDay ? "Check-in successful! It's gift day!" : "Check-in successful",
+      data: {
+        cumulativeStreak: result.cumulativeStreak,
+        consecutiveDays: result.consecutiveDays,
+        bonusApplied: result.bonusApplied,
+        isGiftDay: result.isGiftDay,
+        isNewUser: result.wasAutoFollowed,
+        wasAutoFollowed: result.wasAutoFollowed,
+        giftInfo,
+      },
+    };
+  } catch (error: unknown) {
+    if (error instanceof HttpsError) {
+      throw error;
+    }
+
+    logger.error("Error in checkInUser:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    await createActivityLog(`shops/${shopId}/activityLogs`, {
+      action: "check_in_failed",
+      success: false,
+      actorId: scannerId,
+      actorRole: "system",
+      functionName: "checkInUser",
+      customerId: userId,
+      shopId,
+      failureReason: "unknown",
+      errorCode: "unknown",
+      errorMessage,
+      phoneNumber: customerPhoneNumber,
+    });
+
+    throw new HttpsError(
+      "internal",
+      "Failed to check in user",
+      SHOP_FOLLOW_ERROR_CODES.TRANSACTION_FAILED
+    );
   }
-);
+}
+
+/**
+ * Check In User
+ * Vendor or staff scans user QR code for daily check-in
+ * Handles cumulative streak, consecutive days, multiplier bonus, and gift day detection
+ */
+export const checkInUser = onCall<CheckInUserRequest, Promise<CheckInResponse>>(handleCheckInUser);
 
 /**
  * Add Offer to Shop

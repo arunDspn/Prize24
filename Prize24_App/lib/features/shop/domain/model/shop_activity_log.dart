@@ -116,6 +116,11 @@ sealed class ShopActivityLogPayload with _$ShopActivityLogPayload {
     required bool isGiftDay,
     required bool wasAutoFollowed,
     required int previousStreak,
+    required String billNumber,
+    required double billAmount,
+    required double cycleBillSum,
+    required double previousCycleBillSum,
+    required double cumulativeBillSum,
     int? bonusValue,
     String? campaignId,
   }) = ShopCheckInSuccessPayload;
@@ -181,6 +186,11 @@ sealed class ShopActivityLogPayload with _$ShopActivityLogPayload {
       campaignId: d.campaignId,
       wasAutoFollowed: d.wasAutoFollowed,
       previousStreak: d.previousStreak,
+      billNumber: d.billNumber,
+      billAmount: d.billAmount,
+      cycleBillSum: d.cycleBillSum,
+      previousCycleBillSum: d.previousCycleBillSum,
+      cumulativeBillSum: d.cumulativeBillSum,
     ),
     CheckInFailedLogDto d => ShopActivityLogPayload.checkInFailed(
       customerId: d.customerId,

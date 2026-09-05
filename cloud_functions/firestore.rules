@@ -213,6 +213,11 @@ service cloud.firestore {
 				// Written by backend functions.
 				allow create, update, delete: if isSuperAdmin();
 			}
+
+			// Reserved bill-number keys are maintained exclusively by Cloud Functions.
+			match /processedBills/{billKey} {
+				allow read, create, update, delete: if false;
+			}
 		}
 
 		// ==========================================

@@ -900,6 +900,16 @@ class _ActivityLogListItem extends StatelessWidget {
       ],
       ShopCheckInSuccessPayload() => [
         (
+          icon: Icons.receipt_long_outlined,
+          label: 'Bill ID',
+          value: p.billNumber,
+        ),
+        (
+          icon: Icons.payments_outlined,
+          label: 'Bill Amount',
+          value: p.billAmount.toStringAsFixed(2),
+        ),
+        (
           icon: Icons.local_fire_department_outlined,
           label: 'Streak',
           value: '${p.cumulativeStreak}',

@@ -17,13 +17,20 @@ class UserCheckinByVendorController extends _$UserCheckinByVendorController {
   Future<void> checkInUser({
     required String userId,
     required String shopId,
+    required String billNumber,
+    required double billAmount,
   }) async {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
       final data = await ref
           .read(shopRepositoryProvider)
-          .checkInUserToShopByVendor(userId: userId, shopId: shopId);
+          .checkInUserToShopByVendor(
+            userId: userId,
+            shopId: shopId,
+            billNumber: billNumber,
+            billAmount: billAmount,
+          );
 
       if (data.success) {
         await ref

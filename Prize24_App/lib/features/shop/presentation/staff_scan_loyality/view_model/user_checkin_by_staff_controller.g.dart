@@ -39,7 +39,7 @@ final class UserCheckinByStaffControllerProvider
 }
 
 String _$userCheckinByStaffControllerHash() =>
-    r'9ea766e81d8f85ef4a800669c295f131fa7d03da';
+    r'ab47c90f930cf715aae3dec106fb9ba14a777120';
 
 abstract class _$UserCheckinByStaffController
     extends $AsyncNotifier<CheckInResponseModel?> {

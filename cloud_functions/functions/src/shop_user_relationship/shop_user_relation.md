@@ -265,6 +265,8 @@ Users can follow shops to participate in a loyalty/streak system. When users fol
 {
   userId: string;        // From scanned QR code
   shopId: string;        // Scanner knows their shop
+  billNumber: string;    // Unique within the shop (case-insensitive)
+  billAmount: number;    // Positive value with at most two decimal places
 }
 ```
 **Validations**:
@@ -272,8 +274,9 @@ Users can follow shops to participate in a loyalty/streak system. When users fol
 2. Verify scanner authorization:
    - Check if scanner owns the shop (`shops/{shopId}.shopOwnerId === scannerId`)
    - OR check if scanner is active staff (`shops/{shopId}/staff/{scannerId}.status === "active"`)
-3. User must be follower of the shop
-4. Only one check-in per day (check `lastCheckInDate` based on shop timezone)
+3. Bill number must be 1–64 trimmed characters and unused in the shop
+4. Bill amount must be positive with at most two decimal places
+5. Only one check-in per day
 **Process**:
 1. Get current streak data
 2. Calculate if eligible for check-in (not already checked in today)
@@ -283,9 +286,9 @@ Users can follow shops to participate in a loyalty/streak system. When users fol
    - Increment `cumulativeStreak` by 1 or `bonusIncrement`
    - Update `consecutiveDays`
    - Update `lastCheckInDate`
-6. Check if it's a gift day:
-   - If `campaignId` not null AND `cumulativeStreak % giftDayCycle === 0`
-7. Update user's copy in `/users/{userId}/followedShops/{shopId}`
+6. Check if the new streak reaches or crosses the next configured gift milestone
+7. Add the bill to cumulative and cycle totals, closing the cycle on gift day
+8. Atomically update both relationship documents, reserve the bill number, and write success logs
 **Response**:
 ```typescript
 {
@@ -373,6 +376,5 @@ Same as `followShopByVendor` but with staff validation:
 4. **Gift Day with Null Campaign**: Return `isGiftDay: false` always
 5. **FCM Failures**: Log error but don't fail the operation (notification is non-critical)
 6. **Timezone Handling**: Store shop timezone in shop document for accurate "day" calculation
-
 
 

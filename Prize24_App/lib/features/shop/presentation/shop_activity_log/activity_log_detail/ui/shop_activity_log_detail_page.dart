@@ -64,7 +64,8 @@ class _ShopActivityLogDetailPageState
     if (phoneNumber == null || phoneNumber.isEmpty) return;
 
     final uri = Uri(scheme: 'tel', path: phoneNumber);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication) && mounted) {
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication) &&
+        mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Unable to open the dialer')),
       );
@@ -445,6 +446,37 @@ class _ShopActivityLogDetailPageState
             label: 'Shop ID',
             value: p.shopId,
             monospace: true,
+          ),
+          const _CardDivider(),
+          _DetailRow(
+            icon: Icons.receipt_long_outlined,
+            label: 'Bill ID',
+            value: p.billNumber,
+            monospace: true,
+          ),
+          const _CardDivider(),
+          _DetailRow(
+            icon: Icons.payments_outlined,
+            label: 'Bill Amount',
+            value: p.billAmount.toStringAsFixed(2),
+          ),
+          const _CardDivider(),
+          _DetailRow(
+            icon: Icons.autorenew_rounded,
+            label: 'Current Cycle Bill Sum',
+            value: p.cycleBillSum.toStringAsFixed(2),
+          ),
+          const _CardDivider(),
+          _DetailRow(
+            icon: Icons.history_rounded,
+            label: 'Previous Cycle Bill Sum',
+            value: p.previousCycleBillSum.toStringAsFixed(2),
+          ),
+          const _CardDivider(),
+          _DetailRow(
+            icon: Icons.account_balance_wallet_outlined,
+            label: 'Cumulative Bill Sum',
+            value: p.cumulativeBillSum.toStringAsFixed(2),
           ),
           const _CardDivider(),
           _DetailRow(

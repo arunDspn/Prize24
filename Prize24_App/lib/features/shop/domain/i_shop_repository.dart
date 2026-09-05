@@ -148,6 +148,8 @@ abstract class IShopRepository {
   Future<CheckInResponseModel> checkInUserToShopByVendor({
     required String shopId,
     required String userId,
+    required String billNumber,
+    required double billAmount,
   });
 
   /// Check in user by staff
@@ -155,6 +157,8 @@ abstract class IShopRepository {
     required String shopId,
     required String userId,
     required String staffUserId,
+    required String billNumber,
+    required double billAmount,
   });
 
   Future<void> toggleShopNotification({

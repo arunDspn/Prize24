@@ -1,4 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
+
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,7 @@ import 'package:prize24_app/common_widgets/show_toast.dart';
 import 'package:prize24_app/features/campaign/presentation/vendor_campaign_detail/components/vendor_scan_user/view_model/vendor_scan_user_controller.dart';
 import 'package:prize24_app/features/shop/domain/model/shop_model.dart';
 import 'package:prize24_app/features/shop/presentation/vendor_scan_loyality/view_model/user_checkin_by_vendor_controller.dart';
+import 'package:prize24_app/features/shop/presentation/widgets/check_in_bill_dialog.dart';
 
 /// Design colors matching the HTML theme
 class _DesignColors {
@@ -20,7 +22,6 @@ class _DesignColors {
   // Text colors
   static const Color textMain = Color(0xFF1E293B); // slate-800
   static const Color textSub = Color(0xFF64748B); // slate-500
-  static const Color textAccent = Color(0xFF0F172A); // slate-900
 
   // Brand gradient colors
   static const Color brandStart = Color(0xFFEF4444); // red-500
@@ -32,12 +33,6 @@ class _DesignColors {
   static const Color successIcon = Color(0xFF16A34A); // green-600
   static const Color successText = Color(0xFF166534); // green-800
   static const Color successTextLight = Color(0xFF15803D); // green-700
-
-  // Error colors (red)
-  static const Color errorBg = Color(0xFFFEF2F2); // red-50
-  static const Color errorBorder = Color(0xFFFECACA); // red-200
-  static const Color errorIcon = Color(0xFFEF4444); // red-500
-  static const Color errorText = Color(0xFFB91C1C); // red-700
 
   // Info colors (blue)
   static const Color infoBg = Color(0xFFEFF6FF); // blue-50
@@ -100,79 +95,33 @@ class _VendorScanLoyalityPageState
           _isScannerDisabled = true;
           scannedCode = code;
         });
-        _showScannedDialog(code);
+        unawaited(_showScannedDialog(code));
         break;
       }
     }
   }
 
-  void _showScannedDialog(String code) {
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: _DesignColors.pageCard,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Text(
-            'Checking-in Confirmation',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: _DesignColors.textMain,
-            ),
-          ),
-          content: const Text(
-            'Check in to the shop?',
-            style: TextStyle(fontSize: 15, color: _DesignColors.textSub),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: _DesignColors.textSub,
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            Container(
-              decoration: BoxDecoration(
-                gradient: _DesignColors.brandGradient,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(8),
-                  onTap: () {
-                    ref
-                        .read(userCheckinByVendorControllerProvider.notifier)
-                        .checkInUser(userId: code, shopId: widget.shop.id!);
-                  },
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    child: Text(
-                      'Confirm',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
+  Future<void> _showScannedDialog(String code) async {
+    await cameraController.stop();
+    if (!_isScannerDisabled) {
+      setState(() => _isScannerDisabled = true);
+    }
+
+    final billDetails = await showCheckInBillDialog(context, userId: code);
+    if (!mounted) return;
+    if (billDetails == null) {
+      _rescan();
+      return;
+    }
+
+    await ref
+        .read(userCheckinByVendorControllerProvider.notifier)
+        .checkInUser(
+          userId: code,
+          shopId: widget.shop.id!,
+          billNumber: billDetails.billNumber,
+          billAmount: billDetails.billAmount,
         );
-      },
-    );
   }
 
   @override
@@ -361,19 +310,17 @@ class _VendorScanLoyalityPageState
                   );
                 }
               } else {
-                final error = data.error ?? 'Check-in failed';
                 // Already checked in today message
                 showToastAtTop(
                   context,
                   'Error during check-in, Please try again',
                   false,
                 );
+                _rescan();
               }
             }
           },
           loading: () {
-            // CLose any open dialogs
-            Navigator.of(context).pop();
             // Optionally show a loading indicator dialog
             showDialog<void>(
               context: context,
@@ -430,7 +377,13 @@ class _VendorScanLoyalityPageState
                 'This customer is not a follower of your shop.',
                 false,
               );
-              return;
+            } else if (error is FirebaseFunctionsException &&
+                error.details == 'BILL_NUMBER_ALREADY_USED') {
+              showToastAtTop(
+                context,
+                'This bill number has already been used for this shop.',
+                false,
+              );
             } else if (error is FirebaseFunctionsException &&
                 error.code == 'already-exists') {
               showToastAtTop(
@@ -446,6 +399,8 @@ class _VendorScanLoyalityPageState
                 false,
               );
             }
+
+            _rescan();
 
             // cameraController.start(); // Restart scanner
           },
@@ -687,10 +642,7 @@ class _VendorScanLoyalityPageState
                     const SizedBox(height: 6),
                     const Text(
                       'Tap below to scan another QR code',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                      ),
+                      style: TextStyle(color: Colors.white70, fontSize: 13),
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton.icon(
@@ -952,6 +904,8 @@ class _VendorScanLoyalityPageState
   }
 
   void _handleManualCheckin() {
+    if (_isScannerDisabled) return;
+
     final code = _manualCodeController.text.trim();
     if (code.isEmpty) {
       showToastAtTop(context, 'Please enter a Customer User ID', false);
@@ -959,8 +913,9 @@ class _VendorScanLoyalityPageState
     }
     setState(() {
       scannedCode = code;
+      _isScannerDisabled = true;
     });
-    _showScannedDialog(code);
+    unawaited(_showScannedDialog(code));
   }
 
   Widget _buildFooterActions(BuildContext context) {

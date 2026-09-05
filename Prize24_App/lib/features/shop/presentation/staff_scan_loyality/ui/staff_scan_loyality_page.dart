@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +8,7 @@ import 'package:prize24_app/common_widgets/show_toast.dart';
 import 'package:prize24_app/configs/theme_config.dart';
 import 'package:prize24_app/features/campaign/presentation/vendor_campaign_detail/components/vendor_scan_user/view_model/vendor_scan_user_controller.dart';
 import 'package:prize24_app/features/shop/presentation/staff_scan_loyality/view_model/user_checkin_by_staff_controller.dart';
+import 'package:prize24_app/features/shop/presentation/widgets/check_in_bill_dialog.dart';
 
 class StaffScanLoyalityPage extends ConsumerStatefulWidget {
   const StaffScanLoyalityPage({
@@ -78,222 +81,34 @@ class _StaffScanLoyalityPageState extends ConsumerState<StaffScanLoyalityPage>
           _isScannerDisabled = true;
           scannedCode = code;
         });
-        _showConfirmDialog(code);
+        unawaited(_showConfirmDialog(code));
         break;
       }
     }
   }
 
-  void _showConfirmDialog(String code) {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: 'Dismiss',
-      barrierColor: const Color(0xFF0F172A).withOpacity(0.6),
-      transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return const SizedBox.shrink();
-      },
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        final curvedAnimation = CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeOutCubic,
+  Future<void> _showConfirmDialog(String code) async {
+    await cameraController.stop();
+    _scanAnimationController.stop();
+    if (!_isScannerDisabled) {
+      setState(() => _isScannerDisabled = true);
+    }
+
+    final billDetails = await showCheckInBillDialog(context, userId: code);
+    if (!mounted) return;
+    if (billDetails == null) {
+      _rescan();
+      return;
+    }
+
+    await ref
+        .read(userCheckinByStaffControllerProvider.notifier)
+        .checkInUser(
+          userId: code,
+          shopId: widget.shopId,
+          billNumber: billDetails.billNumber,
+          billAmount: billDetails.billAmount,
         );
-        return BackdropFilter(
-          filter: ColorFilter.mode(
-            Colors.black.withOpacity(0.4 * animation.value),
-            BlendMode.srcOver,
-          ),
-          child: ScaleTransition(
-            scale: Tween<double>(
-              begin: 0.95,
-              end: 1.0,
-            ).animate(curvedAnimation),
-            child: FadeTransition(
-              opacity: animation,
-              child: Center(
-                child: Container(
-                  width: MediaQuery.of(context).size.width - 32,
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  margin: const EdgeInsets.all(16),
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
-                        blurRadius: 30,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Icon
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Icon(
-                            Icons.qr_code_2_rounded,
-                            size: 24,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Title
-                        const Text(
-                          'Check In Club',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF0F172A),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        // Subtitle
-                        Row(
-                          children: [
-                            const Text(
-                              'Confirm check-in for user ',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Color(0xFF64748B),
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                code.length > 12
-                                    ? '${code.substring(0, 12)}...'
-                                    : code,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontFamily: 'monospace',
-                                  color: Color(0xFF475569),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            const Text(
-                              '?',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Color(0xFF64748B),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        // Buttons
-                        Row(
-                          children: [
-                            Expanded(
-                              child: SizedBox(
-                                height: 48,
-                                child: OutlinedButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    side: BorderSide(
-                                      color: Colors.grey.shade200,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Cancel',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF475569),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: SizedBox(
-                                height: 48,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        ThemeConfig.primaryColor,
-                                        ThemeConfig.secondaryColor,
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: ThemeConfig.primaryColor
-                                            .withOpacity(0.3),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      ref
-                                          .read(
-                                            userCheckinByStaffControllerProvider
-                                                .notifier,
-                                          )
-                                          .checkInUser(
-                                            userId: code,
-                                            shopId: widget.shopId,
-                                          );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.transparent,
-                                      shadowColor: Colors.transparent,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    child: const Text(
-                                      'Confirm',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
   }
 
   void _showGiftDialog(String giftName) {
@@ -536,14 +351,12 @@ class _StaffScanLoyalityPageState extends ConsumerState<StaffScanLoyalityPage>
                   );
                 }
               } else {
-                final error = data.error ?? 'Check-in failed';
                 showToastAtTop(context, 'Error during check-in', false);
+                _rescan();
               }
             }
           },
           loading: () {
-            // Close any open dialogs
-            Navigator.of(context, rootNavigator: true).pop();
             // Optionally show a loading indicator dialog
             _showLoadingDialog('Checking in...');
           },
@@ -552,6 +365,13 @@ class _StaffScanLoyalityPageState extends ConsumerState<StaffScanLoyalityPage>
             Navigator.of(context, rootNavigator: true).pop();
 
             if (error is FirebaseFunctionsException &&
+                error.details == 'BILL_NUMBER_ALREADY_USED') {
+              showToastAtTop(
+                context,
+                'This bill number has already been used for this shop.',
+                false,
+              );
+            } else if (error is FirebaseFunctionsException &&
                 error.code == 'already-exists') {
               showToastAtTop(
                 context,
@@ -561,6 +381,7 @@ class _StaffScanLoyalityPageState extends ConsumerState<StaffScanLoyalityPage>
             } else {
               showToastAtTop(context, 'Error during check-in', false);
             }
+            _rescan();
           },
         );
       });
@@ -802,6 +623,8 @@ class _StaffScanLoyalityPageState extends ConsumerState<StaffScanLoyalityPage>
   }
 
   void _handleManualCheckin() {
+    if (_isScannerDisabled) return;
+
     final code = _manualCodeController.text.trim();
     if (code.isEmpty) {
       showToastAtTop(context, 'Please enter a Customer User ID', false);
@@ -809,8 +632,9 @@ class _StaffScanLoyalityPageState extends ConsumerState<StaffScanLoyalityPage>
     }
     setState(() {
       scannedCode = code;
+      _isScannerDisabled = true;
     });
-    _showConfirmDialog(code);
+    unawaited(_showConfirmDialog(code));
   }
 
   Widget _buildAppBar() {
@@ -1091,10 +915,7 @@ class _StaffScanLoyalityPageState extends ConsumerState<StaffScanLoyalityPage>
                         const SizedBox(height: 4),
                         const Text(
                           'Tap below to scan another QR code',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 13,
-                          ),
+                          style: TextStyle(color: Colors.white70, fontSize: 13),
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton.icon(

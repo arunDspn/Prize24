@@ -152,6 +152,8 @@ abstract class IShopService {
   Future<CheckInResponseDto> checkInUserToShopByVendor({
     required String shopId,
     required String userId,
+    required String billNumber,
+    required double billAmount,
   });
 
   /// Check in user by staff
@@ -159,6 +161,8 @@ abstract class IShopService {
     required String shopId,
     required String userId,
     required String staffUserId,
+    required String billNumber,
+    required double billAmount,
   });
 
   Future<void> toggleShopNotification({

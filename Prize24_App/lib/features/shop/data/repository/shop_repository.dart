@@ -223,11 +223,15 @@ class ShopRepository extends IShopRepository {
     required String shopId,
     required String userId,
     required String staffUserId,
+    required String billNumber,
+    required double billAmount,
   }) async {
     final response = await _shopService.checkInUserToShopByStaff(
       shopId: shopId,
       userId: userId,
       staffUserId: staffUserId,
+      billNumber: billNumber,
+      billAmount: billAmount,
     );
     return response.toDomain();
   }
@@ -236,10 +240,14 @@ class ShopRepository extends IShopRepository {
   Future<CheckInResponseModel> checkInUserToShopByVendor({
     required String shopId,
     required String userId,
+    required String billNumber,
+    required double billAmount,
   }) async {
     final response = await _shopService.checkInUserToShopByVendor(
       shopId: shopId,
       userId: userId,
+      billNumber: billNumber,
+      billAmount: billAmount,
     );
     return response.toDomain();
   }

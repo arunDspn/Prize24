@@ -425,6 +425,11 @@ export interface ShopFollower {
     lastGiftDayStreak: number | null; // Cumulative streak at last gift
     lastBonusDate: Timestamp | null; // Last time bonus was applied
 
+    // Bill totals for this shop/customer relationship
+    cycleBillSum: number;
+    previousCycleBillSum: number;
+    cumulativeBillSum: number;
+
     followedAt: Timestamp;
     createdAt: Timestamp;
     updatedAt: Timestamp;
@@ -442,6 +447,9 @@ export interface UserFollowingShop {
     cumulativeStreak: number;
     consecutiveDays: number;
     lastCheckInDate: Timestamp | null;
+    cycleBillSum: number;
+    previousCycleBillSum: number;
+    cumulativeBillSum: number;
 
     followedAt: Timestamp;
     updatedAt: Timestamp;
@@ -508,6 +516,8 @@ export interface RemoveFollowerRequest {
 export interface CheckInUserRequest {
     userId: string;
     shopId: string;
+    billNumber: string;
+    billAmount: number;
 }
 
 export interface AddOfferRequest {
@@ -563,6 +573,9 @@ export const SHOP_FOLLOW_ERROR_CODES = {
   ALREADY_CHECKED_IN_TODAY: "ALREADY_CHECKED_IN_TODAY",
   OFFER_INVALID_DATES: "OFFER_INVALID_DATES",
   SCANNER_NOT_AUTHORIZED: "SCANNER_NOT_AUTHORIZED",
+  BILL_NUMBER_ALREADY_USED: "BILL_NUMBER_ALREADY_USED",
+  INVALID_BILL_NUMBER: "INVALID_BILL_NUMBER",
+  INVALID_BILL_AMOUNT: "INVALID_BILL_AMOUNT",
 } as const;
 
 export type ShopFollowErrorCode = typeof SHOP_FOLLOW_ERROR_CODES[keyof typeof SHOP_FOLLOW_ERROR_CODES];
@@ -603,4 +616,3 @@ export interface RequestAccountDeletionResponse {
 export interface CancelAccountDeletionResponse {
     success: boolean;
 }
-
