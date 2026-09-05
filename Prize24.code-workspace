@@ -1,0 +1,16 @@
+{
+  "folders": [
+    {
+      "name": "Prize24 Flutter",
+      "path": "Prize24_App"
+    },
+    {
+      "name": "Cloud Functions",
+      "path": "cloud_functions"
+    },
+    {
+      "name": "Commission Dashboard",
+      "path": "commission-web-app"
+    }
+  ]
+}
