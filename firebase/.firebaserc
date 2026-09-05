@@ -1,8 +1,0 @@
-{
-  "projects": {
-    "default": "prize24-dev",
-    "prod": "prize24"
-  },
-  "targets": {},
-  "etags": {}
-}

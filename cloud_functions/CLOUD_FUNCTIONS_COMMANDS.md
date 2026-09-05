@@ -1,55 +1,79 @@
-# Cloud Functions Commands
+# Firebase Backend Commands
 
-## Quick Commands
+Run direct Firebase CLI commands from this directory. Run npm commands from `functions/` unless a command says otherwise.
 
-### Lint & Fix
-```bash
-# Run linter
-cd functions && npm run lint
+## Toolchain and install
 
-# Fix linting issues automatically
-cd functions && npm run lint -- --fix
+The Functions runtime is Node.js 22, pinned by `.nvmrc` and `functions/package.json`.
+
+```sh
+nvm use
+node --version
+firebase --version
+cd functions
+npm ci
 ```
 
-### Build
-```bash
-# Build TypeScript to JavaScript
-cd functions && npm run build
+When using NVM, global npm tools are installed per Node.js version. If `firebase` is unavailable after `nvm use`, install the Firebase CLI for Node.js 22 before using the emulator or deployment commands.
 
-# Build with watch mode (auto-rebuild on changes)
-cd functions && npm run build:watch
+## Lint and build
+
+```sh
+cd functions
+npm run lint
+npm run build
 ```
 
-### Deploy
-```bash
-# Deploy all functions
-firebase deploy --only functions
+Use `npm run build:watch` for continuous TypeScript compilation. `functions/lib/` is generated output and must not be edited directly.
 
-# Deploy specific function
-firebase deploy --only functions:functionName
+## Local emulators
+
+The Functions package provides two emulator modes:
+
+```sh
+cd functions
+
+# Functions only; retained for compatibility
+npm run serve
+
+# Auth + Firestore + Functions using an isolated demo project
+npm run emulators
 ```
 
-### Local Development
-```bash
-# Start local emulator
-cd functions && npm run serve
+The full suite uses these ports:
 
-# Open functions shell
-cd functions && npm run shell
+- Auth: `9099`
+- Functions: `5001`
+- Firestore: `8080`
+- Emulator UI: Firebase CLI default
+
+The RevenueCat webhook binds `REVENUECAT_WEBHOOK_SECRET`. Before emulating that function, create an ignored `functions/.secret.local` containing a dummy local value:
+
+```dotenv
+REVENUECAT_WEBHOOK_SECRET=local-test-only
 ```
 
-### Logs
-```bash
-# View function logs
-firebase functions:log
+Never put the production secret in a local file, command, fixture, or log. Remove the dummy file when it is no longer needed.
 
-# Follow logs in real-time
-firebase functions:log --tail
+## Functions shell and logs
+
+```sh
+cd functions
+npm run shell
+npm run logs
 ```
 
-## Common Workflow
-1. Make changes to TypeScript files in `functions/src/`
-2. Run `npm run lint -- --fix` to fix formatting
-3. Run `npm run build` to compile
-4. Test locally with `npm run serve`
-5. Deploy with `firebase deploy --only functions`
+The Functions shell does not provide full cross-service Firestore/Auth emulation; prefer `npm run emulators` for integrated behavior.
+
+## Deployment
+
+Deployment is a production-affecting operation. Confirm the Firebase project alias first and always use an explicit target:
+
+```sh
+# Run from cloud_functions/
+firebase deploy --only functions --project CONFIRMED_ALIAS
+firebase deploy --only firestore --project CONFIRMED_ALIAS
+firebase deploy --only functions,firestore --project CONFIRMED_ALIAS
+```
+
+Do not run a bare `firebase deploy`; this backend root now configures both Functions and Firestore. Local builds and emulator checks never require deployment.

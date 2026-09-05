@@ -3,7 +3,7 @@
 Use the root `AGENTS.md` for repository-wide guidance and the nearest nested `AGENTS.md` for the project being edited.
 
 - This is a multi-project repository; there is no root build or package-manager command.
-- Keep changes scoped to `Prize24_App/`, `cloud_functions/`, `firebase/`, or `commission-web-app/` as requested.
+- Keep changes scoped to `Prize24_App/`, `cloud_functions/`, or `commission-web-app/` as requested. `cloud_functions/` is the canonical Firebase backend root.
 - Never hand-edit generated Dart files, Functions `lib/` output, `.react-router/`, build output, dependency folders, or local environment files.
 - Search all consumers before changing a callable Function contract or Firestore collection, field, role, timestamp, or path.
 - Preserve server-side authentication/authorization and Firestore rule enforcement; UI route guards are not security boundaries.

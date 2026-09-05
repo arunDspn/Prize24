@@ -1,14 +1,13 @@
-# Implemented Cloud Functions guide
+# Firebase backend guide
 
 These instructions apply to `cloud_functions/` and extend the repository-level `AGENTS.md`.
 
 ## Scope and architecture
 
-- This tree contains the implemented Firebase Functions used by the clients. TypeScript source is in `functions/src/`; `functions/src/index.ts` is the public export surface.
+- This is the canonical Firebase backend root. `firestore.rules` and `firestore.indexes.json` are its deployable database configuration; implemented Functions source is in `functions/src/`, and `functions/src/index.ts` is the public export surface.
 - `functions/package.json` targets Node.js 22. Use a compatible local Node version for install, build, emulator, and deployment work.
 - Feature modules are grouped by domain, including campaign gifts/sharing, shop relationships, vendor friendships, account lifecycle, and the RevenueCat webhook.
 - `functions/lib/` is TypeScript output and is ignored by lint. Never edit it directly.
-- The sibling `../firebase/functions/` directory is a separate minimal scaffold. Do not assume edits here update it.
 
 ## Function conventions
 
@@ -28,15 +27,17 @@ Run these from `cloud_functions/functions/`:
 npm run lint
 npm run build
 npm run serve
+npm run emulators
 ```
 
-`npm run serve` builds and starts the Functions emulator. There is currently no package test script, so do not claim unit tests passed; add targeted tests when implementing logic that can be isolated.
+`npm run serve` builds and starts only the Functions emulator. `npm run emulators` builds and starts Auth, Firestore, and Functions with the isolated `demo-prize24` project. There is currently no package test script, so do not claim unit tests passed; add targeted tests when implementing logic that can be isolated.
 
-Run Firebase CLI commands from `cloud_functions/`, where `firebase.json` and `.firebaserc` live. Deployment is an explicit production-affecting action and is never part of routine verification.
+Run direct Firebase CLI commands from `cloud_functions/`, where `firebase.json` and `.firebaserc` live. A bare `firebase deploy` includes every configured backend resource; use an explicit `--only` target after confirming the project. Deployment is never part of routine verification.
 
 ## Operational safety
 
 - Treat `functions/src/seed*.js` and `functions/src/delete*.js` as destructive operational utilities. Do not execute, modernize, or fold them into ordinary build work without explicit scope and a confirmed target project.
 - Keep webhook secrets in Firebase/Google secret management. Do not put values into source or Markdown.
-- If a function changes Firestore access patterns, review `../firebase/firestore.rules` and `../firebase/firestore.indexes.json` even though this Firebase config deploys only Functions.
+- For local RevenueCat webhook emulation, put only a dummy value in ignored `functions/.secret.local`; never let the emulator retrieve or use the production secret.
+- If a function changes Firestore access patterns, review this directory's `firestore.rules` and `firestore.indexes.json`.
 - Prefer emulator-based end-to-end verification of callable and transaction behavior. Never use live collections as fixtures.

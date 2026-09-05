@@ -25,7 +25,7 @@ These instructions apply to `commission-web-app/` and extend the repository-leve
 - Required public client variables are documented in `.env.example` and use the `VITE_FIREBASE_*` prefix. Add new names to the example with empty/safe placeholder values.
 - Never commit a populated `.env`, Admin SDK credential, private key, or server secret. `VITE_*` values are bundled into the client and must never contain secrets.
 - Firestore collection defaults and profile normalization are centralized in `app/lib/firestore.ts`; avoid scattering alternate collection names or field fallbacks.
-- `firestore.rules` is not referenced by this directory's hosting-only `firebase.json`. Do not assume it is deployed from here; coordinate rule changes with `../firebase/firestore.rules` deliberately.
+- This directory's `firebase.json` configures Hosting only. Coordinate Firestore rule changes with the canonical `../cloud_functions/firestore.rules` and `../cloud_functions/firestore.indexes.json`.
 
 ## Commands
 
