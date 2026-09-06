@@ -7,6 +7,7 @@ import 'package:prize24_app/core/constants.dart';
 import 'package:prize24_app/features/campaign/domain/models/campaign_model.dart';
 import 'package:prize24_app/features/clubs/presentation/vendor/create_club/ui/components/campaign_selection_list/campaign_selecter_list_modal.dart';
 import 'package:prize24_app/features/shop/domain/model/shop_model.dart';
+import 'package:prize24_app/features/shop/presentation/add_edit_shop/shop_phone_number_parser.dart';
 import 'package:prize24_app/features/shop/presentation/add_edit_shop/view_model/add_edit_shop_controller.dart';
 import 'package:prize24_app/features/vendor/presentation/vendor_home_content/ui/components/vendors_campaign_list/components/vendors_campaign_list_controller.dart';
 import 'package:prize24_app/features/vendor/presentation/vendor_home_content/ui/components/vendors_shop_list/view_model/vendor_shop_list_controller.dart';
@@ -84,12 +85,11 @@ class _AddOrEditShopPageState extends ConsumerState<AddOrEditShopPage>
     _animationController.forward();
 
     if (widget.shop != null) {
+      final phoneNumberParts = parseShopPhoneNumber(widget.shop!.shopPhone);
       _shopNameController.text = widget.shop!.shopName;
       _shopEmailController.text = widget.shop!.shopEmail ?? '';
-      _shopPhoneController.text = widget.shop!.shopPhone.replaceFirst(
-        RegExp(r'^\+\d{1,4}'),
-        '',
-      );
+      _selectedCountryCode = phoneNumberParts.country;
+      _shopPhoneController.text = phoneNumberParts.localNumber;
       _shopAddressController.text = widget.shop!.shopAddress;
       _shopDescriptionController.text = widget.shop!.shopDescription ?? '';
       _giftCycleDayController.text = widget.shop!.giftCycleDay.toString();
