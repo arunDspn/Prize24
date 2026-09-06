@@ -91,6 +91,16 @@ class AuthController extends _$AuthController {
     state = AsyncData(updatedUser);
   }
 
+  void updateUserPhoneNumber(String newPhoneNumber) {
+    final currentUser = state.requireValue;
+    if (currentUser == null) {
+      logger.w('No authenticated user to update phone number.');
+      return;
+    }
+    final updatedUser = currentUser.copyWith(userPhoneNumber: newPhoneNumber);
+    state = AsyncData(updatedUser);
+  }
+
   // Update user phone number
   Future<void> updateUserVendorNumber(String newPhoneNumber) async {
     final currentUser = state.requireValue;

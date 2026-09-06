@@ -21,6 +21,11 @@ abstract class UserRepository {
     required String newUserName,
   });
 
+  Future<void> updateUserPhoneNumber({
+    required String userId,
+    required String userPhoneNumber,
+  });
+
   /// Get user name by user id
   Future<String?> getUserNameById(String userId);
 }

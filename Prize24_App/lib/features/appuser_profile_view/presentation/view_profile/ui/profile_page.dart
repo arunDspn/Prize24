@@ -1,3 +1,4 @@
+import 'package:country_code_picker_plus/country_code_picker_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +7,7 @@ import 'package:prize24_app/common_widgets/common_widgets.dart';
 import 'package:prize24_app/common_widgets/show_toast.dart';
 import 'package:prize24_app/features/appuser_profile_view/presentation/view_profile/ui/components/set_referrer_popup/set_referrer_view.dart';
 import 'package:prize24_app/features/appuser_profile_view/presentation/view_profile/view_models/update_user_name_controller.dart';
+import 'package:prize24_app/features/appuser_profile_view/presentation/view_profile/view_models/update_user_phone_number_controller.dart';
 import 'package:prize24_app/features/authentication/domain/model/app_user.dart';
 import 'package:prize24_app/features/authentication/presentation/pages/pop_auth/pop_auth_shell_page.dart';
 import 'package:prize24_app/features/global_controller/auth/auth_controller.dart';
@@ -420,10 +422,7 @@ void _showEditNameDialog(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        side: const BorderSide(
-                          color: _ProfileTheme.inputBg,
-                          width: 1,
-                        ),
+                        side: const BorderSide(color: _ProfileTheme.inputBg),
                       ),
                       child: const Text(
                         'Cancel',
@@ -495,8 +494,403 @@ void _showEditNameDialog(
   // ).then((_) => nameController.dispose());
 }
 
-// Helper function to show Edit Phone Dialog
-void _showEditPhoneDialog(
+Future<void> _showEditUserPhoneDialog(
+  BuildContext context,
+  String currentPhone,
+  WidgetRef ref,
+) async {
+  final updatedPhone = await showDialog<String>(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => _EditUserPhoneDialog(currentPhone: currentPhone),
+  );
+
+  if (updatedPhone == null || !context.mounted) return;
+
+  ref.read(authControllerProvider.notifier).updateUserPhoneNumber(updatedPhone);
+  showToastAtTop(context, 'Phone number updated successfully!', true);
+}
+
+class _EditUserPhoneDialog extends ConsumerStatefulWidget {
+  const _EditUserPhoneDialog({required this.currentPhone});
+
+  final String currentPhone;
+
+  @override
+  ConsumerState<_EditUserPhoneDialog> createState() =>
+      _EditUserPhoneDialogState();
+}
+
+class _EditUserPhoneDialogState extends ConsumerState<_EditUserPhoneDialog> {
+  static const String _countryDataAsset =
+      'packages/country_code_picker_plus/assets/countries.json';
+
+  final _phoneController = TextEditingController();
+  Country _selectedCountry = Country(
+    name: 'India',
+    code: 'IN',
+    dialCode: '+91',
+    flagUri: 'assets/flags/in.png',
+  );
+  bool _didInitialize = false;
+  bool _isInitializing = true;
+  bool _isSubmitting = false;
+  String? _inputError;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didInitialize) return;
+    _didInitialize = true;
+    _initializeCurrentPhone();
+  }
+
+  Future<void> _initializeCurrentPhone() async {
+    final currentPhone = widget.currentPhone.trim();
+    if (currentPhone.isEmpty) {
+      setState(() => _isInitializing = false);
+      return;
+    }
+
+    final digits = currentPhone.replaceAll(RegExp(r'\D'), '');
+    Country? matchedCountry;
+    var localNumber = digits;
+
+    if (currentPhone.startsWith('+')) {
+      try {
+        final countries = await PhoneService.fetchCountryData(
+          context,
+          _countryDataAsset,
+        );
+        final candidates = PhoneService.getPotentialCountries(digits, countries)
+          ..sort(
+            (first, second) =>
+                second.dialCode.length.compareTo(first.dialCode.length),
+          );
+
+        for (final country in candidates) {
+          final dialCodeDigits = country.dialCode.replaceFirst('+', '');
+          if (!digits.startsWith(dialCodeDigits)) continue;
+
+          final candidateLocalNumber = digits.substring(dialCodeDigits.length);
+          final isValid =
+              await PhoneService.parsePhoneNumber(
+                candidateLocalNumber,
+                country.code,
+              ) ??
+              false;
+          if (isValid) {
+            matchedCountry = country;
+            localNumber = candidateLocalNumber;
+            break;
+          }
+        }
+      } on Object {
+        // Fall back to the app's default country below.
+      }
+    }
+
+    if (matchedCountry == null && currentPhone.startsWith('+91')) {
+      localNumber = digits.substring(2);
+    }
+
+    if (!mounted) return;
+    setState(() {
+      if (matchedCountry != null) {
+        _selectedCountry = matchedCountry;
+      }
+      _phoneController.text = localNumber;
+      _isInitializing = false;
+    });
+  }
+
+  Future<void> _save() async {
+    if (_isSubmitting) return;
+
+    final localNumber = _phoneController.text.trim();
+    var normalizedPhoneNumber = '';
+
+    setState(() {
+      _inputError = null;
+      _isSubmitting = true;
+    });
+
+    if (localNumber.isNotEmpty) {
+      final isValid =
+          await PhoneService.parsePhoneNumber(
+            localNumber,
+            _selectedCountry.code,
+          ) ??
+          false;
+      if (!isValid) {
+        if (mounted) {
+          setState(() {
+            _inputError = 'Please enter a valid phone number';
+            _isSubmitting = false;
+          });
+        }
+        return;
+      }
+
+      final normalized = await PhoneService.getNormalizedPhoneNumber(
+        localNumber,
+        _selectedCountry.code,
+      );
+      if (normalized == null || normalized.isEmpty) {
+        if (mounted) {
+          setState(() {
+            _inputError = 'Please enter a valid phone number';
+            _isSubmitting = false;
+          });
+        }
+        return;
+      }
+      normalizedPhoneNumber = normalized;
+    }
+
+    await ref
+        .read(updateUserPhoneNumberControllerProvider.notifier)
+        .updateUserPhoneNumber(normalizedPhoneNumber);
+
+    if (!mounted) return;
+    ref
+        .read(updateUserPhoneNumberControllerProvider)
+        .whenOrNull(
+          data: (phoneNumber) {
+            Navigator.pop(context, phoneNumber ?? normalizedPhoneNumber);
+          },
+          error: (error, stackTrace) {
+            setState(() {
+              _inputError = 'Failed to update phone number. Please try again.';
+              _isSubmitting = false;
+            });
+          },
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final updateState = ref.watch(updateUserPhoneNumberControllerProvider);
+    final isSaving = _isSubmitting || updateState.isLoading;
+
+    return PopScope(
+      canPop: !isSaving,
+      child: Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: _ProfileTheme.cardBg,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Edit User Phone Number',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: _ProfileTheme.textMain,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: isSaving ? null : () => Navigator.pop(context),
+                    icon: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: _ProfileTheme.inputBg,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        size: 18,
+                        color: _ProfileTheme.textSub,
+                      ),
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Phone Number',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: _ProfileTheme.textMain,
+                  fontFamily: 'Inter',
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  color: _ProfileTheme.inputBg,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    CountryCodePicker(
+                      initialSelection: _selectedCountry.code,
+                      onChanged: (country) {
+                        setState(() {
+                          _selectedCountry = country;
+                          _inputError = null;
+                        });
+                      },
+                      enabled: !isSaving && !_isInitializing,
+                      textStyle: const TextStyle(
+                        color: _ProfileTheme.textMain,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Container(
+                      width: 1,
+                      height: 28,
+                      color: _ProfileTheme.textSub.withValues(alpha: 0.2),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        key: const Key('user-phone-input'),
+                        controller: _phoneController,
+                        enabled: !isSaving && !_isInitializing,
+                        keyboardType: TextInputType.phone,
+                        maxLength: 15,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        onChanged: (_) {
+                          if (_inputError != null) {
+                            setState(() => _inputError = null);
+                          }
+                        },
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: _ProfileTheme.textMain,
+                          fontFamily: 'Inter',
+                        ),
+                        decoration: const InputDecoration(
+                          hintText: 'Phone number',
+                          hintStyle: TextStyle(
+                            color: _ProfileTheme.textSub,
+                            fontFamily: 'Inter',
+                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          counterText: '',
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (_inputError != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  _inputError!,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: _ProfileTheme.gradStart,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+              ],
+              const SizedBox(height: 8),
+              Text(
+                'Leave empty to remove your phone number.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: _ProfileTheme.textSub.withValues(alpha: 0.8),
+                  fontFamily: 'Inter',
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: isSaving ? null : () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        side: const BorderSide(color: _ProfileTheme.inputBg),
+                      ),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: _ProfileTheme.textMain,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      key: const Key('save-user-phone-button'),
+                      onPressed: isSaving || _isInitializing ? null : _save,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        backgroundColor: _ProfileTheme.gradStart,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: isSaving
+                          ? const SizedBox.square(
+                              dimension: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Save',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+}
+
+// Helper function to show Edit Vendor Phone Dialog
+void _showEditVendorPhoneDialog(
   BuildContext context,
   String currentPhone,
   WidgetRef ref,
@@ -865,13 +1259,25 @@ class _ContactInfoCard extends ConsumerWidget {
       ),
       child: Column(
         children: [
+          _InfoRow(
+            key: const Key('user-phone-row'),
+            icon: Icons.phone_outlined,
+            label: 'USER PHONE',
+            value: user.userPhoneNumber ?? '',
+            isFirst: true,
+            editButtonKey: const Key('edit-user-phone-button'),
+            onEdit: () => _showEditUserPhoneDialog(
+              context,
+              user.userPhoneNumber ?? '',
+              ref,
+            ),
+          ),
           if (user.isVendor)
             _InfoRow(
               icon: Icons.phone_outlined,
               label: 'VENDOR PHONE',
               value: user.vendorPhoneNumber ?? 'Not provided',
-              isFirst: true,
-              onEdit: () => _showEditPhoneDialog(
+              onEdit: () => _showEditVendorPhoneDialog(
                 context,
                 user.vendorPhoneNumber ?? 'Not provided',
                 ref,
@@ -1053,6 +1459,8 @@ class _InfoRow extends StatelessWidget {
     this.isFirst = false,
     this.isLast = false,
     this.onEdit,
+    this.editButtonKey,
+    super.key,
   });
 
   final IconData icon;
@@ -1061,6 +1469,7 @@ class _InfoRow extends StatelessWidget {
   final bool isFirst;
   final bool isLast;
   final VoidCallback? onEdit;
+  final Key? editButtonKey;
 
   @override
   Widget build(BuildContext context) {
@@ -1113,6 +1522,7 @@ class _InfoRow extends StatelessWidget {
             Material(
               color: Colors.transparent,
               child: InkWell(
+                key: editButtonKey,
                 borderRadius: BorderRadius.circular(20),
                 onTap: onEdit,
                 child: Container(

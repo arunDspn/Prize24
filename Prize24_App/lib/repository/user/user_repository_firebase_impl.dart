@@ -34,6 +34,18 @@ class UserRepositoryFirebaseImpl implements UserRepository {
   }
 
   @override
+  Future<void> updateUserPhoneNumber({
+    required String userId,
+    required String userPhoneNumber,
+  }) async {
+    final userRef = _firestore.collection('users').doc(userId);
+    await userRef.update({
+      'userPhoneNumber': userPhoneNumber,
+      'updatedAt': DateTime.now(),
+    });
+  }
+
+  @override
   Future<String?> getUserNameById(String userId) async {
     final userRef = _firestore.collection('users').doc(userId);
     final userSnapshot = await userRef.get();

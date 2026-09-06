@@ -239,6 +239,7 @@ class AuthRepositoryFirebaseImpl implements AuthRepository {
       staffShopIds: List<String>.from(
         user.data()?['staffShopIds'] as List? ?? [],
       ),
+      userPhoneNumber: user.data()?['userPhoneNumber'] as String? ?? '',
       vendorPhoneNumber: user.data()?['vendorPhoneNumber'] as String?,
       referralCode: user.data()?['referralCode'] as String? ?? 'OLD USER',
       referredBy: user.data()?['referredBy'] as String?,
@@ -254,7 +255,6 @@ class AuthRepositoryFirebaseImpl implements AuthRepository {
     required String userName,
     required String? fcmToken,
     String? userAvatar,
-    String? userPhoneNumber,
   }) async {
     logger.i('Signing up new user: $email');
 
@@ -267,7 +267,7 @@ class AuthRepositoryFirebaseImpl implements AuthRepository {
       'userEmail': email,
       'userName': userName,
       'userAvatar': userAvatar ?? '',
-      'userPhoneNumber': userPhoneNumber ?? '',
+      'userPhoneNumber': '',
       'role': 'user',
       'isVendor': false,
       'createdAt': DateTime.now(),
@@ -291,7 +291,7 @@ class AuthRepositoryFirebaseImpl implements AuthRepository {
       userEmail: email,
       userName: userName,
       profilePic: userAvatar ?? '',
-      userPhoneNumber: userPhoneNumber ?? '',
+      userPhoneNumber: '',
       fcmToken: fcmToken ?? '',
       isVendor: false,
       referralCode: newUserReferralCode,
@@ -423,7 +423,6 @@ class AuthRepositoryFirebaseImpl implements AuthRepository {
           email: userCredential.user!.email ?? '',
           userName: userCredential.user!.displayName ?? 'No Name',
           userAvatar: userCredential.user!.photoURL,
-          userPhoneNumber: userCredential.user!.phoneNumber,
           fcmToken: currentfcmToken ?? '',
         );
       }
@@ -530,7 +529,6 @@ class AuthRepositoryFirebaseImpl implements AuthRepository {
           email: userCredential.user!.email ?? '',
           userName: userName,
           userAvatar: userCredential.user!.photoURL,
-          userPhoneNumber: userCredential.user!.phoneNumber,
           fcmToken: currentfcmToken ?? '',
         );
       }
@@ -596,6 +594,7 @@ class AuthRepositoryFirebaseImpl implements AuthRepository {
             userEmail: event.email ?? 'no email',
             userName: userName as String? ?? 'No Name',
             profilePic: value.data()?['userAvatar'] as String? ?? '',
+            userPhoneNumber: value.data()?['userPhoneNumber'] as String? ?? '',
             isVendor: value.data()?['isVendor'] as bool? ?? false,
             fcmToken: value.data()?['fcmToken'] as String? ?? '',
             referralCode:

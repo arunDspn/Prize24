@@ -45,7 +45,7 @@ final class AuthControllerProvider
   AuthController create() => AuthController();
 }
 
-String _$authControllerHash() => r'1641251ac867b76bb385647bb42e01dafccfa320';
+String _$authControllerHash() => r'bed8e203bb24e06e68064739cb8091211730802f';
 
 /// Purpose
 /// -  Gate keeper for authentication state when the app starts.
