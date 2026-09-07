@@ -2,7 +2,7 @@ name: prize24_app
 description: Prize24
 # Dev version 1.0.1+3
 # Prod version 1.0.5+20
-version: 1.0.12+29
+version: 1.0.13+30
 publish_to: none
 
 environment:

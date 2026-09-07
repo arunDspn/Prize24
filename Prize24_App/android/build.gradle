@@ -13,6 +13,17 @@ subprojects {
     project.evaluationDependsOn(':app')
 }
 
+// libphonenumber_plugin 0.3.3 hard-codes compileSdkVersion 31. Its AndroidX
+// dependencies require API 34 or newer, so keep the unmaintained plugin aligned
+// with the compile SDK used by the current Flutter toolchain.
+subprojects { subproject ->
+    if (subproject.name == 'libphonenumber_plugin') {
+        subproject.afterEvaluate {
+            subproject.android.compileSdk = subproject.flutter.compileSdkVersion
+        }
+    }
+}
+
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
