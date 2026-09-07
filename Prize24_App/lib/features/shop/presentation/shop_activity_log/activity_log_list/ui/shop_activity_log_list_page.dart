@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:prize24_app/core/data/audit_log/activity_log_dto.dart';
 import 'package:prize24_app/features/shop/domain/model/shop_activity_log.dart';
+import 'package:prize24_app/features/shop/presentation/shop_activity_log/activity_log_list/ui/shop_activity_log_qr_scanner_page.dart';
 import 'package:prize24_app/features/shop/presentation/shop_activity_log/activity_log_list/view_model/shop_activity_log_list_controller.dart';
 import 'package:prize24_app/routing/app_routes.dart';
+
+typedef UserQrScannerLauncher = Future<String?> Function(BuildContext context);
 
 // Shared color palette
 class _DC {
@@ -38,9 +41,17 @@ class _DC {
 }
 
 class ShopActivityLogListPage extends ConsumerStatefulWidget {
-  const ShopActivityLogListPage({required this.shopId, super.key});
+  const ShopActivityLogListPage({
+    required this.shopId,
+    this.qrScannerLauncher,
+    super.key,
+  });
 
   final String shopId;
+
+  /// Overrides the default scanner route, allowing the scanner result flow to
+  /// be exercised without a platform camera in widget tests.
+  final UserQrScannerLauncher? qrScannerLauncher;
 
   @override
   ConsumerState<ShopActivityLogListPage> createState() =>
@@ -102,6 +113,31 @@ class _ShopActivityLogListPageState
           shopActivityLogListControllerProvider(shopId: widget.shopId).notifier,
         )
         .search(null);
+  }
+
+  Future<void> _onScanQr() async {
+    _searchFocus.unfocus();
+
+    final userId =
+        await (widget.qrScannerLauncher?.call(context) ??
+            Navigator.of(context).push<String>(
+              MaterialPageRoute<String>(
+                fullscreenDialog: true,
+                builder: (_) => const ShopActivityLogQrScannerPage(),
+              ),
+            ));
+
+    if (!mounted || userId == null) return;
+
+    final normalizedUserId = userId.trim();
+    if (normalizedUserId.isEmpty) return;
+
+    _userIdController.text = normalizedUserId;
+    await ref
+        .read(
+          shopActivityLogListControllerProvider(shopId: widget.shopId).notifier,
+        )
+        .search(normalizedUserId);
   }
 
   @override
@@ -298,33 +334,18 @@ class _ShopActivityLogListPageState
             ),
           ),
           const SizedBox(width: 10),
-          // Search button
-          GestureDetector(
+          _FilterActionButton(
+            key: const ValueKey('search-user-id'),
+            tooltip: 'Search User ID',
+            icon: Icons.search_rounded,
             onTap: _onSearch,
-            child: Container(
-              height: 44,
-              width: 44,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [_DC.brandStart, _DC.brandEnd],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: _DC.brandStart.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.search_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
+          ),
+          const SizedBox(width: 8),
+          _FilterActionButton(
+            key: const ValueKey('scan-user-qr'),
+            tooltip: 'Scan User QR',
+            icon: Icons.qr_code_scanner_rounded,
+            onTap: _onScanQr,
           ),
         ],
       ),
@@ -696,6 +717,58 @@ class _ShopActivityLogListPageState
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterActionButton extends StatelessWidget {
+  const _FilterActionButton({
+    required this.tooltip,
+    required this.icon,
+    required this.onTap,
+    super.key,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: tooltip,
+      child: Tooltip(
+        message: tooltip,
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          child: Ink(
+            height: 44,
+            width: 44,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [_DC.brandStart, _DC.brandEnd],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: _DC.brandStart.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: onTap,
+              child: Icon(icon, color: Colors.white, size: 20),
+            ),
+          ),
         ),
       ),
     );
