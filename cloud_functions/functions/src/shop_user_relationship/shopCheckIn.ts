@@ -325,6 +325,8 @@ async function handleCheckInUser(
     const scannerType = isOwner ? "owner" : "staff";
     const userData = userDoc.data();
     const userName = userData?.name || userData?.userName || "Anonymous User";
+    const userPhoneNumber = typeof userData?.userPhoneNumber === "string" &&
+      userData.userPhoneNumber.trim().length > 0 ? userData.userPhoneNumber : null;
     const userProfilePic = userData?.userAvatar || userData?.photoURL || null;
     const fcmToken = userData?.fcmToken;
     customerPhoneNumber = resolvePhoneNumber(userData);
@@ -428,6 +430,7 @@ async function handleCheckInUser(
         transaction.set(followerRef, {
           userId,
           userName,
+          userPhoneNumber,
           userProfilePic,
           notificationEnabled: true,
           lastGiftDayStreak: isGiftDay ? milestone : null,

@@ -415,6 +415,7 @@ export type ClubErrorCode = typeof CLUB_ERROR_CODES[keyof typeof CLUB_ERROR_CODE
 export interface ShopFollower {
     userId: string;
     userName: string;
+    userPhoneNumber: string | null;
     userProfilePic: string | null;
     notificationEnabled: boolean;
 

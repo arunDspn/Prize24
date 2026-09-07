@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ShopFollowerModel {
 
- String get userId; String get userName; int get cumulativeStreak; DateTime get followedAt; DateTime? get lastCheckInDate; int? get lastGiftDayStreak; String? get userProfilePic;
+ String get userId; String get userName; int get cumulativeStreak; DateTime get followedAt; String? get userPhoneNumber; DateTime? get lastCheckInDate; int? get lastGiftDayStreak; String? get userProfilePic;
 /// Create a copy of ShopFollowerModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ShopFollowerModelCopyWith<ShopFollowerModel> get copyWith => _$ShopFollowerMode
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ShopFollowerModel&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.cumulativeStreak, cumulativeStreak) || other.cumulativeStreak == cumulativeStreak)&&(identical(other.followedAt, followedAt) || other.followedAt == followedAt)&&(identical(other.lastCheckInDate, lastCheckInDate) || other.lastCheckInDate == lastCheckInDate)&&(identical(other.lastGiftDayStreak, lastGiftDayStreak) || other.lastGiftDayStreak == lastGiftDayStreak)&&(identical(other.userProfilePic, userProfilePic) || other.userProfilePic == userProfilePic));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ShopFollowerModel&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.cumulativeStreak, cumulativeStreak) || other.cumulativeStreak == cumulativeStreak)&&(identical(other.followedAt, followedAt) || other.followedAt == followedAt)&&(identical(other.userPhoneNumber, userPhoneNumber) || other.userPhoneNumber == userPhoneNumber)&&(identical(other.lastCheckInDate, lastCheckInDate) || other.lastCheckInDate == lastCheckInDate)&&(identical(other.lastGiftDayStreak, lastGiftDayStreak) || other.lastGiftDayStreak == lastGiftDayStreak)&&(identical(other.userProfilePic, userProfilePic) || other.userProfilePic == userProfilePic));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,userId,userName,cumulativeStreak,followedAt,lastCheckInDate,lastGiftDayStreak,userProfilePic);
+int get hashCode => Object.hash(runtimeType,userId,userName,cumulativeStreak,followedAt,userPhoneNumber,lastCheckInDate,lastGiftDayStreak,userProfilePic);
 
 @override
 String toString() {
-  return 'ShopFollowerModel(userId: $userId, userName: $userName, cumulativeStreak: $cumulativeStreak, followedAt: $followedAt, lastCheckInDate: $lastCheckInDate, lastGiftDayStreak: $lastGiftDayStreak, userProfilePic: $userProfilePic)';
+  return 'ShopFollowerModel(userId: $userId, userName: $userName, cumulativeStreak: $cumulativeStreak, followedAt: $followedAt, userPhoneNumber: $userPhoneNumber, lastCheckInDate: $lastCheckInDate, lastGiftDayStreak: $lastGiftDayStreak, userProfilePic: $userProfilePic)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ShopFollowerModelCopyWith<$Res>  {
   factory $ShopFollowerModelCopyWith(ShopFollowerModel value, $Res Function(ShopFollowerModel) _then) = _$ShopFollowerModelCopyWithImpl;
 @useResult
 $Res call({
- String userId, String userName, int cumulativeStreak, DateTime followedAt, DateTime? lastCheckInDate, int? lastGiftDayStreak, String? userProfilePic
+ String userId, String userName, int cumulativeStreak, DateTime followedAt, String? userPhoneNumber, DateTime? lastCheckInDate, int? lastGiftDayStreak, String? userProfilePic
 });
 
 
@@ -62,13 +62,14 @@ class _$ShopFollowerModelCopyWithImpl<$Res>
 
 /// Create a copy of ShopFollowerModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? userId = null,Object? userName = null,Object? cumulativeStreak = null,Object? followedAt = null,Object? lastCheckInDate = freezed,Object? lastGiftDayStreak = freezed,Object? userProfilePic = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? userId = null,Object? userName = null,Object? cumulativeStreak = null,Object? followedAt = null,Object? userPhoneNumber = freezed,Object? lastCheckInDate = freezed,Object? lastGiftDayStreak = freezed,Object? userProfilePic = freezed,}) {
   return _then(_self.copyWith(
 userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,userName: null == userName ? _self.userName : userName // ignore: cast_nullable_to_non_nullable
 as String,cumulativeStreak: null == cumulativeStreak ? _self.cumulativeStreak : cumulativeStreak // ignore: cast_nullable_to_non_nullable
 as int,followedAt: null == followedAt ? _self.followedAt : followedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,lastCheckInDate: freezed == lastCheckInDate ? _self.lastCheckInDate : lastCheckInDate // ignore: cast_nullable_to_non_nullable
+as DateTime,userPhoneNumber: freezed == userPhoneNumber ? _self.userPhoneNumber : userPhoneNumber // ignore: cast_nullable_to_non_nullable
+as String?,lastCheckInDate: freezed == lastCheckInDate ? _self.lastCheckInDate : lastCheckInDate // ignore: cast_nullable_to_non_nullable
 as DateTime?,lastGiftDayStreak: freezed == lastGiftDayStreak ? _self.lastGiftDayStreak : lastGiftDayStreak // ignore: cast_nullable_to_non_nullable
 as int?,userProfilePic: freezed == userProfilePic ? _self.userProfilePic : userProfilePic // ignore: cast_nullable_to_non_nullable
 as String?,
@@ -156,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String userId,  String userName,  int cumulativeStreak,  DateTime followedAt,  DateTime? lastCheckInDate,  int? lastGiftDayStreak,  String? userProfilePic)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String userId,  String userName,  int cumulativeStreak,  DateTime followedAt,  String? userPhoneNumber,  DateTime? lastCheckInDate,  int? lastGiftDayStreak,  String? userProfilePic)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ShopFollowerModel() when $default != null:
-return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followedAt,_that.lastCheckInDate,_that.lastGiftDayStreak,_that.userProfilePic);case _:
+return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followedAt,_that.userPhoneNumber,_that.lastCheckInDate,_that.lastGiftDayStreak,_that.userProfilePic);case _:
   return orElse();
 
 }
@@ -177,10 +178,10 @@ return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followe
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String userId,  String userName,  int cumulativeStreak,  DateTime followedAt,  DateTime? lastCheckInDate,  int? lastGiftDayStreak,  String? userProfilePic)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String userId,  String userName,  int cumulativeStreak,  DateTime followedAt,  String? userPhoneNumber,  DateTime? lastCheckInDate,  int? lastGiftDayStreak,  String? userProfilePic)  $default,) {final _that = this;
 switch (_that) {
 case _ShopFollowerModel():
-return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followedAt,_that.lastCheckInDate,_that.lastGiftDayStreak,_that.userProfilePic);case _:
+return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followedAt,_that.userPhoneNumber,_that.lastCheckInDate,_that.lastGiftDayStreak,_that.userProfilePic);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +198,10 @@ return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followe
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String userId,  String userName,  int cumulativeStreak,  DateTime followedAt,  DateTime? lastCheckInDate,  int? lastGiftDayStreak,  String? userProfilePic)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String userId,  String userName,  int cumulativeStreak,  DateTime followedAt,  String? userPhoneNumber,  DateTime? lastCheckInDate,  int? lastGiftDayStreak,  String? userProfilePic)?  $default,) {final _that = this;
 switch (_that) {
 case _ShopFollowerModel() when $default != null:
-return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followedAt,_that.lastCheckInDate,_that.lastGiftDayStreak,_that.userProfilePic);case _:
+return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followedAt,_that.userPhoneNumber,_that.lastCheckInDate,_that.lastGiftDayStreak,_that.userProfilePic);case _:
   return null;
 
 }
@@ -212,13 +213,14 @@ return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followe
 
 
 class _ShopFollowerModel implements ShopFollowerModel {
-  const _ShopFollowerModel({required this.userId, required this.userName, required this.cumulativeStreak, required this.followedAt, this.lastCheckInDate, this.lastGiftDayStreak, this.userProfilePic});
+  const _ShopFollowerModel({required this.userId, required this.userName, required this.cumulativeStreak, required this.followedAt, this.userPhoneNumber, this.lastCheckInDate, this.lastGiftDayStreak, this.userProfilePic});
   
 
 @override final  String userId;
 @override final  String userName;
 @override final  int cumulativeStreak;
 @override final  DateTime followedAt;
+@override final  String? userPhoneNumber;
 @override final  DateTime? lastCheckInDate;
 @override final  int? lastGiftDayStreak;
 @override final  String? userProfilePic;
@@ -233,16 +235,16 @@ _$ShopFollowerModelCopyWith<_ShopFollowerModel> get copyWith => __$ShopFollowerM
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ShopFollowerModel&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.cumulativeStreak, cumulativeStreak) || other.cumulativeStreak == cumulativeStreak)&&(identical(other.followedAt, followedAt) || other.followedAt == followedAt)&&(identical(other.lastCheckInDate, lastCheckInDate) || other.lastCheckInDate == lastCheckInDate)&&(identical(other.lastGiftDayStreak, lastGiftDayStreak) || other.lastGiftDayStreak == lastGiftDayStreak)&&(identical(other.userProfilePic, userProfilePic) || other.userProfilePic == userProfilePic));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ShopFollowerModel&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.cumulativeStreak, cumulativeStreak) || other.cumulativeStreak == cumulativeStreak)&&(identical(other.followedAt, followedAt) || other.followedAt == followedAt)&&(identical(other.userPhoneNumber, userPhoneNumber) || other.userPhoneNumber == userPhoneNumber)&&(identical(other.lastCheckInDate, lastCheckInDate) || other.lastCheckInDate == lastCheckInDate)&&(identical(other.lastGiftDayStreak, lastGiftDayStreak) || other.lastGiftDayStreak == lastGiftDayStreak)&&(identical(other.userProfilePic, userProfilePic) || other.userProfilePic == userProfilePic));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,userId,userName,cumulativeStreak,followedAt,lastCheckInDate,lastGiftDayStreak,userProfilePic);
+int get hashCode => Object.hash(runtimeType,userId,userName,cumulativeStreak,followedAt,userPhoneNumber,lastCheckInDate,lastGiftDayStreak,userProfilePic);
 
 @override
 String toString() {
-  return 'ShopFollowerModel(userId: $userId, userName: $userName, cumulativeStreak: $cumulativeStreak, followedAt: $followedAt, lastCheckInDate: $lastCheckInDate, lastGiftDayStreak: $lastGiftDayStreak, userProfilePic: $userProfilePic)';
+  return 'ShopFollowerModel(userId: $userId, userName: $userName, cumulativeStreak: $cumulativeStreak, followedAt: $followedAt, userPhoneNumber: $userPhoneNumber, lastCheckInDate: $lastCheckInDate, lastGiftDayStreak: $lastGiftDayStreak, userProfilePic: $userProfilePic)';
 }
 
 
@@ -253,7 +255,7 @@ abstract mixin class _$ShopFollowerModelCopyWith<$Res> implements $ShopFollowerM
   factory _$ShopFollowerModelCopyWith(_ShopFollowerModel value, $Res Function(_ShopFollowerModel) _then) = __$ShopFollowerModelCopyWithImpl;
 @override @useResult
 $Res call({
- String userId, String userName, int cumulativeStreak, DateTime followedAt, DateTime? lastCheckInDate, int? lastGiftDayStreak, String? userProfilePic
+ String userId, String userName, int cumulativeStreak, DateTime followedAt, String? userPhoneNumber, DateTime? lastCheckInDate, int? lastGiftDayStreak, String? userProfilePic
 });
 
 
@@ -270,13 +272,14 @@ class __$ShopFollowerModelCopyWithImpl<$Res>
 
 /// Create a copy of ShopFollowerModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? userName = null,Object? cumulativeStreak = null,Object? followedAt = null,Object? lastCheckInDate = freezed,Object? lastGiftDayStreak = freezed,Object? userProfilePic = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? userName = null,Object? cumulativeStreak = null,Object? followedAt = null,Object? userPhoneNumber = freezed,Object? lastCheckInDate = freezed,Object? lastGiftDayStreak = freezed,Object? userProfilePic = freezed,}) {
   return _then(_ShopFollowerModel(
 userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,userName: null == userName ? _self.userName : userName // ignore: cast_nullable_to_non_nullable
 as String,cumulativeStreak: null == cumulativeStreak ? _self.cumulativeStreak : cumulativeStreak // ignore: cast_nullable_to_non_nullable
 as int,followedAt: null == followedAt ? _self.followedAt : followedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,lastCheckInDate: freezed == lastCheckInDate ? _self.lastCheckInDate : lastCheckInDate // ignore: cast_nullable_to_non_nullable
+as DateTime,userPhoneNumber: freezed == userPhoneNumber ? _self.userPhoneNumber : userPhoneNumber // ignore: cast_nullable_to_non_nullable
+as String?,lastCheckInDate: freezed == lastCheckInDate ? _self.lastCheckInDate : lastCheckInDate // ignore: cast_nullable_to_non_nullable
 as DateTime?,lastGiftDayStreak: freezed == lastGiftDayStreak ? _self.lastGiftDayStreak : lastGiftDayStreak // ignore: cast_nullable_to_non_nullable
 as int?,userProfilePic: freezed == userProfilePic ? _self.userProfilePic : userProfilePic // ignore: cast_nullable_to_non_nullable
 as String?,

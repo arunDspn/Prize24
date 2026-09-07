@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:prize24_app/common_widgets/phone_number_link.dart';
 import 'package:prize24_app/features/happy_hours/domain/model/shop_follower_model.dart';
 import 'package:prize24_app/features/shop/domain/model/follower_streak_log_model.dart';
 import 'package:prize24_app/features/shop/presentation/shop_follower_detail/component/user_streak_log/user_streak_log_controller.dart';
@@ -306,6 +307,8 @@ class _UserInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final phoneNumber = follower.userPhoneNumber?.trim();
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
@@ -330,6 +333,24 @@ class _UserInfoCard extends StatelessWidget {
               value: follower.userName,
               isFirst: true,
             ),
+            if (phoneNumber != null && phoneNumber.isNotEmpty)
+              _InfoRow(
+                icon: Icons.phone_outlined,
+                label: 'PHONE NUMBER',
+                valueWidget: PhoneNumberLink(
+                  key: const ValueKey('follower-detail-phone'),
+                  phoneNumber: phoneNumber,
+                  iconColor: _FollowerDetailTheme.gradStart,
+                  iconSize: 15,
+                  showIcon: false,
+                  textStyle: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: _FollowerDetailTheme.gradStart,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+              ),
             _InfoRow(
               icon: Icons.local_fire_department,
               label: 'CUMULATIVE STREAK',
@@ -366,14 +387,19 @@ class _InfoRow extends StatelessWidget {
   const _InfoRow({
     required this.icon,
     required this.label,
-    required this.value,
+    this.value,
+    this.valueWidget,
     this.isFirst = false,
     this.isLast = false,
-  });
+  }) : assert(
+         value != null || valueWidget != null,
+         'Either value or valueWidget must be provided.',
+       );
 
   final IconData icon;
   final String label;
-  final String value;
+  final String? value;
+  final Widget? valueWidget;
   final bool isFirst;
   final bool isLast;
 
@@ -418,15 +444,16 @@ class _InfoRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: _FollowerDetailTheme.textMain,
-                    fontFamily: 'Inter',
-                  ),
-                ),
+                valueWidget ??
+                    Text(
+                      value!,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: _FollowerDetailTheme.textMain,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
               ],
             ),
           ),

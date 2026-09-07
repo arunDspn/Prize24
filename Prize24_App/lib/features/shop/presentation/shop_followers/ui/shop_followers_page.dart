@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:prize24_app/common_widgets/phone_number_link.dart';
 import 'package:prize24_app/features/shop/presentation/shop_followers/view_model/shop_followers_controller.dart';
 import 'package:prize24_app/routing/app_routes.dart';
 
@@ -321,6 +322,8 @@ class _ShopFollowersPageState extends ConsumerState<ShopFollowersPage> {
                                 );
                               }
                               final follower = followers[index];
+                              final phoneNumber = follower.userPhoneNumber
+                                  ?.trim();
                               return TweenAnimationBuilder<double>(
                                 tween: Tween(begin: 0, end: 1),
                                 duration: Duration(
@@ -413,7 +416,26 @@ class _ShopFollowersPageState extends ConsumerState<ShopFollowersPage> {
                                                   overflow:
                                                       TextOverflow.ellipsis,
                                                 ),
-                                                // const SizedBox(height: 4),
+                                                if (phoneNumber != null &&
+                                                    phoneNumber.isNotEmpty) ...[
+                                                  const SizedBox(height: 4),
+                                                  PhoneNumberLink(
+                                                    key: ValueKey(
+                                                      'follower-phone-${follower.userId}',
+                                                    ),
+                                                    phoneNumber: phoneNumber,
+                                                    iconColor:
+                                                        _DesignColors.slate500,
+                                                    iconSize: 14,
+                                                    textStyle: const TextStyle(
+                                                      fontSize: 13,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: _DesignColors
+                                                          .slate500,
+                                                    ),
+                                                  ),
+                                                ],
                                                 // Row(
                                                 //   children: [
                                                 //     Container(

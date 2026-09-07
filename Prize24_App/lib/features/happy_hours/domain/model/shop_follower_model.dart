@@ -8,6 +8,7 @@ abstract class ShopFollowerModel with _$ShopFollowerModel {
     required String userName,
     required int cumulativeStreak,
     required DateTime followedAt,
+    String? userPhoneNumber,
     DateTime? lastCheckInDate,
 
     int? lastGiftDayStreak,

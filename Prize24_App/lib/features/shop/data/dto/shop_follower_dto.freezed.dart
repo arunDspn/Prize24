@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ShopFollowerDto {
 
- String get userId; String get userName; int get cumulativeStreak;@JsonKey(fromJson: FirebaseHelper.timestampFromJson, toJson: FirebaseHelper.timestampToJson) Timestamp get followedAt;@JsonKey(fromJson: FirebaseHelper.nullableTimestampFromJson, toJson: FirebaseHelper.nullableTimestampToJson) Timestamp? get lastCheckInDate; int? get lastGiftDayStreak; String? get userProfilePic;
+ String get userId; String get userName; int get cumulativeStreak;@JsonKey(fromJson: FirebaseHelper.timestampFromJson, toJson: FirebaseHelper.timestampToJson) Timestamp get followedAt; String? get userPhoneNumber;@JsonKey(fromJson: FirebaseHelper.nullableTimestampFromJson, toJson: FirebaseHelper.nullableTimestampToJson) Timestamp? get lastCheckInDate; int? get lastGiftDayStreak; String? get userProfilePic;
 /// Create a copy of ShopFollowerDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $ShopFollowerDtoCopyWith<ShopFollowerDto> get copyWith => _$ShopFollowerDtoCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ShopFollowerDto&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.cumulativeStreak, cumulativeStreak) || other.cumulativeStreak == cumulativeStreak)&&(identical(other.followedAt, followedAt) || other.followedAt == followedAt)&&(identical(other.lastCheckInDate, lastCheckInDate) || other.lastCheckInDate == lastCheckInDate)&&(identical(other.lastGiftDayStreak, lastGiftDayStreak) || other.lastGiftDayStreak == lastGiftDayStreak)&&(identical(other.userProfilePic, userProfilePic) || other.userProfilePic == userProfilePic));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ShopFollowerDto&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.cumulativeStreak, cumulativeStreak) || other.cumulativeStreak == cumulativeStreak)&&(identical(other.followedAt, followedAt) || other.followedAt == followedAt)&&(identical(other.userPhoneNumber, userPhoneNumber) || other.userPhoneNumber == userPhoneNumber)&&(identical(other.lastCheckInDate, lastCheckInDate) || other.lastCheckInDate == lastCheckInDate)&&(identical(other.lastGiftDayStreak, lastGiftDayStreak) || other.lastGiftDayStreak == lastGiftDayStreak)&&(identical(other.userProfilePic, userProfilePic) || other.userProfilePic == userProfilePic));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,userName,cumulativeStreak,followedAt,lastCheckInDate,lastGiftDayStreak,userProfilePic);
+int get hashCode => Object.hash(runtimeType,userId,userName,cumulativeStreak,followedAt,userPhoneNumber,lastCheckInDate,lastGiftDayStreak,userProfilePic);
 
 @override
 String toString() {
-  return 'ShopFollowerDto(userId: $userId, userName: $userName, cumulativeStreak: $cumulativeStreak, followedAt: $followedAt, lastCheckInDate: $lastCheckInDate, lastGiftDayStreak: $lastGiftDayStreak, userProfilePic: $userProfilePic)';
+  return 'ShopFollowerDto(userId: $userId, userName: $userName, cumulativeStreak: $cumulativeStreak, followedAt: $followedAt, userPhoneNumber: $userPhoneNumber, lastCheckInDate: $lastCheckInDate, lastGiftDayStreak: $lastGiftDayStreak, userProfilePic: $userProfilePic)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $ShopFollowerDtoCopyWith<$Res>  {
   factory $ShopFollowerDtoCopyWith(ShopFollowerDto value, $Res Function(ShopFollowerDto) _then) = _$ShopFollowerDtoCopyWithImpl;
 @useResult
 $Res call({
- String userId, String userName, int cumulativeStreak,@JsonKey(fromJson: FirebaseHelper.timestampFromJson, toJson: FirebaseHelper.timestampToJson) Timestamp followedAt,@JsonKey(fromJson: FirebaseHelper.nullableTimestampFromJson, toJson: FirebaseHelper.nullableTimestampToJson) Timestamp? lastCheckInDate, int? lastGiftDayStreak, String? userProfilePic
+ String userId, String userName, int cumulativeStreak,@JsonKey(fromJson: FirebaseHelper.timestampFromJson, toJson: FirebaseHelper.timestampToJson) Timestamp followedAt, String? userPhoneNumber,@JsonKey(fromJson: FirebaseHelper.nullableTimestampFromJson, toJson: FirebaseHelper.nullableTimestampToJson) Timestamp? lastCheckInDate, int? lastGiftDayStreak, String? userProfilePic
 });
 
 
@@ -65,13 +65,14 @@ class _$ShopFollowerDtoCopyWithImpl<$Res>
 
 /// Create a copy of ShopFollowerDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? userId = null,Object? userName = null,Object? cumulativeStreak = null,Object? followedAt = null,Object? lastCheckInDate = freezed,Object? lastGiftDayStreak = freezed,Object? userProfilePic = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? userId = null,Object? userName = null,Object? cumulativeStreak = null,Object? followedAt = null,Object? userPhoneNumber = freezed,Object? lastCheckInDate = freezed,Object? lastGiftDayStreak = freezed,Object? userProfilePic = freezed,}) {
   return _then(_self.copyWith(
 userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,userName: null == userName ? _self.userName : userName // ignore: cast_nullable_to_non_nullable
 as String,cumulativeStreak: null == cumulativeStreak ? _self.cumulativeStreak : cumulativeStreak // ignore: cast_nullable_to_non_nullable
 as int,followedAt: null == followedAt ? _self.followedAt : followedAt // ignore: cast_nullable_to_non_nullable
-as Timestamp,lastCheckInDate: freezed == lastCheckInDate ? _self.lastCheckInDate : lastCheckInDate // ignore: cast_nullable_to_non_nullable
+as Timestamp,userPhoneNumber: freezed == userPhoneNumber ? _self.userPhoneNumber : userPhoneNumber // ignore: cast_nullable_to_non_nullable
+as String?,lastCheckInDate: freezed == lastCheckInDate ? _self.lastCheckInDate : lastCheckInDate // ignore: cast_nullable_to_non_nullable
 as Timestamp?,lastGiftDayStreak: freezed == lastGiftDayStreak ? _self.lastGiftDayStreak : lastGiftDayStreak // ignore: cast_nullable_to_non_nullable
 as int?,userProfilePic: freezed == userProfilePic ? _self.userProfilePic : userProfilePic // ignore: cast_nullable_to_non_nullable
 as String?,
@@ -159,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String userId,  String userName,  int cumulativeStreak, @JsonKey(fromJson: FirebaseHelper.timestampFromJson, toJson: FirebaseHelper.timestampToJson)  Timestamp followedAt, @JsonKey(fromJson: FirebaseHelper.nullableTimestampFromJson, toJson: FirebaseHelper.nullableTimestampToJson)  Timestamp? lastCheckInDate,  int? lastGiftDayStreak,  String? userProfilePic)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String userId,  String userName,  int cumulativeStreak, @JsonKey(fromJson: FirebaseHelper.timestampFromJson, toJson: FirebaseHelper.timestampToJson)  Timestamp followedAt,  String? userPhoneNumber, @JsonKey(fromJson: FirebaseHelper.nullableTimestampFromJson, toJson: FirebaseHelper.nullableTimestampToJson)  Timestamp? lastCheckInDate,  int? lastGiftDayStreak,  String? userProfilePic)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ShopFollowerDto() when $default != null:
-return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followedAt,_that.lastCheckInDate,_that.lastGiftDayStreak,_that.userProfilePic);case _:
+return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followedAt,_that.userPhoneNumber,_that.lastCheckInDate,_that.lastGiftDayStreak,_that.userProfilePic);case _:
   return orElse();
 
 }
@@ -180,10 +181,10 @@ return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followe
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String userId,  String userName,  int cumulativeStreak, @JsonKey(fromJson: FirebaseHelper.timestampFromJson, toJson: FirebaseHelper.timestampToJson)  Timestamp followedAt, @JsonKey(fromJson: FirebaseHelper.nullableTimestampFromJson, toJson: FirebaseHelper.nullableTimestampToJson)  Timestamp? lastCheckInDate,  int? lastGiftDayStreak,  String? userProfilePic)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String userId,  String userName,  int cumulativeStreak, @JsonKey(fromJson: FirebaseHelper.timestampFromJson, toJson: FirebaseHelper.timestampToJson)  Timestamp followedAt,  String? userPhoneNumber, @JsonKey(fromJson: FirebaseHelper.nullableTimestampFromJson, toJson: FirebaseHelper.nullableTimestampToJson)  Timestamp? lastCheckInDate,  int? lastGiftDayStreak,  String? userProfilePic)  $default,) {final _that = this;
 switch (_that) {
 case _ShopFollowerDto():
-return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followedAt,_that.lastCheckInDate,_that.lastGiftDayStreak,_that.userProfilePic);case _:
+return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followedAt,_that.userPhoneNumber,_that.lastCheckInDate,_that.lastGiftDayStreak,_that.userProfilePic);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +201,10 @@ return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followe
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String userId,  String userName,  int cumulativeStreak, @JsonKey(fromJson: FirebaseHelper.timestampFromJson, toJson: FirebaseHelper.timestampToJson)  Timestamp followedAt, @JsonKey(fromJson: FirebaseHelper.nullableTimestampFromJson, toJson: FirebaseHelper.nullableTimestampToJson)  Timestamp? lastCheckInDate,  int? lastGiftDayStreak,  String? userProfilePic)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String userId,  String userName,  int cumulativeStreak, @JsonKey(fromJson: FirebaseHelper.timestampFromJson, toJson: FirebaseHelper.timestampToJson)  Timestamp followedAt,  String? userPhoneNumber, @JsonKey(fromJson: FirebaseHelper.nullableTimestampFromJson, toJson: FirebaseHelper.nullableTimestampToJson)  Timestamp? lastCheckInDate,  int? lastGiftDayStreak,  String? userProfilePic)?  $default,) {final _that = this;
 switch (_that) {
 case _ShopFollowerDto() when $default != null:
-return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followedAt,_that.lastCheckInDate,_that.lastGiftDayStreak,_that.userProfilePic);case _:
+return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followedAt,_that.userPhoneNumber,_that.lastCheckInDate,_that.lastGiftDayStreak,_that.userProfilePic);case _:
   return null;
 
 }
@@ -215,13 +216,14 @@ return $default(_that.userId,_that.userName,_that.cumulativeStreak,_that.followe
 @JsonSerializable()
 
 class _ShopFollowerDto extends ShopFollowerDto {
-  const _ShopFollowerDto({required this.userId, required this.userName, required this.cumulativeStreak, @JsonKey(fromJson: FirebaseHelper.timestampFromJson, toJson: FirebaseHelper.timestampToJson) required this.followedAt, @JsonKey(fromJson: FirebaseHelper.nullableTimestampFromJson, toJson: FirebaseHelper.nullableTimestampToJson) this.lastCheckInDate, this.lastGiftDayStreak, this.userProfilePic}): super._();
+  const _ShopFollowerDto({required this.userId, required this.userName, required this.cumulativeStreak, @JsonKey(fromJson: FirebaseHelper.timestampFromJson, toJson: FirebaseHelper.timestampToJson) required this.followedAt, this.userPhoneNumber, @JsonKey(fromJson: FirebaseHelper.nullableTimestampFromJson, toJson: FirebaseHelper.nullableTimestampToJson) this.lastCheckInDate, this.lastGiftDayStreak, this.userProfilePic}): super._();
   factory _ShopFollowerDto.fromJson(Map<String, dynamic> json) => _$ShopFollowerDtoFromJson(json);
 
 @override final  String userId;
 @override final  String userName;
 @override final  int cumulativeStreak;
 @override@JsonKey(fromJson: FirebaseHelper.timestampFromJson, toJson: FirebaseHelper.timestampToJson) final  Timestamp followedAt;
+@override final  String? userPhoneNumber;
 @override@JsonKey(fromJson: FirebaseHelper.nullableTimestampFromJson, toJson: FirebaseHelper.nullableTimestampToJson) final  Timestamp? lastCheckInDate;
 @override final  int? lastGiftDayStreak;
 @override final  String? userProfilePic;
@@ -239,16 +241,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ShopFollowerDto&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.cumulativeStreak, cumulativeStreak) || other.cumulativeStreak == cumulativeStreak)&&(identical(other.followedAt, followedAt) || other.followedAt == followedAt)&&(identical(other.lastCheckInDate, lastCheckInDate) || other.lastCheckInDate == lastCheckInDate)&&(identical(other.lastGiftDayStreak, lastGiftDayStreak) || other.lastGiftDayStreak == lastGiftDayStreak)&&(identical(other.userProfilePic, userProfilePic) || other.userProfilePic == userProfilePic));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ShopFollowerDto&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.cumulativeStreak, cumulativeStreak) || other.cumulativeStreak == cumulativeStreak)&&(identical(other.followedAt, followedAt) || other.followedAt == followedAt)&&(identical(other.userPhoneNumber, userPhoneNumber) || other.userPhoneNumber == userPhoneNumber)&&(identical(other.lastCheckInDate, lastCheckInDate) || other.lastCheckInDate == lastCheckInDate)&&(identical(other.lastGiftDayStreak, lastGiftDayStreak) || other.lastGiftDayStreak == lastGiftDayStreak)&&(identical(other.userProfilePic, userProfilePic) || other.userProfilePic == userProfilePic));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,userName,cumulativeStreak,followedAt,lastCheckInDate,lastGiftDayStreak,userProfilePic);
+int get hashCode => Object.hash(runtimeType,userId,userName,cumulativeStreak,followedAt,userPhoneNumber,lastCheckInDate,lastGiftDayStreak,userProfilePic);
 
 @override
 String toString() {
-  return 'ShopFollowerDto(userId: $userId, userName: $userName, cumulativeStreak: $cumulativeStreak, followedAt: $followedAt, lastCheckInDate: $lastCheckInDate, lastGiftDayStreak: $lastGiftDayStreak, userProfilePic: $userProfilePic)';
+  return 'ShopFollowerDto(userId: $userId, userName: $userName, cumulativeStreak: $cumulativeStreak, followedAt: $followedAt, userPhoneNumber: $userPhoneNumber, lastCheckInDate: $lastCheckInDate, lastGiftDayStreak: $lastGiftDayStreak, userProfilePic: $userProfilePic)';
 }
 
 
@@ -259,7 +261,7 @@ abstract mixin class _$ShopFollowerDtoCopyWith<$Res> implements $ShopFollowerDto
   factory _$ShopFollowerDtoCopyWith(_ShopFollowerDto value, $Res Function(_ShopFollowerDto) _then) = __$ShopFollowerDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String userId, String userName, int cumulativeStreak,@JsonKey(fromJson: FirebaseHelper.timestampFromJson, toJson: FirebaseHelper.timestampToJson) Timestamp followedAt,@JsonKey(fromJson: FirebaseHelper.nullableTimestampFromJson, toJson: FirebaseHelper.nullableTimestampToJson) Timestamp? lastCheckInDate, int? lastGiftDayStreak, String? userProfilePic
+ String userId, String userName, int cumulativeStreak,@JsonKey(fromJson: FirebaseHelper.timestampFromJson, toJson: FirebaseHelper.timestampToJson) Timestamp followedAt, String? userPhoneNumber,@JsonKey(fromJson: FirebaseHelper.nullableTimestampFromJson, toJson: FirebaseHelper.nullableTimestampToJson) Timestamp? lastCheckInDate, int? lastGiftDayStreak, String? userProfilePic
 });
 
 
@@ -276,13 +278,14 @@ class __$ShopFollowerDtoCopyWithImpl<$Res>
 
 /// Create a copy of ShopFollowerDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? userName = null,Object? cumulativeStreak = null,Object? followedAt = null,Object? lastCheckInDate = freezed,Object? lastGiftDayStreak = freezed,Object? userProfilePic = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? userName = null,Object? cumulativeStreak = null,Object? followedAt = null,Object? userPhoneNumber = freezed,Object? lastCheckInDate = freezed,Object? lastGiftDayStreak = freezed,Object? userProfilePic = freezed,}) {
   return _then(_ShopFollowerDto(
 userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,userName: null == userName ? _self.userName : userName // ignore: cast_nullable_to_non_nullable
 as String,cumulativeStreak: null == cumulativeStreak ? _self.cumulativeStreak : cumulativeStreak // ignore: cast_nullable_to_non_nullable
 as int,followedAt: null == followedAt ? _self.followedAt : followedAt // ignore: cast_nullable_to_non_nullable
-as Timestamp,lastCheckInDate: freezed == lastCheckInDate ? _self.lastCheckInDate : lastCheckInDate // ignore: cast_nullable_to_non_nullable
+as Timestamp,userPhoneNumber: freezed == userPhoneNumber ? _self.userPhoneNumber : userPhoneNumber // ignore: cast_nullable_to_non_nullable
+as String?,lastCheckInDate: freezed == lastCheckInDate ? _self.lastCheckInDate : lastCheckInDate // ignore: cast_nullable_to_non_nullable
 as Timestamp?,lastGiftDayStreak: freezed == lastGiftDayStreak ? _self.lastGiftDayStreak : lastGiftDayStreak // ignore: cast_nullable_to_non_nullable
 as int?,userProfilePic: freezed == userProfilePic ? _self.userProfilePic : userProfilePic // ignore: cast_nullable_to_non_nullable
 as String?,

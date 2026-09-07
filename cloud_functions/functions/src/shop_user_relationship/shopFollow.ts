@@ -47,6 +47,8 @@ export async function followUserToShop(
 
   const userData = userDoc.data();
   const userName = userData?.name || userData?.userName || "Anonymous User";
+  const userPhoneNumber = typeof userData?.userPhoneNumber === "string" &&
+    userData.userPhoneNumber.trim().length > 0 ? userData.userPhoneNumber : null;
   const userProfilePic = userData?.userAvatar || userData?.photoURL || null;
   const fcmToken = userData?.fcmToken;
 
@@ -130,6 +132,7 @@ export async function followUserToShop(
     const shopFollowerData: ShopFollower = {
       userId,
       userName,
+      userPhoneNumber,
       userProfilePic,
       notificationEnabled: true,
       cumulativeStreak: initialCumulativeStreak,

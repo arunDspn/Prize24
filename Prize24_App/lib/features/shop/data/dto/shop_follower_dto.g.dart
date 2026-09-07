@@ -12,6 +12,7 @@ _ShopFollowerDto _$ShopFollowerDtoFromJson(Map<String, dynamic> json) =>
       userName: json['userName'] as String,
       cumulativeStreak: (json['cumulativeStreak'] as num).toInt(),
       followedAt: FirebaseHelper.timestampFromJson(json['followedAt']),
+      userPhoneNumber: json['userPhoneNumber'] as String?,
       lastCheckInDate: FirebaseHelper.nullableTimestampFromJson(
         json['lastCheckInDate'],
       ),
@@ -25,6 +26,7 @@ Map<String, dynamic> _$ShopFollowerDtoToJson(_ShopFollowerDto instance) =>
       'userName': instance.userName,
       'cumulativeStreak': instance.cumulativeStreak,
       'followedAt': FirebaseHelper.timestampToJson(instance.followedAt),
+      'userPhoneNumber': instance.userPhoneNumber,
       'lastCheckInDate': FirebaseHelper.nullableTimestampToJson(
         instance.lastCheckInDate,
       ),
