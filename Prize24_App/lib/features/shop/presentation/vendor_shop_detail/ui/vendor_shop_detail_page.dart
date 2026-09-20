@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:prize24_app/features/gift_library/data/gift_library_service.dart';
 import 'package:prize24_app/features/shop/domain/model/shop_model.dart';
+import 'package:prize24_app/features/gift_library/presentation/gift_reward_flow.dart';
 import 'package:prize24_app/features/shop/presentation/shop_followers/ui/shop_followers_page.dart';
 import 'package:prize24_app/features/shop/presentation/vendor_scan_loyality/ui/vendor_scan_loyality_page.dart';
 import 'package:prize24_app/routing/app_routes.dart';
@@ -45,11 +47,17 @@ class _VendorShopDetailsPageState extends State<VendorShopDetailsPage>
   late Animation<Offset> _slideAnimation;
 
   late ShopModel currentShop;
+  late Future<bool> _hasActiveLibraryGifts;
 
   @override
   void initState() {
     super.initState();
     currentShop = widget.shop;
+    _hasActiveLibraryGifts = currentShop.associatedGiftLibraryId == null
+        ? Future.value(false)
+        : GiftLibraryService()
+              .getAttachedLibrary(currentShop.id!)
+              .then((library) => library.gifts.isNotEmpty);
     _scrollController = ScrollController()..addListener(_onScroll);
 
     _animationController = AnimationController(
@@ -395,6 +403,69 @@ class _VendorShopDetailsPageState extends State<VendorShopDetailsPage>
                     builder: (context) =>
                         VendorScanLoyalityPage(shop: currentShop),
                   ),
+                );
+              },
+            ),
+            FutureBuilder<bool>(
+              future: _hasActiveLibraryGifts,
+              builder: (context, snapshot) {
+                final enabled = snapshot.data ?? false;
+                return _QuickActionButton(
+                  icon: Icons.card_giftcard_rounded,
+                  label: enabled ? 'Assign Gift' : 'Configure Gifts',
+                  iconBgColor: Colors.pink.shade50,
+                  iconColor: Colors.pink.shade500,
+                  enabled: enabled,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => GiftLibraryScannerPage(
+                          shopId: currentShop.id!,
+                          mode: LibraryScannerMode.assign,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+            _QuickActionButton(
+              icon: Icons.qr_code_2_rounded,
+              label: 'Redeem Gift',
+              iconBgColor: Colors.green.shade50,
+              iconColor: Colors.green.shade600,
+              enabled: currentShop.associatedGiftLibraryId != null,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => GiftLibraryScannerPage(
+                      shopId: currentShop.id!,
+                      mode: LibraryScannerMode.redeem,
+                    ),
+                  ),
+                );
+              },
+            ),
+            StreamBuilder<int>(
+              stream: watchPendingRewardCount(currentShop.id!),
+              builder: (context, snapshot) {
+                final count = snapshot.data ?? 0;
+                return _QuickActionButton(
+                  icon: Icons.pending_actions_rounded,
+                  label: 'Pending Rewards ($count)',
+                  iconBgColor: Colors.blue.shade50,
+                  iconColor: Colors.blue.shade600,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) =>
+                            PendingRewardsPage(shopId: currentShop.id!),
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -811,6 +882,7 @@ class _QuickActionButton extends StatelessWidget {
     required this.iconBgColor,
     required this.iconColor,
     required this.onTap,
+    this.enabled = true,
   });
 
   final IconData icon;
@@ -818,6 +890,7 @@ class _QuickActionButton extends StatelessWidget {
   final Color iconBgColor;
   final Color iconColor;
   final VoidCallback onTap;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -826,7 +899,7 @@ class _QuickActionButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: onTap,
+        onTap: enabled ? onTap : null,
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -847,19 +920,25 @@ class _QuickActionButton extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: iconBgColor,
+                  color: enabled ? iconBgColor : _DesignColors.slate100,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, size: 20, color: iconColor),
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: enabled ? iconColor : _DesignColors.slate400,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'PlusJakartaSans',
                   fontWeight: FontWeight.w700,
                   fontSize: 12,
-                  color: _DesignColors.slate700,
+                  color: enabled
+                      ? _DesignColors.slate700
+                      : _DesignColors.slate400,
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 1,

@@ -21,6 +21,27 @@ type BillAmount = {
   minorUnits: number;
 };
 
+export type RewardSource = "campaign" | "gift_library";
+
+/**
+ * Resolves milestone reward sources while preserving legacy-client behavior.
+ * @param {unknown} campaignId Attached Campaign ID
+ * @param {unknown} giftLibraryId Attached Gift Library ID
+ * @param {boolean} supportsGiftLibrary Whether the caller uses reward flow v1
+ * @return {RewardSource[]} Available sources in display order
+ */
+export function getAvailableRewardSources(
+  campaignId: unknown,
+  giftLibraryId: unknown,
+  supportsGiftLibrary: boolean
+): RewardSource[] {
+  return [
+    ...(typeof campaignId === "string" && campaignId.length > 0 ? ["campaign" as const] : []),
+    ...(supportsGiftLibrary && typeof giftLibraryId === "string" && giftLibraryId.length > 0 ?
+      ["gift_library" as const] : []),
+  ];
+}
+
 /**
  * Validates and normalizes a bill number for storage and comparison.
  * @param {unknown} value Raw bill number
@@ -258,6 +279,10 @@ type CheckInTransactionResult = {
   isGiftDay: boolean;
   crossedMilestone: number | null;
   wasAutoFollowed: boolean;
+  cumulativeBillSum: number;
+  milestoneCycleBillSum: number;
+  rewardOpportunityId: string | null;
+  availableSources: Array<"campaign" | "gift_library">;
 };
 
 /**
@@ -278,6 +303,7 @@ async function handleCheckInUser(
 
   const scannerId = request.auth.uid;
   const {userId, shopId} = request.data;
+  const rewardFlowVersion = request.data.rewardFlowVersion === 1;
   const {billNumber, normalizedBillNumber} = validateBillNumber(request.data.billNumber);
   const validatedBillAmount = validateBillAmount(request.data.billAmount);
   let customerPhoneNumber: string | null = null;
@@ -333,7 +359,16 @@ async function handleCheckInUser(
 
     const shopData = shopDoc.data();
     const associatedCampaignId = shopData?.associatedCampaignId || null;
+    const associatedGiftLibraryId = shopData?.associatedGiftLibraryId || null;
+    const availableSources = getAvailableRewardSources(
+      associatedCampaignId,
+      associatedGiftLibraryId,
+      rewardFlowVersion
+    );
     const campaignName = shopData?.campaignName || "";
+    const giftLibraryDoc = rewardFlowVersion && associatedGiftLibraryId ?
+      await db.collection("giftLibraries").doc(associatedGiftLibraryId).get() : null;
+    const giftLibraryData = giftLibraryDoc?.data();
     const giftCycleDay = shopData?.giftCycleDay || null;
     const bonusIncrementDaysRequired = shopData?.bonusIncrementDaysRequired || null;
     const bonusIncrementValue = shopData?.bonusIncrementValue || null;
@@ -350,6 +385,7 @@ async function handleCheckInUser(
     const checkInLogRef = followerRef.collection("checkInLogs").doc();
     const activityLogRef = db.collection("shops").doc(shopId).collection("activityLogs").doc();
     const followerAddedLogRef = db.collection("shops").doc(shopId).collection("activityLogs").doc();
+    const rewardOpportunityLogRef = db.collection("shops").doc(shopId).collection("activityLogs").doc();
 
     const result = await db.runTransaction<CheckInTransactionResult>(async (transaction) => {
       const [followerDoc, processedBillDoc] = await transaction.getAll(followerRef, processedBillRef);
@@ -393,7 +429,7 @@ async function handleCheckInUser(
       }
 
       const newCumulativeStreak = currentCumulativeStreak + streakIncrement;
-      const milestone = associatedCampaignId ? crossedGiftMilestone(
+      const milestone = availableSources.length > 0 ? crossedGiftMilestone(
         currentCumulativeStreak,
         newCumulativeStreak,
         giftCycleDay,
@@ -524,8 +560,67 @@ async function handleCheckInUser(
         previousStreak: currentCumulativeStreak,
         phoneNumber: customerPhoneNumber,
         crossedMilestone: milestone,
+        rewardSources: isGiftDay ? availableSources : [],
         ...billLogData,
       });
+
+      let rewardOpportunityId: string | null = null;
+      if (isGiftDay && rewardFlowVersion && milestone !== null) {
+        rewardOpportunityId = `${userId}_${milestone}`;
+        const rewardOpportunityRef = db
+          .collection("shops")
+          .doc(shopId)
+          .collection("rewardOpportunities")
+          .doc(rewardOpportunityId);
+        const rewardOpportunityData = {
+          opportunityId: rewardOpportunityId,
+          userId,
+          shopId,
+          milestone,
+          cumulativeStreak: newCumulativeStreak,
+          status: "pending",
+          selectedSource: null,
+          outcome: null,
+          availableSources,
+          campaignId: associatedCampaignId,
+          giftLibraryId: associatedGiftLibraryId,
+          campaignSnapshot: associatedCampaignId ? {
+            id: associatedCampaignId,
+            name: campaignName,
+          } : null,
+          giftLibrarySnapshot: associatedGiftLibraryId ? {
+            id: associatedGiftLibraryId,
+            name: giftLibraryData?.name ?? "",
+            description: giftLibraryData?.description ?? "",
+          } : null,
+          cumulativeBillSum: newCumulativeBillSum,
+          milestoneCycleBillSum: newPreviousCycleBillSum,
+          checkInLogId: checkInLogRef.id,
+          checkInActivityLogId: activityLogRef.id,
+          createdAt: now,
+          updatedAt: now,
+          completedAt: null,
+          userGiftId: null,
+        };
+        transaction.set(rewardOpportunityRef, rewardOpportunityData);
+        transaction.set(rewardOpportunityLogRef, {
+          logId: rewardOpportunityLogRef.id,
+          timestamp: now,
+          action: "reward_opportunity_created",
+          success: true,
+          actorId: scannerId,
+          actorRole: scannerType,
+          functionName: "checkInUser",
+          customerId: userId,
+          shopId,
+          rewardOpportunityId,
+          crossedMilestone: milestone,
+          availableSources,
+          cumulativeBillSum: newCumulativeBillSum,
+          milestoneCycleBillSum: newPreviousCycleBillSum,
+          phoneNumber: customerPhoneNumber,
+        });
+      }
 
       return {
         cumulativeStreak: newCumulativeStreak,
@@ -534,6 +629,10 @@ async function handleCheckInUser(
         isGiftDay,
         crossedMilestone: milestone,
         wasAutoFollowed,
+        cumulativeBillSum: newCumulativeBillSum,
+        milestoneCycleBillSum: newPreviousCycleBillSum,
+        rewardOpportunityId,
+        availableSources,
       };
     });
 
@@ -596,6 +695,17 @@ async function handleCheckInUser(
         isGiftDay: result.isGiftDay,
         isNewUser: result.wasAutoFollowed,
         wasAutoFollowed: result.wasAutoFollowed,
+        cumulativeBillSum: result.cumulativeBillSum,
+        milestoneCycleBillSum: result.milestoneCycleBillSum,
+        crossedMilestone: result.crossedMilestone,
+        ...(result.rewardOpportunityId ? {
+          rewardOpportunity: {
+            id: result.rewardOpportunityId,
+            status: "pending" as const,
+            availableSources: result.availableSources,
+            selectedSource: null,
+          },
+        } : {}),
         giftInfo,
       },
     };

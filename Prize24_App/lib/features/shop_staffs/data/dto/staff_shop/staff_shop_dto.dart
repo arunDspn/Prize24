@@ -10,6 +10,7 @@ abstract class StaffShopDto with _$StaffShopDto {
     // Shop ID
     String? id,
     String? associatedCampaignId,
+    String? associatedGiftLibraryId,
   }) = _StaffShopDto;
 
   factory StaffShopDto.fromJson(Map<String, dynamic> json) =>
@@ -24,6 +25,7 @@ abstract class StaffShopDto with _$StaffShopDto {
       id: id!,
       shopName: shopName,
       associatedCampaignId: associatedCampaignId,
+      associatedGiftLibraryId: associatedGiftLibraryId,
     );
   }
 }

@@ -83,6 +83,15 @@ service cloud.firestore {
 				isShopStaff(shopId);
 		}
 
+		function isValidOwnedGiftLibrary(shopData) {
+			return !('associatedGiftLibraryId' in shopData) ||
+				shopData.associatedGiftLibraryId == null ||
+				(
+					get(/databases/$(database)/documents/giftLibraries/$(shopData.associatedGiftLibraryId)).data.ownerVendorId == shopData.shopOwnerId &&
+					get(/databases/$(database)/documents/giftLibraries/$(shopData.associatedGiftLibraryId)).data.status == 'active'
+				);
+		}
+
 		// --------------------------
 		// Campaign helpers
 		// --------------------------
@@ -167,9 +176,11 @@ service cloud.firestore {
 			allow read: if canReadShopDoc(resource.data, shopId);
 
 			allow create: if isSuperAdmin() ||
-				(isAppUser() && request.resource.data.shopOwnerId == uid());
+				(isAppUser() && request.resource.data.shopOwnerId == uid() &&
+					isValidOwnedGiftLibrary(request.resource.data));
 
-			allow update: if isSuperAdmin() || isShopOwnerFromData(resource.data);
+			allow update: if isSuperAdmin() ||
+				(isShopOwnerFromData(resource.data) && isValidOwnedGiftLibrary(request.resource.data));
 
 			allow delete: if isSuperAdmin();
 
@@ -218,6 +229,66 @@ service cloud.firestore {
 			match /processedBills/{billKey} {
 				allow read, create, update, delete: if false;
 			}
+
+			match /rewardOpportunities/{opportunityId} {
+				allow read: if isSuperAdmin() || canManageShop(shopId) || isShopStaff(shopId) ||
+					resource.data.userId == uid();
+				allow create, update, delete: if false;
+			}
+
+			match /manualGiftAssignments/{requestId} {
+				allow read, create, update, delete: if false;
+			}
+		}
+
+		// ==========================================
+		// 🎁 VENDOR GIFT LIBRARIES
+		// ==========================================
+		match /giftLibraries/{libraryId} {
+			allow read: if isSuperAdmin() ||
+				(isAuthenticated() && resource.data.ownerVendorId == uid());
+			allow create: if isSuperAdmin() ||
+				(isAppUser() && request.resource.data.ownerVendorId == uid() &&
+					request.resource.data.name is string &&
+					request.resource.data.name.size() > 0 &&
+					request.resource.data.description is string &&
+					request.resource.data.description.size() > 0 &&
+					request.resource.data.status == 'active');
+			allow update: if isSuperAdmin() ||
+				(isAuthenticated() && resource.data.ownerVendorId == uid() &&
+					request.resource.data.ownerVendorId == resource.data.ownerVendorId &&
+					request.resource.data.status == resource.data.status &&
+					request.resource.data.name is string &&
+					request.resource.data.name.size() > 0 &&
+					request.resource.data.description is string &&
+					request.resource.data.description.size() > 0);
+			allow delete: if false;
+
+			match /gifts/{giftId} {
+				allow read: if isSuperAdmin() ||
+					(isAuthenticated() &&
+						get(/databases/$(database)/documents/giftLibraries/$(libraryId)).data.ownerVendorId == uid());
+				allow create: if isSuperAdmin() ||
+					(isAuthenticated() &&
+						get(/databases/$(database)/documents/giftLibraries/$(libraryId)).data.ownerVendorId == uid() &&
+						get(/databases/$(database)/documents/giftLibraries/$(libraryId)).data.status == 'active' &&
+						request.resource.data.name is string &&
+						request.resource.data.name.size() > 0 &&
+						request.resource.data.description is string &&
+						request.resource.data.description.size() > 0 &&
+						request.resource.data.status == 'active');
+				allow update: if isSuperAdmin() ||
+					(isAuthenticated() &&
+						get(/databases/$(database)/documents/giftLibraries/$(libraryId)).data.ownerVendorId == uid() &&
+						request.resource.data.name is string &&
+						request.resource.data.name.size() > 0 &&
+						request.resource.data.description is string &&
+						request.resource.data.description.size() > 0 &&
+						request.resource.data.status in ['active', 'archived'] &&
+						(resource.data.status == request.resource.data.status ||
+							(resource.data.status == 'active' && request.resource.data.status == 'archived')));
+				allow delete: if false;
+			}
 		}
 
 		// ==========================================
@@ -231,7 +302,7 @@ service cloud.firestore {
 					request.resource.data.vendorId == uid() ||
 					request.resource.data.partnerId == uid() ||
 					request.resource.data.shopOwnerId == uid()
-				));
+				)));
 
 			allow update: if isSuperAdmin() || isCampaignOwnerFromData(resource.data);
 
@@ -295,13 +366,15 @@ service cloud.firestore {
 				uid() == resource.data.shopOwnerId ||
 				hasHierarchicalReadAccess(resource.data);
 
-			allow create: if isAuthenticated();
+			allow create: if isSuperAdmin();
 
 			// FirebaseGiftService.redeemGift allows user-driven redeem write.
 			allow update: if isSuperAdmin() ||
-				uid() == resource.data.partnerId ||
-				uid() == resource.data.shopOwnerId ||
-				uid() == resource.data.userId;
+				((!('sourceType' in resource.data) || resource.data.sourceType != 'gift_library') && (
+					uid() == resource.data.partnerId ||
+					uid() == resource.data.shopOwnerId ||
+					uid() == resource.data.userId
+				));
 
 			allow delete: if isSuperAdmin();
 		}

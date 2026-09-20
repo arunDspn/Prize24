@@ -31,6 +31,7 @@ class _DC {
   static const Color orange100 = Color(0xFFFFEDD5);
   static const Color orange500 = Color(0xFFF97316);
   static const Color purple50 = Color(0xFFF5F3FF);
+  static const Color purple100 = Color(0xFFEDE9FE);
   static const Color purple500 = Color(0xFF8B5CF6);
   static const Color red50 = Color(0xFFFFF1F2);
   static const Color red100 = Color(0xFFFFE4E6);
@@ -870,6 +871,13 @@ class _ActivityLogListItem extends StatelessWidget {
         return _DC.green500;
       case 'gift_avail_triggered':
         return _DC.blue500;
+      case 'reward_opportunity_created':
+      case 'reward_source_selected':
+      case 'campaign_reward_completed':
+      case 'library_gift_assignment_success':
+      case 'manual_library_gift_assignment_success':
+      case 'library_gift_redemption_success':
+        return _DC.purple500;
       case 'follower_added':
         return _DC.teal500;
       case 'check_in_failed':
@@ -885,6 +893,13 @@ class _ActivityLogListItem extends StatelessWidget {
         return _DC.green50;
       case 'gift_avail_triggered':
         return _DC.blue50;
+      case 'reward_opportunity_created':
+      case 'reward_source_selected':
+      case 'campaign_reward_completed':
+      case 'library_gift_assignment_success':
+      case 'manual_library_gift_assignment_success':
+      case 'library_gift_redemption_success':
+        return _DC.purple50;
       case 'follower_added':
         return _DC.teal50;
       case 'check_in_failed':
@@ -900,6 +915,13 @@ class _ActivityLogListItem extends StatelessWidget {
         return _DC.green100;
       case 'gift_avail_triggered':
         return _DC.blue100;
+      case 'reward_opportunity_created':
+      case 'reward_source_selected':
+      case 'campaign_reward_completed':
+      case 'library_gift_assignment_success':
+      case 'manual_library_gift_assignment_success':
+      case 'library_gift_redemption_success':
+        return _DC.purple100;
       case 'follower_added':
         return _DC.teal100;
       case 'check_in_failed':
@@ -915,6 +937,16 @@ class _ActivityLogListItem extends StatelessWidget {
         return Icons.check_circle_outline_rounded;
       case 'gift_avail_triggered':
         return Icons.card_giftcard_rounded;
+      case 'reward_opportunity_created':
+      case 'reward_source_selected':
+      case 'campaign_reward_completed':
+      case 'library_gift_assignment_success':
+      case 'manual_library_gift_assignment_success':
+      case 'library_gift_redemption_success':
+      case 'library_gift_assignment_failed':
+      case 'manual_library_gift_assignment_failed':
+      case 'library_gift_redemption_failed':
+        return Icons.redeem_rounded;
       case 'follower_added':
         return Icons.person_add_outlined;
       case 'check_in_failed':
@@ -948,6 +980,7 @@ class _ActivityLogListItem extends StatelessWidget {
       ShopCheckInSuccessPayload(:final customerId) => customerId,
       ShopCheckInFailedPayload(:final customerId) => customerId,
       ShopFollowerAddedPayload(:final customerId) => customerId,
+      ShopRewardEventPayload(:final customerId) => customerId,
       UnknownShopPayload() => null,
     };
   }
@@ -1018,6 +1051,32 @@ class _ActivityLogListItem extends StatelessWidget {
           label: 'Initial Streak',
           value: '${p.initialStreak}',
         ),
+      ],
+      ShopRewardEventPayload() => [
+        if (p.giftName != null)
+          (
+            icon: Icons.card_giftcard_outlined,
+            label: 'Gift',
+            value: p.giftName!,
+          ),
+        if (p.selectedSource != null)
+          (
+            icon: Icons.account_tree_outlined,
+            label: 'Source',
+            value: p.selectedSource!.replaceAll('_', ' '),
+          ),
+        if (p.outcome != null)
+          (
+            icon: Icons.info_outline_rounded,
+            label: 'Outcome',
+            value: p.outcome!,
+          ),
+        if (p.crossedMilestone != null)
+          (
+            icon: Icons.flag_outlined,
+            label: 'Milestone',
+            value: '${p.crossedMilestone}',
+          ),
       ],
       UnknownShopPayload() => [],
     };

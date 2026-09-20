@@ -30,6 +30,11 @@ abstract class UserGiftDto with _$UserGiftDto {
     String? payload,
     bool? availedViaStreak,
     String? streakShopID,
+    String? sourceType,
+    String? giftLibraryId,
+    String? shopId,
+    String? assignmentMode,
+    String? rewardOpportunityId,
   }) = _UserGiftDto;
 
   factory UserGiftDto.fromJson(Map<String, dynamic> json) {
@@ -41,6 +46,7 @@ abstract class UserGiftDto with _$UserGiftDto {
       giftDescription: json['giftDescription'] as String,
       isRedeemable: json['isRedeemable'] as bool,
       isRedeemed: json['isRedeemed'] as bool?,
+      availedViaClub: json['availedViaClub'] as bool? ?? false,
       redeemedAt: _timestampFromJson(json['redeemedAt']),
       supportedShops: (json['supportedShops'] as List<dynamic>?)
           ?.map((e) => SupportedShopDto.fromJson(e as Map<String, dynamic>))
@@ -50,6 +56,11 @@ abstract class UserGiftDto with _$UserGiftDto {
 
       availedViaStreak: json['availedViaStreak'] as bool?,
       streakShopID: json['streakShopID'] as String?,
+      sourceType: json['sourceType'] as String?,
+      giftLibraryId: json['giftLibraryId'] as String?,
+      shopId: json['shopId'] as String?,
+      assignmentMode: json['assignmentMode'] as String?,
+      rewardOpportunityId: json['rewardOpportunityId'] as String?,
 
       // payload: '',
     );
@@ -68,11 +79,18 @@ abstract class UserGiftDto with _$UserGiftDto {
       'giftDescription': giftDescription,
       'isRedeemable': isRedeemable,
       'isRedeemed': isRedeemed,
+      'availedViaClub': availedViaClub,
+      'availedAt': _timestampToJson(availedAt),
       'redeemedAt': _timestampToJson(redeemedAt),
       'supportedShops': supportedShops?.map((e) => e.toJson()).toList(),
       'payload': payload,
       'availedViaStreak': availedViaStreak,
       'streakShopID': streakShopID,
+      'sourceType': sourceType,
+      'giftLibraryId': giftLibraryId,
+      'shopId': shopId,
+      'assignmentMode': assignmentMode,
+      'rewardOpportunityId': rewardOpportunityId,
     };
   }
 
@@ -89,13 +107,19 @@ abstract class UserGiftDto with _$UserGiftDto {
       // availedAt: availedAt ?? DateTime.now(), // Default to now if null
       availedAt: availedAt ?? DateTime.now(), // Default to now if null
       redeemedAt: redeemedAt,
-      supportedShops:
-          supportedShops?.map((shop) => shop.toDomainModel()).toList(),
+      supportedShops: supportedShops
+          ?.map((shop) => shop.toDomainModel())
+          .toList(),
       // supportedShops: [],
       payload: payload,
       availedViaClub: availedViaClub ?? false,
       availedViaStreak: availedViaStreak,
       streakShopID: streakShopID,
+      sourceType: sourceType,
+      giftLibraryId: giftLibraryId,
+      shopId: shopId,
+      assignmentMode: assignmentMode,
+      rewardOpportunityId: rewardOpportunityId,
     );
   }
 }

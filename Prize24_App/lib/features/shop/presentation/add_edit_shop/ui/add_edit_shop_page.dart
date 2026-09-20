@@ -6,6 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:prize24_app/core/constants.dart';
 import 'package:prize24_app/features/campaign/domain/models/campaign_model.dart';
 import 'package:prize24_app/features/clubs/presentation/vendor/create_club/ui/components/campaign_selection_list/campaign_selecter_list_modal.dart';
+import 'package:prize24_app/features/gift_library/data/gift_library_service.dart';
+import 'package:prize24_app/features/gift_library/domain/gift_library_models.dart';
+import 'package:prize24_app/features/global_controller/auth/auth_controller.dart';
 import 'package:prize24_app/features/shop/domain/model/shop_model.dart';
 import 'package:prize24_app/features/shop/presentation/add_edit_shop/shop_phone_number_parser.dart';
 import 'package:prize24_app/features/shop/presentation/add_edit_shop/view_model/add_edit_shop_controller.dart';
@@ -51,6 +54,9 @@ class _AddOrEditShopPageState extends ConsumerState<AddOrEditShopPage>
   // Selected Campaign
   CampaignModel? _selectedCampaign;
   bool _hasInitializedCampaign = false;
+  GiftLibraryModel? _selectedGiftLibrary;
+  bool _hasInitializedGiftLibrary = false;
+  late Future<List<GiftLibraryModel>> _giftLibraries;
 
   // Animation controller for fade-in
   late AnimationController _animationController;
@@ -83,6 +89,11 @@ class _AddOrEditShopPageState extends ConsumerState<AddOrEditShopPage>
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
     _animationController.forward();
+
+    final userId = ref.read(authControllerProvider).requireValue!.userId;
+    _giftLibraries = ref
+        .read(giftLibraryServiceProvider)
+        .listOwnedLibraries(userId);
 
     if (widget.shop != null) {
       final phoneNumberParts = parseShopPhoneNumber(widget.shop!.shopPhone);
@@ -615,6 +626,8 @@ class _AddOrEditShopPageState extends ConsumerState<AddOrEditShopPage>
 
               // Campaign Selector
               _buildCampaignSelector(),
+              const SizedBox(height: 24),
+              _buildGiftLibrarySelector(),
             ],
           ),
         ),
@@ -804,6 +817,142 @@ class _AddOrEditShopPageState extends ConsumerState<AddOrEditShopPage>
     );
   }
 
+  Widget _buildGiftLibrarySelector() {
+    return FutureBuilder<List<GiftLibraryModel>>(
+      future: _giftLibraries,
+      builder: (context, snapshot) {
+        final libraries = (snapshot.data ?? const <GiftLibraryModel>[])
+            .where((library) => library.isActive)
+            .toList();
+        if (!_hasInitializedGiftLibrary && widget.shop != null) {
+          _selectedGiftLibrary = libraries.firstWhereOrNull(
+            (library) => library.id == widget.shop!.associatedGiftLibraryId,
+          );
+          _hasInitializedGiftLibrary =
+              snapshot.connectionState == ConnectionState.done;
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Associated Gift Library',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: _slate700,
+                  ),
+                ),
+                Text(
+                  'Optional',
+                  style: TextStyle(fontSize: 11, color: _slate400),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: snapshot.connectionState != ConnectionState.done
+                  ? null
+                  : () async {
+                      final selected = await showModalBottomSheet<GiftLibraryModel>(
+                        context: context,
+                        showDragHandle: true,
+                        builder: (context) => SafeArea(
+                          child: libraries.isEmpty
+                              ? const Padding(
+                                  padding: EdgeInsets.all(32),
+                                  child: Text(
+                                    'Create a Gift Library from the vendor Libraries tab first.',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                )
+                              : ListView(
+                                  shrinkWrap: true,
+                                  children: libraries
+                                      .map(
+                                        (library) => ListTile(
+                                          leading: const Icon(
+                                            Icons.card_giftcard_rounded,
+                                          ),
+                                          title: Text(library.name),
+                                          subtitle: Text(library.description),
+                                          onTap: () =>
+                                              Navigator.pop(context, library),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                        ),
+                      );
+                      if (selected != null && mounted) {
+                        setState(() => _selectedGiftLibrary = selected);
+                      }
+                    },
+              child: Container(
+                width: double.infinity,
+                constraints: const BoxConstraints(minHeight: 72),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: _selectedGiftLibrary == null
+                        ? _slate200
+                        : _brandStart.withOpacity(0.5),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.card_giftcard_rounded, color: _slate400),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _selectedGiftLibrary?.name ??
+                                'Select a Gift Library',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: _selectedGiftLibrary == null
+                                  ? _slate400
+                                  : _slate900,
+                            ),
+                          ),
+                          if (_selectedGiftLibrary != null)
+                            Text(
+                              _selectedGiftLibrary!.description,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: _slate500,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    if (_selectedGiftLibrary != null)
+                      IconButton(
+                        onPressed: () =>
+                            setState(() => _selectedGiftLibrary = null),
+                        icon: const Icon(Icons.close_rounded),
+                      )
+                    else
+                      const Icon(Icons.chevron_right_rounded),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildSelectedCampaignState() {
     final campaign = _selectedCampaign!;
     return Row(
@@ -963,6 +1112,7 @@ class _AddOrEditShopPageState extends ConsumerState<AddOrEditShopPage>
                 shopAddress: _shopAddressController.text,
                 shopDescription: _shopDescriptionController.text,
                 associatedCampaignId: _selectedCampaign?.id,
+                associatedGiftLibraryId: _selectedGiftLibrary?.id,
                 giftCycleDay: int.parse(_giftCycleDayController.text),
               ),
             );
@@ -985,6 +1135,7 @@ class _AddOrEditShopPageState extends ConsumerState<AddOrEditShopPage>
               shopAddress: _shopAddressController.text,
               shopDescription: _shopDescriptionController.text,
               associatedCampaignId: _selectedCampaign?.id,
+              associatedGiftLibraryId: _selectedGiftLibrary?.id,
               giftCycleDay: int.parse(_giftCycleDayController.text),
               bonusIncrement: 1,
               daysRequired: 1,

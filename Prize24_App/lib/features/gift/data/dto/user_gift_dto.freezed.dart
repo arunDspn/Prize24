@@ -20,7 +20,7 @@ mixin _$UserGiftDto {
 // Redeemed at will be null before redemption
  DateTime? get redeemedAt;// If is Redeemable is true,
  List<SupportedShopDto>? get supportedShops;// If is Redeemable is false,
- String? get payload; bool? get availedViaStreak; String? get streakShopID;
+ String? get payload; bool? get availedViaStreak; String? get streakShopID; String? get sourceType; String? get giftLibraryId; String? get shopId; String? get assignmentMode; String? get rewardOpportunityId;
 /// Create a copy of UserGiftDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -31,16 +31,16 @@ $UserGiftDtoCopyWith<UserGiftDto> get copyWith => _$UserGiftDtoCopyWithImpl<User
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserGiftDto&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.giftId, giftId) || other.giftId == giftId)&&(identical(other.giftName, giftName) || other.giftName == giftName)&&(identical(other.giftDescription, giftDescription) || other.giftDescription == giftDescription)&&(identical(other.isRedeemable, isRedeemable) || other.isRedeemable == isRedeemable)&&(identical(other.isRedeemed, isRedeemed) || other.isRedeemed == isRedeemed)&&(identical(other.availedViaClub, availedViaClub) || other.availedViaClub == availedViaClub)&&(identical(other.availedAt, availedAt) || other.availedAt == availedAt)&&(identical(other.redeemedAt, redeemedAt) || other.redeemedAt == redeemedAt)&&const DeepCollectionEquality().equals(other.supportedShops, supportedShops)&&(identical(other.payload, payload) || other.payload == payload)&&(identical(other.availedViaStreak, availedViaStreak) || other.availedViaStreak == availedViaStreak)&&(identical(other.streakShopID, streakShopID) || other.streakShopID == streakShopID));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserGiftDto&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.giftId, giftId) || other.giftId == giftId)&&(identical(other.giftName, giftName) || other.giftName == giftName)&&(identical(other.giftDescription, giftDescription) || other.giftDescription == giftDescription)&&(identical(other.isRedeemable, isRedeemable) || other.isRedeemable == isRedeemable)&&(identical(other.isRedeemed, isRedeemed) || other.isRedeemed == isRedeemed)&&(identical(other.availedViaClub, availedViaClub) || other.availedViaClub == availedViaClub)&&(identical(other.availedAt, availedAt) || other.availedAt == availedAt)&&(identical(other.redeemedAt, redeemedAt) || other.redeemedAt == redeemedAt)&&const DeepCollectionEquality().equals(other.supportedShops, supportedShops)&&(identical(other.payload, payload) || other.payload == payload)&&(identical(other.availedViaStreak, availedViaStreak) || other.availedViaStreak == availedViaStreak)&&(identical(other.streakShopID, streakShopID) || other.streakShopID == streakShopID)&&(identical(other.sourceType, sourceType) || other.sourceType == sourceType)&&(identical(other.giftLibraryId, giftLibraryId) || other.giftLibraryId == giftLibraryId)&&(identical(other.shopId, shopId) || other.shopId == shopId)&&(identical(other.assignmentMode, assignmentMode) || other.assignmentMode == assignmentMode)&&(identical(other.rewardOpportunityId, rewardOpportunityId) || other.rewardOpportunityId == rewardOpportunityId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,giftId,giftName,giftDescription,isRedeemable,isRedeemed,availedViaClub,availedAt,redeemedAt,const DeepCollectionEquality().hash(supportedShops),payload,availedViaStreak,streakShopID);
+int get hashCode => Object.hashAll([runtimeType,id,userId,giftId,giftName,giftDescription,isRedeemable,isRedeemed,availedViaClub,availedAt,redeemedAt,const DeepCollectionEquality().hash(supportedShops),payload,availedViaStreak,streakShopID,sourceType,giftLibraryId,shopId,assignmentMode,rewardOpportunityId]);
 
 @override
 String toString() {
-  return 'UserGiftDto(id: $id, userId: $userId, giftId: $giftId, giftName: $giftName, giftDescription: $giftDescription, isRedeemable: $isRedeemable, isRedeemed: $isRedeemed, availedViaClub: $availedViaClub, availedAt: $availedAt, redeemedAt: $redeemedAt, supportedShops: $supportedShops, payload: $payload, availedViaStreak: $availedViaStreak, streakShopID: $streakShopID)';
+  return 'UserGiftDto(id: $id, userId: $userId, giftId: $giftId, giftName: $giftName, giftDescription: $giftDescription, isRedeemable: $isRedeemable, isRedeemed: $isRedeemed, availedViaClub: $availedViaClub, availedAt: $availedAt, redeemedAt: $redeemedAt, supportedShops: $supportedShops, payload: $payload, availedViaStreak: $availedViaStreak, streakShopID: $streakShopID, sourceType: $sourceType, giftLibraryId: $giftLibraryId, shopId: $shopId, assignmentMode: $assignmentMode, rewardOpportunityId: $rewardOpportunityId)';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $UserGiftDtoCopyWith<$Res>  {
   factory $UserGiftDtoCopyWith(UserGiftDto value, $Res Function(UserGiftDto) _then) = _$UserGiftDtoCopyWithImpl;
 @useResult
 $Res call({
- String? id, String userId, String giftId, String giftName, String giftDescription, bool isRedeemable, bool? isRedeemed,@JsonKey(defaultValue: false) bool? availedViaClub, DateTime availedAt, DateTime? redeemedAt, List<SupportedShopDto>? supportedShops, String? payload, bool? availedViaStreak, String? streakShopID
+ String? id, String userId, String giftId, String giftName, String giftDescription, bool isRedeemable, bool? isRedeemed,@JsonKey(defaultValue: false) bool? availedViaClub, DateTime availedAt, DateTime? redeemedAt, List<SupportedShopDto>? supportedShops, String? payload, bool? availedViaStreak, String? streakShopID, String? sourceType, String? giftLibraryId, String? shopId, String? assignmentMode, String? rewardOpportunityId
 });
 
 
@@ -68,7 +68,7 @@ class _$UserGiftDtoCopyWithImpl<$Res>
 
 /// Create a copy of UserGiftDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? userId = null,Object? giftId = null,Object? giftName = null,Object? giftDescription = null,Object? isRedeemable = null,Object? isRedeemed = freezed,Object? availedViaClub = freezed,Object? availedAt = null,Object? redeemedAt = freezed,Object? supportedShops = freezed,Object? payload = freezed,Object? availedViaStreak = freezed,Object? streakShopID = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? userId = null,Object? giftId = null,Object? giftName = null,Object? giftDescription = null,Object? isRedeemable = null,Object? isRedeemed = freezed,Object? availedViaClub = freezed,Object? availedAt = null,Object? redeemedAt = freezed,Object? supportedShops = freezed,Object? payload = freezed,Object? availedViaStreak = freezed,Object? streakShopID = freezed,Object? sourceType = freezed,Object? giftLibraryId = freezed,Object? shopId = freezed,Object? assignmentMode = freezed,Object? rewardOpportunityId = freezed,}) {
   return _then(_self.copyWith(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String?,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -84,6 +84,11 @@ as DateTime?,supportedShops: freezed == supportedShops ? _self.supportedShops : 
 as List<SupportedShopDto>?,payload: freezed == payload ? _self.payload : payload // ignore: cast_nullable_to_non_nullable
 as String?,availedViaStreak: freezed == availedViaStreak ? _self.availedViaStreak : availedViaStreak // ignore: cast_nullable_to_non_nullable
 as bool?,streakShopID: freezed == streakShopID ? _self.streakShopID : streakShopID // ignore: cast_nullable_to_non_nullable
+as String?,sourceType: freezed == sourceType ? _self.sourceType : sourceType // ignore: cast_nullable_to_non_nullable
+as String?,giftLibraryId: freezed == giftLibraryId ? _self.giftLibraryId : giftLibraryId // ignore: cast_nullable_to_non_nullable
+as String?,shopId: freezed == shopId ? _self.shopId : shopId // ignore: cast_nullable_to_non_nullable
+as String?,assignmentMode: freezed == assignmentMode ? _self.assignmentMode : assignmentMode // ignore: cast_nullable_to_non_nullable
+as String?,rewardOpportunityId: freezed == rewardOpportunityId ? _self.rewardOpportunityId : rewardOpportunityId // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -169,10 +174,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String userId,  String giftId,  String giftName,  String giftDescription,  bool isRedeemable,  bool? isRedeemed, @JsonKey(defaultValue: false)  bool? availedViaClub,  DateTime availedAt,  DateTime? redeemedAt,  List<SupportedShopDto>? supportedShops,  String? payload,  bool? availedViaStreak,  String? streakShopID)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String userId,  String giftId,  String giftName,  String giftDescription,  bool isRedeemable,  bool? isRedeemed, @JsonKey(defaultValue: false)  bool? availedViaClub,  DateTime availedAt,  DateTime? redeemedAt,  List<SupportedShopDto>? supportedShops,  String? payload,  bool? availedViaStreak,  String? streakShopID,  String? sourceType,  String? giftLibraryId,  String? shopId,  String? assignmentMode,  String? rewardOpportunityId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserGiftDto() when $default != null:
-return $default(_that.id,_that.userId,_that.giftId,_that.giftName,_that.giftDescription,_that.isRedeemable,_that.isRedeemed,_that.availedViaClub,_that.availedAt,_that.redeemedAt,_that.supportedShops,_that.payload,_that.availedViaStreak,_that.streakShopID);case _:
+return $default(_that.id,_that.userId,_that.giftId,_that.giftName,_that.giftDescription,_that.isRedeemable,_that.isRedeemed,_that.availedViaClub,_that.availedAt,_that.redeemedAt,_that.supportedShops,_that.payload,_that.availedViaStreak,_that.streakShopID,_that.sourceType,_that.giftLibraryId,_that.shopId,_that.assignmentMode,_that.rewardOpportunityId);case _:
   return orElse();
 
 }
@@ -190,10 +195,10 @@ return $default(_that.id,_that.userId,_that.giftId,_that.giftName,_that.giftDesc
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String userId,  String giftId,  String giftName,  String giftDescription,  bool isRedeemable,  bool? isRedeemed, @JsonKey(defaultValue: false)  bool? availedViaClub,  DateTime availedAt,  DateTime? redeemedAt,  List<SupportedShopDto>? supportedShops,  String? payload,  bool? availedViaStreak,  String? streakShopID)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String userId,  String giftId,  String giftName,  String giftDescription,  bool isRedeemable,  bool? isRedeemed, @JsonKey(defaultValue: false)  bool? availedViaClub,  DateTime availedAt,  DateTime? redeemedAt,  List<SupportedShopDto>? supportedShops,  String? payload,  bool? availedViaStreak,  String? streakShopID,  String? sourceType,  String? giftLibraryId,  String? shopId,  String? assignmentMode,  String? rewardOpportunityId)  $default,) {final _that = this;
 switch (_that) {
 case _UserGiftDto():
-return $default(_that.id,_that.userId,_that.giftId,_that.giftName,_that.giftDescription,_that.isRedeemable,_that.isRedeemed,_that.availedViaClub,_that.availedAt,_that.redeemedAt,_that.supportedShops,_that.payload,_that.availedViaStreak,_that.streakShopID);case _:
+return $default(_that.id,_that.userId,_that.giftId,_that.giftName,_that.giftDescription,_that.isRedeemable,_that.isRedeemed,_that.availedViaClub,_that.availedAt,_that.redeemedAt,_that.supportedShops,_that.payload,_that.availedViaStreak,_that.streakShopID,_that.sourceType,_that.giftLibraryId,_that.shopId,_that.assignmentMode,_that.rewardOpportunityId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +215,10 @@ return $default(_that.id,_that.userId,_that.giftId,_that.giftName,_that.giftDesc
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String userId,  String giftId,  String giftName,  String giftDescription,  bool isRedeemable,  bool? isRedeemed, @JsonKey(defaultValue: false)  bool? availedViaClub,  DateTime availedAt,  DateTime? redeemedAt,  List<SupportedShopDto>? supportedShops,  String? payload,  bool? availedViaStreak,  String? streakShopID)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String userId,  String giftId,  String giftName,  String giftDescription,  bool isRedeemable,  bool? isRedeemed, @JsonKey(defaultValue: false)  bool? availedViaClub,  DateTime availedAt,  DateTime? redeemedAt,  List<SupportedShopDto>? supportedShops,  String? payload,  bool? availedViaStreak,  String? streakShopID,  String? sourceType,  String? giftLibraryId,  String? shopId,  String? assignmentMode,  String? rewardOpportunityId)?  $default,) {final _that = this;
 switch (_that) {
 case _UserGiftDto() when $default != null:
-return $default(_that.id,_that.userId,_that.giftId,_that.giftName,_that.giftDescription,_that.isRedeemable,_that.isRedeemed,_that.availedViaClub,_that.availedAt,_that.redeemedAt,_that.supportedShops,_that.payload,_that.availedViaStreak,_that.streakShopID);case _:
+return $default(_that.id,_that.userId,_that.giftId,_that.giftName,_that.giftDescription,_that.isRedeemable,_that.isRedeemed,_that.availedViaClub,_that.availedAt,_that.redeemedAt,_that.supportedShops,_that.payload,_that.availedViaStreak,_that.streakShopID,_that.sourceType,_that.giftLibraryId,_that.shopId,_that.assignmentMode,_that.rewardOpportunityId);case _:
   return null;
 
 }
@@ -225,7 +230,7 @@ return $default(_that.id,_that.userId,_that.giftId,_that.giftName,_that.giftDesc
 
 
 class _UserGiftDto extends UserGiftDto {
-  const _UserGiftDto({required this.id, required this.userId, required this.giftId, required this.giftName, required this.giftDescription, required this.isRedeemable, required this.isRedeemed, @JsonKey(defaultValue: false) this.availedViaClub, required this.availedAt, this.redeemedAt, final  List<SupportedShopDto>? supportedShops, this.payload, this.availedViaStreak, this.streakShopID}): _supportedShops = supportedShops,super._();
+  const _UserGiftDto({required this.id, required this.userId, required this.giftId, required this.giftName, required this.giftDescription, required this.isRedeemable, required this.isRedeemed, @JsonKey(defaultValue: false) this.availedViaClub, required this.availedAt, this.redeemedAt, final  List<SupportedShopDto>? supportedShops, this.payload, this.availedViaStreak, this.streakShopID, this.sourceType, this.giftLibraryId, this.shopId, this.assignmentMode, this.rewardOpportunityId}): _supportedShops = supportedShops,super._();
   
 
 @override final  String? id;
@@ -257,6 +262,11 @@ class _UserGiftDto extends UserGiftDto {
 @override final  String? payload;
 @override final  bool? availedViaStreak;
 @override final  String? streakShopID;
+@override final  String? sourceType;
+@override final  String? giftLibraryId;
+@override final  String? shopId;
+@override final  String? assignmentMode;
+@override final  String? rewardOpportunityId;
 
 /// Create a copy of UserGiftDto
 /// with the given fields replaced by the non-null parameter values.
@@ -268,16 +278,16 @@ _$UserGiftDtoCopyWith<_UserGiftDto> get copyWith => __$UserGiftDtoCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserGiftDto&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.giftId, giftId) || other.giftId == giftId)&&(identical(other.giftName, giftName) || other.giftName == giftName)&&(identical(other.giftDescription, giftDescription) || other.giftDescription == giftDescription)&&(identical(other.isRedeemable, isRedeemable) || other.isRedeemable == isRedeemable)&&(identical(other.isRedeemed, isRedeemed) || other.isRedeemed == isRedeemed)&&(identical(other.availedViaClub, availedViaClub) || other.availedViaClub == availedViaClub)&&(identical(other.availedAt, availedAt) || other.availedAt == availedAt)&&(identical(other.redeemedAt, redeemedAt) || other.redeemedAt == redeemedAt)&&const DeepCollectionEquality().equals(other._supportedShops, _supportedShops)&&(identical(other.payload, payload) || other.payload == payload)&&(identical(other.availedViaStreak, availedViaStreak) || other.availedViaStreak == availedViaStreak)&&(identical(other.streakShopID, streakShopID) || other.streakShopID == streakShopID));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserGiftDto&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.giftId, giftId) || other.giftId == giftId)&&(identical(other.giftName, giftName) || other.giftName == giftName)&&(identical(other.giftDescription, giftDescription) || other.giftDescription == giftDescription)&&(identical(other.isRedeemable, isRedeemable) || other.isRedeemable == isRedeemable)&&(identical(other.isRedeemed, isRedeemed) || other.isRedeemed == isRedeemed)&&(identical(other.availedViaClub, availedViaClub) || other.availedViaClub == availedViaClub)&&(identical(other.availedAt, availedAt) || other.availedAt == availedAt)&&(identical(other.redeemedAt, redeemedAt) || other.redeemedAt == redeemedAt)&&const DeepCollectionEquality().equals(other._supportedShops, _supportedShops)&&(identical(other.payload, payload) || other.payload == payload)&&(identical(other.availedViaStreak, availedViaStreak) || other.availedViaStreak == availedViaStreak)&&(identical(other.streakShopID, streakShopID) || other.streakShopID == streakShopID)&&(identical(other.sourceType, sourceType) || other.sourceType == sourceType)&&(identical(other.giftLibraryId, giftLibraryId) || other.giftLibraryId == giftLibraryId)&&(identical(other.shopId, shopId) || other.shopId == shopId)&&(identical(other.assignmentMode, assignmentMode) || other.assignmentMode == assignmentMode)&&(identical(other.rewardOpportunityId, rewardOpportunityId) || other.rewardOpportunityId == rewardOpportunityId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,giftId,giftName,giftDescription,isRedeemable,isRedeemed,availedViaClub,availedAt,redeemedAt,const DeepCollectionEquality().hash(_supportedShops),payload,availedViaStreak,streakShopID);
+int get hashCode => Object.hashAll([runtimeType,id,userId,giftId,giftName,giftDescription,isRedeemable,isRedeemed,availedViaClub,availedAt,redeemedAt,const DeepCollectionEquality().hash(_supportedShops),payload,availedViaStreak,streakShopID,sourceType,giftLibraryId,shopId,assignmentMode,rewardOpportunityId]);
 
 @override
 String toString() {
-  return 'UserGiftDto(id: $id, userId: $userId, giftId: $giftId, giftName: $giftName, giftDescription: $giftDescription, isRedeemable: $isRedeemable, isRedeemed: $isRedeemed, availedViaClub: $availedViaClub, availedAt: $availedAt, redeemedAt: $redeemedAt, supportedShops: $supportedShops, payload: $payload, availedViaStreak: $availedViaStreak, streakShopID: $streakShopID)';
+  return 'UserGiftDto(id: $id, userId: $userId, giftId: $giftId, giftName: $giftName, giftDescription: $giftDescription, isRedeemable: $isRedeemable, isRedeemed: $isRedeemed, availedViaClub: $availedViaClub, availedAt: $availedAt, redeemedAt: $redeemedAt, supportedShops: $supportedShops, payload: $payload, availedViaStreak: $availedViaStreak, streakShopID: $streakShopID, sourceType: $sourceType, giftLibraryId: $giftLibraryId, shopId: $shopId, assignmentMode: $assignmentMode, rewardOpportunityId: $rewardOpportunityId)';
 }
 
 
@@ -288,7 +298,7 @@ abstract mixin class _$UserGiftDtoCopyWith<$Res> implements $UserGiftDtoCopyWith
   factory _$UserGiftDtoCopyWith(_UserGiftDto value, $Res Function(_UserGiftDto) _then) = __$UserGiftDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String? id, String userId, String giftId, String giftName, String giftDescription, bool isRedeemable, bool? isRedeemed,@JsonKey(defaultValue: false) bool? availedViaClub, DateTime availedAt, DateTime? redeemedAt, List<SupportedShopDto>? supportedShops, String? payload, bool? availedViaStreak, String? streakShopID
+ String? id, String userId, String giftId, String giftName, String giftDescription, bool isRedeemable, bool? isRedeemed,@JsonKey(defaultValue: false) bool? availedViaClub, DateTime availedAt, DateTime? redeemedAt, List<SupportedShopDto>? supportedShops, String? payload, bool? availedViaStreak, String? streakShopID, String? sourceType, String? giftLibraryId, String? shopId, String? assignmentMode, String? rewardOpportunityId
 });
 
 
@@ -305,7 +315,7 @@ class __$UserGiftDtoCopyWithImpl<$Res>
 
 /// Create a copy of UserGiftDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? userId = null,Object? giftId = null,Object? giftName = null,Object? giftDescription = null,Object? isRedeemable = null,Object? isRedeemed = freezed,Object? availedViaClub = freezed,Object? availedAt = null,Object? redeemedAt = freezed,Object? supportedShops = freezed,Object? payload = freezed,Object? availedViaStreak = freezed,Object? streakShopID = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? userId = null,Object? giftId = null,Object? giftName = null,Object? giftDescription = null,Object? isRedeemable = null,Object? isRedeemed = freezed,Object? availedViaClub = freezed,Object? availedAt = null,Object? redeemedAt = freezed,Object? supportedShops = freezed,Object? payload = freezed,Object? availedViaStreak = freezed,Object? streakShopID = freezed,Object? sourceType = freezed,Object? giftLibraryId = freezed,Object? shopId = freezed,Object? assignmentMode = freezed,Object? rewardOpportunityId = freezed,}) {
   return _then(_UserGiftDto(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String?,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -321,6 +331,11 @@ as DateTime?,supportedShops: freezed == supportedShops ? _self._supportedShops :
 as List<SupportedShopDto>?,payload: freezed == payload ? _self.payload : payload // ignore: cast_nullable_to_non_nullable
 as String?,availedViaStreak: freezed == availedViaStreak ? _self.availedViaStreak : availedViaStreak // ignore: cast_nullable_to_non_nullable
 as bool?,streakShopID: freezed == streakShopID ? _self.streakShopID : streakShopID // ignore: cast_nullable_to_non_nullable
+as String?,sourceType: freezed == sourceType ? _self.sourceType : sourceType // ignore: cast_nullable_to_non_nullable
+as String?,giftLibraryId: freezed == giftLibraryId ? _self.giftLibraryId : giftLibraryId // ignore: cast_nullable_to_non_nullable
+as String?,shopId: freezed == shopId ? _self.shopId : shopId // ignore: cast_nullable_to_non_nullable
+as String?,assignmentMode: freezed == assignmentMode ? _self.assignmentMode : assignmentMode // ignore: cast_nullable_to_non_nullable
+as String?,rewardOpportunityId: freezed == rewardOpportunityId ? _self.rewardOpportunityId : rewardOpportunityId // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

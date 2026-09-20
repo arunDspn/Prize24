@@ -12,5 +12,6 @@ abstract class StaffShopModel with _$StaffShopModel {
 
     /// Associated Club ID (if any)
     String? associatedCampaignId,
+    String? associatedGiftLibraryId,
   }) = _StaffShopModel;
 }

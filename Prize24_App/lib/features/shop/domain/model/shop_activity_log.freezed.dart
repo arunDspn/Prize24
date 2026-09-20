@@ -55,14 +55,15 @@ extension ShopActivityLogPayloadPatterns on ShopActivityLogPayload {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ShopGiftAvailTriggeredPayload value)?  giftAvailTriggered,TResult Function( ShopCheckInSuccessPayload value)?  checkInSuccess,TResult Function( ShopCheckInFailedPayload value)?  checkInFailed,TResult Function( ShopFollowerAddedPayload value)?  followerAdded,TResult Function( UnknownShopPayload value)?  unknown,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ShopGiftAvailTriggeredPayload value)?  giftAvailTriggered,TResult Function( ShopCheckInSuccessPayload value)?  checkInSuccess,TResult Function( ShopCheckInFailedPayload value)?  checkInFailed,TResult Function( ShopFollowerAddedPayload value)?  followerAdded,TResult Function( ShopRewardEventPayload value)?  rewardEvent,TResult Function( UnknownShopPayload value)?  unknown,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case ShopGiftAvailTriggeredPayload() when giftAvailTriggered != null:
 return giftAvailTriggered(_that);case ShopCheckInSuccessPayload() when checkInSuccess != null:
 return checkInSuccess(_that);case ShopCheckInFailedPayload() when checkInFailed != null:
 return checkInFailed(_that);case ShopFollowerAddedPayload() when followerAdded != null:
-return followerAdded(_that);case UnknownShopPayload() when unknown != null:
+return followerAdded(_that);case ShopRewardEventPayload() when rewardEvent != null:
+return rewardEvent(_that);case UnknownShopPayload() when unknown != null:
 return unknown(_that);case _:
   return orElse();
 
@@ -81,14 +82,15 @@ return unknown(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ShopGiftAvailTriggeredPayload value)  giftAvailTriggered,required TResult Function( ShopCheckInSuccessPayload value)  checkInSuccess,required TResult Function( ShopCheckInFailedPayload value)  checkInFailed,required TResult Function( ShopFollowerAddedPayload value)  followerAdded,required TResult Function( UnknownShopPayload value)  unknown,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ShopGiftAvailTriggeredPayload value)  giftAvailTriggered,required TResult Function( ShopCheckInSuccessPayload value)  checkInSuccess,required TResult Function( ShopCheckInFailedPayload value)  checkInFailed,required TResult Function( ShopFollowerAddedPayload value)  followerAdded,required TResult Function( ShopRewardEventPayload value)  rewardEvent,required TResult Function( UnknownShopPayload value)  unknown,}){
 final _that = this;
 switch (_that) {
 case ShopGiftAvailTriggeredPayload():
 return giftAvailTriggered(_that);case ShopCheckInSuccessPayload():
 return checkInSuccess(_that);case ShopCheckInFailedPayload():
 return checkInFailed(_that);case ShopFollowerAddedPayload():
-return followerAdded(_that);case UnknownShopPayload():
+return followerAdded(_that);case ShopRewardEventPayload():
+return rewardEvent(_that);case UnknownShopPayload():
 return unknown(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
@@ -103,14 +105,15 @@ return unknown(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ShopGiftAvailTriggeredPayload value)?  giftAvailTriggered,TResult? Function( ShopCheckInSuccessPayload value)?  checkInSuccess,TResult? Function( ShopCheckInFailedPayload value)?  checkInFailed,TResult? Function( ShopFollowerAddedPayload value)?  followerAdded,TResult? Function( UnknownShopPayload value)?  unknown,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ShopGiftAvailTriggeredPayload value)?  giftAvailTriggered,TResult? Function( ShopCheckInSuccessPayload value)?  checkInSuccess,TResult? Function( ShopCheckInFailedPayload value)?  checkInFailed,TResult? Function( ShopFollowerAddedPayload value)?  followerAdded,TResult? Function( ShopRewardEventPayload value)?  rewardEvent,TResult? Function( UnknownShopPayload value)?  unknown,}){
 final _that = this;
 switch (_that) {
 case ShopGiftAvailTriggeredPayload() when giftAvailTriggered != null:
 return giftAvailTriggered(_that);case ShopCheckInSuccessPayload() when checkInSuccess != null:
 return checkInSuccess(_that);case ShopCheckInFailedPayload() when checkInFailed != null:
 return checkInFailed(_that);case ShopFollowerAddedPayload() when followerAdded != null:
-return followerAdded(_that);case UnknownShopPayload() when unknown != null:
+return followerAdded(_that);case ShopRewardEventPayload() when rewardEvent != null:
+return rewardEvent(_that);case UnknownShopPayload() when unknown != null:
 return unknown(_that);case _:
   return null;
 
@@ -128,13 +131,14 @@ return unknown(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String customerId,  String campaignId,  String availStatus,  bool triggeredByStreak,  int? streakValue,  int? giftCycleDay,  String? giftId,  String? giftName,  String? shopId,  String? failureReason,  double? luckFactor,  double? randomNumber)?  giftAvailTriggered,TResult Function( String customerId,  String shopId,  int cumulativeStreak,  int consecutiveDays,  bool bonusApplied,  bool isGiftDay,  bool wasAutoFollowed,  int previousStreak,  String billNumber,  double billAmount,  double cycleBillSum,  double previousCycleBillSum,  double cumulativeBillSum,  int? bonusValue,  String? campaignId)?  checkInSuccess,TResult Function( String customerId,  String shopId,  String? failureReason)?  checkInFailed,TResult Function( String customerId,  String shopId,  String addedMethod,  int initialStreak)?  followerAdded,TResult Function()?  unknown,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String customerId,  String campaignId,  String availStatus,  bool triggeredByStreak,  int? streakValue,  int? giftCycleDay,  String? giftId,  String? giftName,  String? shopId,  String? failureReason,  double? luckFactor,  double? randomNumber)?  giftAvailTriggered,TResult Function( String customerId,  String shopId,  int cumulativeStreak,  int consecutiveDays,  bool bonusApplied,  bool isGiftDay,  bool wasAutoFollowed,  int previousStreak,  String billNumber,  double billAmount,  double cycleBillSum,  double previousCycleBillSum,  double cumulativeBillSum,  int? bonusValue,  String? campaignId)?  checkInSuccess,TResult Function( String customerId,  String shopId,  String? failureReason)?  checkInFailed,TResult Function( String customerId,  String shopId,  String addedMethod,  int initialStreak)?  followerAdded,TResult Function( String eventAction,  String? customerId,  String? shopId,  String? rewardOpportunityId,  String? selectedSource,  List<String> availableSources,  int? crossedMilestone,  double? cumulativeBillSum,  double? milestoneCycleBillSum,  String? campaignId,  String? giftLibraryId,  String? giftId,  String? giftName,  String? userGiftId,  String? requestId,  String? assignmentMode,  String? outcome)?  rewardEvent,TResult Function()?  unknown,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case ShopGiftAvailTriggeredPayload() when giftAvailTriggered != null:
 return giftAvailTriggered(_that.customerId,_that.campaignId,_that.availStatus,_that.triggeredByStreak,_that.streakValue,_that.giftCycleDay,_that.giftId,_that.giftName,_that.shopId,_that.failureReason,_that.luckFactor,_that.randomNumber);case ShopCheckInSuccessPayload() when checkInSuccess != null:
 return checkInSuccess(_that.customerId,_that.shopId,_that.cumulativeStreak,_that.consecutiveDays,_that.bonusApplied,_that.isGiftDay,_that.wasAutoFollowed,_that.previousStreak,_that.billNumber,_that.billAmount,_that.cycleBillSum,_that.previousCycleBillSum,_that.cumulativeBillSum,_that.bonusValue,_that.campaignId);case ShopCheckInFailedPayload() when checkInFailed != null:
 return checkInFailed(_that.customerId,_that.shopId,_that.failureReason);case ShopFollowerAddedPayload() when followerAdded != null:
-return followerAdded(_that.customerId,_that.shopId,_that.addedMethod,_that.initialStreak);case UnknownShopPayload() when unknown != null:
+return followerAdded(_that.customerId,_that.shopId,_that.addedMethod,_that.initialStreak);case ShopRewardEventPayload() when rewardEvent != null:
+return rewardEvent(_that.eventAction,_that.customerId,_that.shopId,_that.rewardOpportunityId,_that.selectedSource,_that.availableSources,_that.crossedMilestone,_that.cumulativeBillSum,_that.milestoneCycleBillSum,_that.campaignId,_that.giftLibraryId,_that.giftId,_that.giftName,_that.userGiftId,_that.requestId,_that.assignmentMode,_that.outcome);case UnknownShopPayload() when unknown != null:
 return unknown();case _:
   return orElse();
 
@@ -153,13 +157,14 @@ return unknown();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String customerId,  String campaignId,  String availStatus,  bool triggeredByStreak,  int? streakValue,  int? giftCycleDay,  String? giftId,  String? giftName,  String? shopId,  String? failureReason,  double? luckFactor,  double? randomNumber)  giftAvailTriggered,required TResult Function( String customerId,  String shopId,  int cumulativeStreak,  int consecutiveDays,  bool bonusApplied,  bool isGiftDay,  bool wasAutoFollowed,  int previousStreak,  String billNumber,  double billAmount,  double cycleBillSum,  double previousCycleBillSum,  double cumulativeBillSum,  int? bonusValue,  String? campaignId)  checkInSuccess,required TResult Function( String customerId,  String shopId,  String? failureReason)  checkInFailed,required TResult Function( String customerId,  String shopId,  String addedMethod,  int initialStreak)  followerAdded,required TResult Function()  unknown,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String customerId,  String campaignId,  String availStatus,  bool triggeredByStreak,  int? streakValue,  int? giftCycleDay,  String? giftId,  String? giftName,  String? shopId,  String? failureReason,  double? luckFactor,  double? randomNumber)  giftAvailTriggered,required TResult Function( String customerId,  String shopId,  int cumulativeStreak,  int consecutiveDays,  bool bonusApplied,  bool isGiftDay,  bool wasAutoFollowed,  int previousStreak,  String billNumber,  double billAmount,  double cycleBillSum,  double previousCycleBillSum,  double cumulativeBillSum,  int? bonusValue,  String? campaignId)  checkInSuccess,required TResult Function( String customerId,  String shopId,  String? failureReason)  checkInFailed,required TResult Function( String customerId,  String shopId,  String addedMethod,  int initialStreak)  followerAdded,required TResult Function( String eventAction,  String? customerId,  String? shopId,  String? rewardOpportunityId,  String? selectedSource,  List<String> availableSources,  int? crossedMilestone,  double? cumulativeBillSum,  double? milestoneCycleBillSum,  String? campaignId,  String? giftLibraryId,  String? giftId,  String? giftName,  String? userGiftId,  String? requestId,  String? assignmentMode,  String? outcome)  rewardEvent,required TResult Function()  unknown,}) {final _that = this;
 switch (_that) {
 case ShopGiftAvailTriggeredPayload():
 return giftAvailTriggered(_that.customerId,_that.campaignId,_that.availStatus,_that.triggeredByStreak,_that.streakValue,_that.giftCycleDay,_that.giftId,_that.giftName,_that.shopId,_that.failureReason,_that.luckFactor,_that.randomNumber);case ShopCheckInSuccessPayload():
 return checkInSuccess(_that.customerId,_that.shopId,_that.cumulativeStreak,_that.consecutiveDays,_that.bonusApplied,_that.isGiftDay,_that.wasAutoFollowed,_that.previousStreak,_that.billNumber,_that.billAmount,_that.cycleBillSum,_that.previousCycleBillSum,_that.cumulativeBillSum,_that.bonusValue,_that.campaignId);case ShopCheckInFailedPayload():
 return checkInFailed(_that.customerId,_that.shopId,_that.failureReason);case ShopFollowerAddedPayload():
-return followerAdded(_that.customerId,_that.shopId,_that.addedMethod,_that.initialStreak);case UnknownShopPayload():
+return followerAdded(_that.customerId,_that.shopId,_that.addedMethod,_that.initialStreak);case ShopRewardEventPayload():
+return rewardEvent(_that.eventAction,_that.customerId,_that.shopId,_that.rewardOpportunityId,_that.selectedSource,_that.availableSources,_that.crossedMilestone,_that.cumulativeBillSum,_that.milestoneCycleBillSum,_that.campaignId,_that.giftLibraryId,_that.giftId,_that.giftName,_that.userGiftId,_that.requestId,_that.assignmentMode,_that.outcome);case UnknownShopPayload():
 return unknown();}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -174,13 +179,14 @@ return unknown();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String customerId,  String campaignId,  String availStatus,  bool triggeredByStreak,  int? streakValue,  int? giftCycleDay,  String? giftId,  String? giftName,  String? shopId,  String? failureReason,  double? luckFactor,  double? randomNumber)?  giftAvailTriggered,TResult? Function( String customerId,  String shopId,  int cumulativeStreak,  int consecutiveDays,  bool bonusApplied,  bool isGiftDay,  bool wasAutoFollowed,  int previousStreak,  String billNumber,  double billAmount,  double cycleBillSum,  double previousCycleBillSum,  double cumulativeBillSum,  int? bonusValue,  String? campaignId)?  checkInSuccess,TResult? Function( String customerId,  String shopId,  String? failureReason)?  checkInFailed,TResult? Function( String customerId,  String shopId,  String addedMethod,  int initialStreak)?  followerAdded,TResult? Function()?  unknown,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String customerId,  String campaignId,  String availStatus,  bool triggeredByStreak,  int? streakValue,  int? giftCycleDay,  String? giftId,  String? giftName,  String? shopId,  String? failureReason,  double? luckFactor,  double? randomNumber)?  giftAvailTriggered,TResult? Function( String customerId,  String shopId,  int cumulativeStreak,  int consecutiveDays,  bool bonusApplied,  bool isGiftDay,  bool wasAutoFollowed,  int previousStreak,  String billNumber,  double billAmount,  double cycleBillSum,  double previousCycleBillSum,  double cumulativeBillSum,  int? bonusValue,  String? campaignId)?  checkInSuccess,TResult? Function( String customerId,  String shopId,  String? failureReason)?  checkInFailed,TResult? Function( String customerId,  String shopId,  String addedMethod,  int initialStreak)?  followerAdded,TResult? Function( String eventAction,  String? customerId,  String? shopId,  String? rewardOpportunityId,  String? selectedSource,  List<String> availableSources,  int? crossedMilestone,  double? cumulativeBillSum,  double? milestoneCycleBillSum,  String? campaignId,  String? giftLibraryId,  String? giftId,  String? giftName,  String? userGiftId,  String? requestId,  String? assignmentMode,  String? outcome)?  rewardEvent,TResult? Function()?  unknown,}) {final _that = this;
 switch (_that) {
 case ShopGiftAvailTriggeredPayload() when giftAvailTriggered != null:
 return giftAvailTriggered(_that.customerId,_that.campaignId,_that.availStatus,_that.triggeredByStreak,_that.streakValue,_that.giftCycleDay,_that.giftId,_that.giftName,_that.shopId,_that.failureReason,_that.luckFactor,_that.randomNumber);case ShopCheckInSuccessPayload() when checkInSuccess != null:
 return checkInSuccess(_that.customerId,_that.shopId,_that.cumulativeStreak,_that.consecutiveDays,_that.bonusApplied,_that.isGiftDay,_that.wasAutoFollowed,_that.previousStreak,_that.billNumber,_that.billAmount,_that.cycleBillSum,_that.previousCycleBillSum,_that.cumulativeBillSum,_that.bonusValue,_that.campaignId);case ShopCheckInFailedPayload() when checkInFailed != null:
 return checkInFailed(_that.customerId,_that.shopId,_that.failureReason);case ShopFollowerAddedPayload() when followerAdded != null:
-return followerAdded(_that.customerId,_that.shopId,_that.addedMethod,_that.initialStreak);case UnknownShopPayload() when unknown != null:
+return followerAdded(_that.customerId,_that.shopId,_that.addedMethod,_that.initialStreak);case ShopRewardEventPayload() when rewardEvent != null:
+return rewardEvent(_that.eventAction,_that.customerId,_that.shopId,_that.rewardOpportunityId,_that.selectedSource,_that.availableSources,_that.crossedMilestone,_that.cumulativeBillSum,_that.milestoneCycleBillSum,_that.campaignId,_that.giftLibraryId,_that.giftId,_that.giftName,_that.userGiftId,_that.requestId,_that.assignmentMode,_that.outcome);case UnknownShopPayload() when unknown != null:
 return unknown();case _:
   return null;
 
@@ -194,7 +200,7 @@ return unknown();case _:
 
 class ShopGiftAvailTriggeredPayload extends ShopActivityLogPayload {
   const ShopGiftAvailTriggeredPayload({required this.customerId, required this.campaignId, required this.availStatus, required this.triggeredByStreak, this.streakValue, this.giftCycleDay, this.giftId, this.giftName, this.shopId, this.failureReason, this.luckFactor, this.randomNumber}): super._();
-  
+
 
  final  String customerId;
  final  String campaignId;
@@ -509,6 +515,110 @@ as String,shopId: null == shopId ? _self.shopId : shopId // ignore: cast_nullabl
 as String,addedMethod: null == addedMethod ? _self.addedMethod : addedMethod // ignore: cast_nullable_to_non_nullable
 as String,initialStreak: null == initialStreak ? _self.initialStreak : initialStreak // ignore: cast_nullable_to_non_nullable
 as int,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class ShopRewardEventPayload extends ShopActivityLogPayload {
+  const ShopRewardEventPayload({required this.eventAction, this.customerId, this.shopId, this.rewardOpportunityId, this.selectedSource, final  List<String> availableSources = const <String>[], this.crossedMilestone, this.cumulativeBillSum, this.milestoneCycleBillSum, this.campaignId, this.giftLibraryId, this.giftId, this.giftName, this.userGiftId, this.requestId, this.assignmentMode, this.outcome}): _availableSources = availableSources,super._();
+
+
+ final  String eventAction;
+ final  String? customerId;
+ final  String? shopId;
+ final  String? rewardOpportunityId;
+ final  String? selectedSource;
+ final  List<String> _availableSources;
+@JsonKey() List<String> get availableSources {
+  if (_availableSources is EqualUnmodifiableListView) return _availableSources;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_availableSources);
+}
+
+ final  int? crossedMilestone;
+ final  double? cumulativeBillSum;
+ final  double? milestoneCycleBillSum;
+ final  String? campaignId;
+ final  String? giftLibraryId;
+ final  String? giftId;
+ final  String? giftName;
+ final  String? userGiftId;
+ final  String? requestId;
+ final  String? assignmentMode;
+ final  String? outcome;
+
+/// Create a copy of ShopActivityLogPayload
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ShopRewardEventPayloadCopyWith<ShopRewardEventPayload> get copyWith => _$ShopRewardEventPayloadCopyWithImpl<ShopRewardEventPayload>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ShopRewardEventPayload&&(identical(other.eventAction, eventAction) || other.eventAction == eventAction)&&(identical(other.customerId, customerId) || other.customerId == customerId)&&(identical(other.shopId, shopId) || other.shopId == shopId)&&(identical(other.rewardOpportunityId, rewardOpportunityId) || other.rewardOpportunityId == rewardOpportunityId)&&(identical(other.selectedSource, selectedSource) || other.selectedSource == selectedSource)&&const DeepCollectionEquality().equals(other._availableSources, _availableSources)&&(identical(other.crossedMilestone, crossedMilestone) || other.crossedMilestone == crossedMilestone)&&(identical(other.cumulativeBillSum, cumulativeBillSum) || other.cumulativeBillSum == cumulativeBillSum)&&(identical(other.milestoneCycleBillSum, milestoneCycleBillSum) || other.milestoneCycleBillSum == milestoneCycleBillSum)&&(identical(other.campaignId, campaignId) || other.campaignId == campaignId)&&(identical(other.giftLibraryId, giftLibraryId) || other.giftLibraryId == giftLibraryId)&&(identical(other.giftId, giftId) || other.giftId == giftId)&&(identical(other.giftName, giftName) || other.giftName == giftName)&&(identical(other.userGiftId, userGiftId) || other.userGiftId == userGiftId)&&(identical(other.requestId, requestId) || other.requestId == requestId)&&(identical(other.assignmentMode, assignmentMode) || other.assignmentMode == assignmentMode)&&(identical(other.outcome, outcome) || other.outcome == outcome));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,eventAction,customerId,shopId,rewardOpportunityId,selectedSource,const DeepCollectionEquality().hash(_availableSources),crossedMilestone,cumulativeBillSum,milestoneCycleBillSum,campaignId,giftLibraryId,giftId,giftName,userGiftId,requestId,assignmentMode,outcome);
+
+@override
+String toString() {
+  return 'ShopActivityLogPayload.rewardEvent(eventAction: $eventAction, customerId: $customerId, shopId: $shopId, rewardOpportunityId: $rewardOpportunityId, selectedSource: $selectedSource, availableSources: $availableSources, crossedMilestone: $crossedMilestone, cumulativeBillSum: $cumulativeBillSum, milestoneCycleBillSum: $milestoneCycleBillSum, campaignId: $campaignId, giftLibraryId: $giftLibraryId, giftId: $giftId, giftName: $giftName, userGiftId: $userGiftId, requestId: $requestId, assignmentMode: $assignmentMode, outcome: $outcome)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ShopRewardEventPayloadCopyWith<$Res> implements $ShopActivityLogPayloadCopyWith<$Res> {
+  factory $ShopRewardEventPayloadCopyWith(ShopRewardEventPayload value, $Res Function(ShopRewardEventPayload) _then) = _$ShopRewardEventPayloadCopyWithImpl;
+@useResult
+$Res call({
+ String eventAction, String? customerId, String? shopId, String? rewardOpportunityId, String? selectedSource, List<String> availableSources, int? crossedMilestone, double? cumulativeBillSum, double? milestoneCycleBillSum, String? campaignId, String? giftLibraryId, String? giftId, String? giftName, String? userGiftId, String? requestId, String? assignmentMode, String? outcome
+});
+
+
+
+
+}
+/// @nodoc
+class _$ShopRewardEventPayloadCopyWithImpl<$Res>
+    implements $ShopRewardEventPayloadCopyWith<$Res> {
+  _$ShopRewardEventPayloadCopyWithImpl(this._self, this._then);
+
+  final ShopRewardEventPayload _self;
+  final $Res Function(ShopRewardEventPayload) _then;
+
+/// Create a copy of ShopActivityLogPayload
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? eventAction = null,Object? customerId = freezed,Object? shopId = freezed,Object? rewardOpportunityId = freezed,Object? selectedSource = freezed,Object? availableSources = null,Object? crossedMilestone = freezed,Object? cumulativeBillSum = freezed,Object? milestoneCycleBillSum = freezed,Object? campaignId = freezed,Object? giftLibraryId = freezed,Object? giftId = freezed,Object? giftName = freezed,Object? userGiftId = freezed,Object? requestId = freezed,Object? assignmentMode = freezed,Object? outcome = freezed,}) {
+  return _then(ShopRewardEventPayload(
+eventAction: null == eventAction ? _self.eventAction : eventAction // ignore: cast_nullable_to_non_nullable
+as String,customerId: freezed == customerId ? _self.customerId : customerId // ignore: cast_nullable_to_non_nullable
+as String?,shopId: freezed == shopId ? _self.shopId : shopId // ignore: cast_nullable_to_non_nullable
+as String?,rewardOpportunityId: freezed == rewardOpportunityId ? _self.rewardOpportunityId : rewardOpportunityId // ignore: cast_nullable_to_non_nullable
+as String?,selectedSource: freezed == selectedSource ? _self.selectedSource : selectedSource // ignore: cast_nullable_to_non_nullable
+as String?,availableSources: null == availableSources ? _self._availableSources : availableSources // ignore: cast_nullable_to_non_nullable
+as List<String>,crossedMilestone: freezed == crossedMilestone ? _self.crossedMilestone : crossedMilestone // ignore: cast_nullable_to_non_nullable
+as int?,cumulativeBillSum: freezed == cumulativeBillSum ? _self.cumulativeBillSum : cumulativeBillSum // ignore: cast_nullable_to_non_nullable
+as double?,milestoneCycleBillSum: freezed == milestoneCycleBillSum ? _self.milestoneCycleBillSum : milestoneCycleBillSum // ignore: cast_nullable_to_non_nullable
+as double?,campaignId: freezed == campaignId ? _self.campaignId : campaignId // ignore: cast_nullable_to_non_nullable
+as String?,giftLibraryId: freezed == giftLibraryId ? _self.giftLibraryId : giftLibraryId // ignore: cast_nullable_to_non_nullable
+as String?,giftId: freezed == giftId ? _self.giftId : giftId // ignore: cast_nullable_to_non_nullable
+as String?,giftName: freezed == giftName ? _self.giftName : giftName // ignore: cast_nullable_to_non_nullable
+as String?,userGiftId: freezed == userGiftId ? _self.userGiftId : userGiftId // ignore: cast_nullable_to_non_nullable
+as String?,requestId: freezed == requestId ? _self.requestId : requestId // ignore: cast_nullable_to_non_nullable
+as String?,assignmentMode: freezed == assignmentMode ? _self.assignmentMode : assignmentMode // ignore: cast_nullable_to_non_nullable
+as String?,outcome: freezed == outcome ? _self.outcome : outcome // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

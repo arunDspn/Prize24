@@ -28,5 +28,10 @@ abstract class UserGiftModel with _$UserGiftModel {
     String? payload,
     bool? availedViaStreak,
     String? streakShopID,
+    String? sourceType,
+    String? giftLibraryId,
+    String? shopId,
+    String? assignmentMode,
+    String? rewardOpportunityId,
   }) = _UserGiftModel;
 }

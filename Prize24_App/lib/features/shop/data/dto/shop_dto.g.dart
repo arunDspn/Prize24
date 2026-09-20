@@ -23,6 +23,7 @@ _ShopDto _$ShopDtoFromJson(Map<String, dynamic> json) => _ShopDto(
       .toInt(),
   totalFollowers: (json['totalFollowers'] as num?)?.toInt() ?? 0,
   associatedCampaignId: json['associatedCampaignId'] as String?,
+  associatedGiftLibraryId: json['associatedGiftLibraryId'] as String?,
 );
 
 Map<String, dynamic> _$ShopDtoToJson(_ShopDto instance) => <String, dynamic>{
@@ -41,4 +42,5 @@ Map<String, dynamic> _$ShopDtoToJson(_ShopDto instance) => <String, dynamic>{
   'bonusIncrementDaysRequired': instance.bonusIncrementDaysRequired,
   'totalFollowers': instance.totalFollowers,
   'associatedCampaignId': instance.associatedCampaignId,
+  'associatedGiftLibraryId': instance.associatedGiftLibraryId,
 };

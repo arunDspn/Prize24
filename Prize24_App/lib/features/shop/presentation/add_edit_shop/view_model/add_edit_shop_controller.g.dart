@@ -34,7 +34,7 @@ final class AddEditShopControllerProvider
 }
 
 String _$addEditShopControllerHash() =>
-    r'5c1a6cd4d7ba3ba9135022ed1320dc3fab8ecd1d';
+    r'06410bcc0125c2e38f94be966893803e3a59a6d4';
 
 abstract class _$AddEditShopController extends $AsyncNotifier<ShopModel?> {
   FutureOr<ShopModel?> build();

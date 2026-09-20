@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:prize24_app/features/gift_library/data/gift_library_service.dart';
+import 'package:prize24_app/features/gift_library/presentation/gift_reward_flow.dart';
 import 'package:prize24_app/features/redeem_gift/ui/redeem_gift_page.dart';
 import 'package:prize24_app/routing/app_routes.dart';
 
@@ -18,10 +20,12 @@ class ShopClubsView extends ConsumerStatefulWidget {
   const ShopClubsView({
     required this.shopId,
     this.campaignId,
+    this.giftLibraryId,
     super.key,
   });
 
   final String? campaignId;
+  final String? giftLibraryId;
   final String shopId;
 
   @override
@@ -32,19 +36,22 @@ class _ShopClubsViewState extends ConsumerState<ShopClubsView>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  late Future<bool> _hasActiveLibraryGifts;
 
   @override
   void initState() {
     super.initState();
+    _hasActiveLibraryGifts = widget.giftLibraryId == null
+        ? Future.value(false)
+        : GiftLibraryService()
+              .getAttachedLibrary(widget.shopId)
+              .then((library) => library.gifts.isNotEmpty);
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOut,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
     _animationController.forward();
   }
@@ -62,10 +69,7 @@ class _ShopClubsViewState extends ConsumerState<ShopClubsView>
       body: AnimatedBuilder(
         animation: _animationController,
         builder: (context, child) {
-          return Opacity(
-            opacity: _fadeAnimation.value,
-            child: child,
-          );
+          return Opacity(opacity: _fadeAnimation.value, child: child);
         },
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -86,6 +90,79 @@ class _ShopClubsViewState extends ConsumerState<ShopClubsView>
                 },
               ),
               const SizedBox(height: 16),
+              FutureBuilder<bool>(
+                future: _hasActiveLibraryGifts,
+                builder: (context, snapshot) {
+                  final enabled = snapshot.data ?? false;
+                  return _ActionCard(
+                    icon: Icons.card_giftcard_rounded,
+                    title: 'Assign Library Gift',
+                    subtitle: enabled
+                        ? 'Assign a gift to an existing shop follower'
+                        : 'Attach a library with at least one active gift',
+                    gradientColors: const [
+                      Color(0xFFEC4899),
+                      Color(0xFFF97316),
+                    ],
+                    enabled: enabled,
+                    onTap: () {
+                      Navigator.of(context).push<void>(
+                        MaterialPageRoute(
+                          builder: (_) => GiftLibraryScannerPage(
+                            shopId: widget.shopId,
+                            mode: LibraryScannerMode.assign,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              _ActionCard(
+                icon: Icons.redeem_rounded,
+                title: 'Redeem Library Gift',
+                subtitle: widget.giftLibraryId == null
+                    ? "Shop doesn't have an active Gift Library"
+                    : 'Redeem a customer wallet gift',
+                gradientColors: const [Color(0xFF10B981), Color(0xFF059669)],
+                enabled: widget.giftLibraryId != null,
+                onTap: () {
+                  Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => GiftLibraryScannerPage(
+                        shopId: widget.shopId,
+                        mode: LibraryScannerMode.redeem,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              StreamBuilder<int>(
+                stream: watchPendingRewardCount(widget.shopId),
+                builder: (context, snapshot) {
+                  final count = snapshot.data ?? 0;
+                  return _ActionCard(
+                    icon: Icons.pending_actions_rounded,
+                    title: 'Pending Rewards ($count)',
+                    subtitle: 'Resume interrupted milestone rewards',
+                    gradientColors: const [
+                      Color(0xFF3B82F6),
+                      Color(0xFF6366F1),
+                    ],
+                    onTap: () {
+                      Navigator.of(context).push<void>(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              PendingRewardsPage(shopId: widget.shopId),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
               // Redeem Gift Action Card
               _ActionCard(
                 icon: Icons.qr_code_scanner_rounded,
@@ -101,10 +178,7 @@ class _ShopClubsViewState extends ConsumerState<ShopClubsView>
                     shopId: widget.shopId,
                     campaignName: '',
                   );
-                  context.push(
-                    AppRoutes.redeemAvailedGiftByStaff,
-                    extra: data,
-                  );
+                  context.push(AppRoutes.redeemAvailedGiftByStaff, extra: data);
                 },
               ),
               const SizedBox(height: 16),
@@ -195,12 +269,15 @@ class _ActionCardState extends State<_ActionCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown:
-          widget.enabled ? (_) => setState(() => _isPressed = true) : null,
-      onTapUp:
-          widget.enabled ? (_) => setState(() => _isPressed = false) : null,
-      onTapCancel:
-          widget.enabled ? () => setState(() => _isPressed = false) : null,
+      onTapDown: widget.enabled
+          ? (_) => setState(() => _isPressed = true)
+          : null,
+      onTapUp: widget.enabled
+          ? (_) => setState(() => _isPressed = false)
+          : null,
+      onTapCancel: widget.enabled
+          ? () => setState(() => _isPressed = false)
+          : null,
       onTap: widget.enabled ? widget.onTap : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
@@ -214,10 +291,7 @@ class _ActionCardState extends State<_ActionCard> {
                   end: Alignment.bottomRight,
                 )
               : LinearGradient(
-                  colors: [
-                    _StreakColors.slate400,
-                    _StreakColors.slate500,
-                  ],
+                  colors: [_StreakColors.slate400, _StreakColors.slate500],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -225,8 +299,9 @@ class _ActionCardState extends State<_ActionCard> {
           boxShadow: widget.enabled
               ? [
                   BoxShadow(
-                    color: widget.gradientColors.first
-                        .withOpacity(_isPressed ? 0.4 : 0.3),
+                    color: widget.gradientColors.first.withOpacity(
+                      _isPressed ? 0.4 : 0.3,
+                    ),
                     blurRadius: _isPressed ? 24 : 20,
                     offset: const Offset(0, 8),
                     spreadRadius: _isPressed ? 2 : 0,

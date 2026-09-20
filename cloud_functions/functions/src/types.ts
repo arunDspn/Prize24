@@ -467,6 +467,7 @@ export interface ShopData {
 
     // Streak & Gift Configuration
     associatedCampaignId: string | null;
+    associatedGiftLibraryId?: string | null;
     campaignName?: string;
     giftDayCycle: number | null;
 
@@ -519,6 +520,7 @@ export interface CheckInUserRequest {
     shopId: string;
     billNumber: string;
     billAmount: number;
+    rewardFlowVersion?: number;
 }
 
 export interface AddOfferRequest {
@@ -539,6 +541,15 @@ export interface CheckInResponse {
         isGiftDay: boolean;
         isNewUser: boolean;
         wasAutoFollowed: boolean;
+        cumulativeBillSum?: number;
+        milestoneCycleBillSum?: number;
+        crossedMilestone?: number | null;
+        rewardOpportunity?: {
+            id: string;
+            status: "pending" | "completed";
+            availableSources: Array<"campaign" | "gift_library">;
+            selectedSource: "campaign" | "gift_library" | null;
+        };
         giftInfo?: {
             campaignId: string;
             campaignName: string;

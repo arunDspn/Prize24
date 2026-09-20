@@ -21,5 +21,19 @@ abstract class CheckInRepsponseDataModel with _$CheckInRepsponseDataModel {
     required bool bonusApplied,
     required bool isGiftDay,
     required bool isNewUser,
+    @Default(0) double cumulativeBillSum,
+    @Default(0) double milestoneCycleBillSum,
+    int? crossedMilestone,
+    RewardOpportunityModel? rewardOpportunity,
   }) = _CheckInRepsponseDataModel;
+}
+
+@freezed
+abstract class RewardOpportunityModel with _$RewardOpportunityModel {
+  const factory RewardOpportunityModel({
+    required String id,
+    required String status,
+    @Default(<String>[]) List<String> availableSources,
+    String? selectedSource,
+  }) = _RewardOpportunityModel;
 }

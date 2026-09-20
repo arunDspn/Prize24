@@ -144,6 +144,26 @@ sealed class ShopActivityLogPayload with _$ShopActivityLogPayload {
     required int initialStreak,
   }) = ShopFollowerAddedPayload;
 
+  const factory ShopActivityLogPayload.rewardEvent({
+    required String eventAction,
+    String? customerId,
+    String? shopId,
+    String? rewardOpportunityId,
+    String? selectedSource,
+    @Default(<String>[]) List<String> availableSources,
+    int? crossedMilestone,
+    double? cumulativeBillSum,
+    double? milestoneCycleBillSum,
+    String? campaignId,
+    String? giftLibraryId,
+    String? giftId,
+    String? giftName,
+    String? userGiftId,
+    String? requestId,
+    String? assignmentMode,
+    String? outcome,
+  }) = ShopRewardEventPayload;
+
   // ── unknown ──────────────────────────────────────────────────────────────
 
   const factory ShopActivityLogPayload.unknown() = UnknownShopPayload;
@@ -157,6 +177,7 @@ sealed class ShopActivityLogPayload with _$ShopActivityLogPayload {
     ShopCheckInSuccessPayload() => 'check_in_success',
     ShopCheckInFailedPayload() => 'check_in_failed',
     ShopFollowerAddedPayload() => 'follower_added',
+    ShopRewardEventPayload(:final eventAction) => eventAction,
     UnknownShopPayload() => 'unknown',
   };
 
@@ -202,6 +223,25 @@ sealed class ShopActivityLogPayload with _$ShopActivityLogPayload {
       shopId: d.shopId,
       addedMethod: d.addedMethod,
       initialStreak: d.initialStreak,
+    ),
+    RewardEventLogDto d => ShopActivityLogPayload.rewardEvent(
+      eventAction: d.action,
+      customerId: d.customerId,
+      shopId: d.shopId,
+      rewardOpportunityId: d.rewardOpportunityId,
+      selectedSource: d.selectedSource,
+      availableSources: d.availableSources,
+      crossedMilestone: d.crossedMilestone,
+      cumulativeBillSum: d.cumulativeBillSum,
+      milestoneCycleBillSum: d.milestoneCycleBillSum,
+      campaignId: d.campaignId,
+      giftLibraryId: d.giftLibraryId,
+      giftId: d.giftId,
+      giftName: d.giftName,
+      userGiftId: d.userGiftId,
+      requestId: d.requestId,
+      assignmentMode: d.assignmentMode,
+      outcome: d.outcome,
     ),
     UnknownShopLogDto() => const ShopActivityLogPayload.unknown(),
   };

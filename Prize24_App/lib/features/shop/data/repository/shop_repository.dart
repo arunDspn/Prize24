@@ -48,6 +48,7 @@ class ShopRepository extends IShopRepository {
       giftCycleDay: shopDto.giftCycleDay,
       totalFollowers: shopDto.totalFollowers,
       associatedCampaignId: shopDto.associatedCampaignId,
+      associatedGiftLibraryId: shopDto.associatedGiftLibraryId,
     );
   }
 
@@ -82,6 +83,7 @@ class ShopRepository extends IShopRepository {
       giftCycleDay: shopDto.giftCycleDay,
       totalFollowers: shopDto.totalFollowers,
       associatedCampaignId: shopDto.associatedCampaignId,
+      associatedGiftLibraryId: shopDto.associatedGiftLibraryId,
       shopEmail: shopDto.shopEmail,
     );
   }
@@ -123,6 +125,7 @@ class ShopRepository extends IShopRepository {
             giftCycleDay: shopDto.giftCycleDay,
             totalFollowers: shopDto.totalFollowers,
             associatedCampaignId: shopDto.associatedCampaignId,
+            associatedGiftLibraryId: shopDto.associatedGiftLibraryId,
           ),
         )
         .toList();

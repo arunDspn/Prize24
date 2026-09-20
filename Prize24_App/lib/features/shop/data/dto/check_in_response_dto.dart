@@ -52,6 +52,10 @@ abstract class CheckInResponseDto with _$CheckInResponseDto {
               bonusApplied: data!.bonusApplied,
               isGiftDay: data!.isGiftDay,
               isNewUser: data!.isNewUser,
+              cumulativeBillSum: data!.cumulativeBillSum,
+              milestoneCycleBillSum: data!.milestoneCycleBillSum,
+              crossedMilestone: data!.crossedMilestone,
+              rewardOpportunity: data!.rewardOpportunity?.toDomain(),
             )
           : null,
     );
@@ -66,8 +70,34 @@ abstract class CheckInResponseDataDto with _$CheckInResponseDataDto {
     required bool bonusApplied,
     required bool isGiftDay,
     required bool isNewUser,
+    @Default(0) double cumulativeBillSum,
+    @Default(0) double milestoneCycleBillSum,
+    int? crossedMilestone,
+    RewardOpportunityDto? rewardOpportunity,
   }) = _CheckInResponseDataDto;
 
   factory CheckInResponseDataDto.fromJson(Map<String, dynamic> json) =>
       _$CheckInResponseDataDtoFromJson(json);
+}
+
+@freezed
+abstract class RewardOpportunityDto with _$RewardOpportunityDto {
+  const factory RewardOpportunityDto({
+    required String id,
+    required String status,
+    @Default(<String>[]) List<String> availableSources,
+    String? selectedSource,
+  }) = _RewardOpportunityDto;
+
+  factory RewardOpportunityDto.fromJson(Map<String, dynamic> json) =>
+      _$RewardOpportunityDtoFromJson(json);
+
+  const RewardOpportunityDto._();
+
+  RewardOpportunityModel toDomain() => RewardOpportunityModel(
+    id: id,
+    status: status,
+    availableSources: availableSources,
+    selectedSource: selectedSource,
+  );
 }

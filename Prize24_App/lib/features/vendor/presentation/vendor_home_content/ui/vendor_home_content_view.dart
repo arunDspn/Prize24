@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:prize24_app/features/global_controller/auth/auth_controller.dart';
 import 'package:prize24_app/features/global_controller/subscription/subscription_controller.dart';
+import 'package:prize24_app/features/gift_library/presentation/gift_libraries_tab.dart';
 import 'package:prize24_app/features/vendor/presentation/vendor_home_content/ui/components/vendors_campaign_list/vendors_campaign_list_view.dart';
 import 'package:prize24_app/features/vendor/presentation/vendor_home_content/ui/components/vendors_shop_list/vendors_shop_list_view.dart';
 import 'package:prize24_app/routing/app_routes.dart';
@@ -11,10 +12,7 @@ import 'package:prize24_app/routing/app_routes.dart';
 /// This page is the entry point for vendors to manage their shops, coupons,
 /// and audience.
 class VendorHomeContentView extends ConsumerWidget {
-  const VendorHomeContentView({
-    required this.vendorId,
-    super.key,
-  });
+  const VendorHomeContentView({required this.vendorId, super.key});
 
   /// The user ID of the vendor.
   /// If this is null, the set vendor should be used.
@@ -62,7 +60,7 @@ class VendorHomeContentView extends ConsumerWidget {
                 // Tab View contains Tab for Shops and Campaigns
                 Expanded(
                   child: DefaultTabController(
-                    length: 2,
+                    length: 3,
                     child: Builder(
                       builder: (context) {
                         return Column(
@@ -76,8 +74,9 @@ class VendorHomeContentView extends ConsumerWidget {
                               child: _PremiumTabSelector(
                                 tabController: DefaultTabController.of(context),
                                 onTabChanged: (index) {
-                                  DefaultTabController.of(context)
-                                      .animateTo(index);
+                                  DefaultTabController.of(
+                                    context,
+                                  ).animateTo(index);
                                 },
                               ),
                             ),
@@ -87,6 +86,7 @@ class VendorHomeContentView extends ConsumerWidget {
                                 children: [
                                   const VendorsShopList(),
                                   VendorsCampaignsList(userID),
+                                  const GiftLibrariesTab(),
                                 ],
                               ),
                             ),
@@ -101,14 +101,10 @@ class VendorHomeContentView extends ConsumerWidget {
           }
         },
         error: (error, stackTrace) {
-          return Center(
-            child: Text('Error, Please try again'),
-          );
+          return Center(child: Text('Error, Please try again'));
         },
         loading: () {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );
@@ -116,9 +112,7 @@ class VendorHomeContentView extends ConsumerWidget {
 }
 
 class SubscriptionExpiresReSubscribeView extends StatelessWidget {
-  const SubscriptionExpiresReSubscribeView({
-    super.key,
-  });
+  const SubscriptionExpiresReSubscribeView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -634,10 +628,7 @@ class _PremiumTabSelectorState extends State<_PremiumTabSelector> {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.7),
         borderRadius: BorderRadius.circular(50),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.5),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.5), width: 1),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF1F2687).withOpacity(0.07),
@@ -649,14 +640,14 @@ class _PremiumTabSelectorState extends State<_PremiumTabSelector> {
       padding: const EdgeInsets.all(6),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final tabWidth = (constraints.maxWidth - 12) / 2;
+          final tabWidth = constraints.maxWidth / 3;
           return Stack(
             children: [
               // Sliding Gradient Indicator
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 600),
                 curve: Curves.easeOutCubic,
-                left: _selectedIndex == 0 ? 0 : tabWidth + 12,
+                left: _selectedIndex * tabWidth,
                 top: 0,
                 bottom: 0,
                 width: tabWidth,
@@ -696,8 +687,9 @@ class _PremiumTabSelectorState extends State<_PremiumTabSelector> {
                             Icon(
                               Icons.storefront_rounded,
                               size: 20,
-                              color:
-                                  _selectedIndex == 0 ? Colors.white : textSub,
+                              color: _selectedIndex == 0
+                                  ? Colors.white
+                                  : textSub,
                             ),
                             const SizedBox(width: 8),
                             Text(
@@ -730,8 +722,9 @@ class _PremiumTabSelectorState extends State<_PremiumTabSelector> {
                             Icon(
                               Icons.campaign_rounded,
                               size: 20,
-                              color:
-                                  _selectedIndex == 1 ? Colors.white : textSub,
+                              color: _selectedIndex == 1
+                                  ? Colors.white
+                                  : textSub,
                             ),
                             const SizedBox(width: 8),
                             Text(
@@ -740,6 +733,40 @@ class _PremiumTabSelectorState extends State<_PremiumTabSelector> {
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
                                 color: _selectedIndex == 1
+                                    ? Colors.white
+                                    : textSub,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _onTabTap(2),
+                      behavior: HitTestBehavior.opaque,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.card_giftcard_rounded,
+                              size: 20,
+                              color: _selectedIndex == 2
+                                  ? Colors.white
+                                  : textSub,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Libraries',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: _selectedIndex == 2
                                     ? Colors.white
                                     : textSub,
                                 fontFamily: 'Inter',

@@ -18,7 +18,7 @@ mixin _$ShopDto {
  String get shopName; String get shopPhone; String get shopAddress;// required String shopCategory,
 /// The ID of the vendor that owns the shop.
  String get shopOwnerId; String get shopStatus;@JsonKey(includeIfNull: false) String? get shopId; String? get shopDescription;@TimestampConverter() DateTime? get createdAt;@TimestampConverter() DateTime? get updatedAt; String? get shopEmail;// Streak Data
- int get giftCycleDay; int get bonusIncrementValue; int get bonusIncrementDaysRequired; int get totalFollowers; String? get associatedCampaignId;
+ int get giftCycleDay; int get bonusIncrementValue; int get bonusIncrementDaysRequired; int get totalFollowers; String? get associatedCampaignId; String? get associatedGiftLibraryId;
 /// Create a copy of ShopDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -31,16 +31,16 @@ $ShopDtoCopyWith<ShopDto> get copyWith => _$ShopDtoCopyWithImpl<ShopDto>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ShopDto&&(identical(other.shopName, shopName) || other.shopName == shopName)&&(identical(other.shopPhone, shopPhone) || other.shopPhone == shopPhone)&&(identical(other.shopAddress, shopAddress) || other.shopAddress == shopAddress)&&(identical(other.shopOwnerId, shopOwnerId) || other.shopOwnerId == shopOwnerId)&&(identical(other.shopStatus, shopStatus) || other.shopStatus == shopStatus)&&(identical(other.shopId, shopId) || other.shopId == shopId)&&(identical(other.shopDescription, shopDescription) || other.shopDescription == shopDescription)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.shopEmail, shopEmail) || other.shopEmail == shopEmail)&&(identical(other.giftCycleDay, giftCycleDay) || other.giftCycleDay == giftCycleDay)&&(identical(other.bonusIncrementValue, bonusIncrementValue) || other.bonusIncrementValue == bonusIncrementValue)&&(identical(other.bonusIncrementDaysRequired, bonusIncrementDaysRequired) || other.bonusIncrementDaysRequired == bonusIncrementDaysRequired)&&(identical(other.totalFollowers, totalFollowers) || other.totalFollowers == totalFollowers)&&(identical(other.associatedCampaignId, associatedCampaignId) || other.associatedCampaignId == associatedCampaignId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ShopDto&&(identical(other.shopName, shopName) || other.shopName == shopName)&&(identical(other.shopPhone, shopPhone) || other.shopPhone == shopPhone)&&(identical(other.shopAddress, shopAddress) || other.shopAddress == shopAddress)&&(identical(other.shopOwnerId, shopOwnerId) || other.shopOwnerId == shopOwnerId)&&(identical(other.shopStatus, shopStatus) || other.shopStatus == shopStatus)&&(identical(other.shopId, shopId) || other.shopId == shopId)&&(identical(other.shopDescription, shopDescription) || other.shopDescription == shopDescription)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.shopEmail, shopEmail) || other.shopEmail == shopEmail)&&(identical(other.giftCycleDay, giftCycleDay) || other.giftCycleDay == giftCycleDay)&&(identical(other.bonusIncrementValue, bonusIncrementValue) || other.bonusIncrementValue == bonusIncrementValue)&&(identical(other.bonusIncrementDaysRequired, bonusIncrementDaysRequired) || other.bonusIncrementDaysRequired == bonusIncrementDaysRequired)&&(identical(other.totalFollowers, totalFollowers) || other.totalFollowers == totalFollowers)&&(identical(other.associatedCampaignId, associatedCampaignId) || other.associatedCampaignId == associatedCampaignId)&&(identical(other.associatedGiftLibraryId, associatedGiftLibraryId) || other.associatedGiftLibraryId == associatedGiftLibraryId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,shopName,shopPhone,shopAddress,shopOwnerId,shopStatus,shopId,shopDescription,createdAt,updatedAt,shopEmail,giftCycleDay,bonusIncrementValue,bonusIncrementDaysRequired,totalFollowers,associatedCampaignId);
+int get hashCode => Object.hash(runtimeType,shopName,shopPhone,shopAddress,shopOwnerId,shopStatus,shopId,shopDescription,createdAt,updatedAt,shopEmail,giftCycleDay,bonusIncrementValue,bonusIncrementDaysRequired,totalFollowers,associatedCampaignId,associatedGiftLibraryId);
 
 @override
 String toString() {
-  return 'ShopDto(shopName: $shopName, shopPhone: $shopPhone, shopAddress: $shopAddress, shopOwnerId: $shopOwnerId, shopStatus: $shopStatus, shopId: $shopId, shopDescription: $shopDescription, createdAt: $createdAt, updatedAt: $updatedAt, shopEmail: $shopEmail, giftCycleDay: $giftCycleDay, bonusIncrementValue: $bonusIncrementValue, bonusIncrementDaysRequired: $bonusIncrementDaysRequired, totalFollowers: $totalFollowers, associatedCampaignId: $associatedCampaignId)';
+  return 'ShopDto(shopName: $shopName, shopPhone: $shopPhone, shopAddress: $shopAddress, shopOwnerId: $shopOwnerId, shopStatus: $shopStatus, shopId: $shopId, shopDescription: $shopDescription, createdAt: $createdAt, updatedAt: $updatedAt, shopEmail: $shopEmail, giftCycleDay: $giftCycleDay, bonusIncrementValue: $bonusIncrementValue, bonusIncrementDaysRequired: $bonusIncrementDaysRequired, totalFollowers: $totalFollowers, associatedCampaignId: $associatedCampaignId, associatedGiftLibraryId: $associatedGiftLibraryId)';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $ShopDtoCopyWith<$Res>  {
   factory $ShopDtoCopyWith(ShopDto value, $Res Function(ShopDto) _then) = _$ShopDtoCopyWithImpl;
 @useResult
 $Res call({
- String shopName, String shopPhone, String shopAddress, String shopOwnerId, String shopStatus,@JsonKey(includeIfNull: false) String? shopId, String? shopDescription,@TimestampConverter() DateTime? createdAt,@TimestampConverter() DateTime? updatedAt, String? shopEmail, int giftCycleDay, int bonusIncrementValue, int bonusIncrementDaysRequired, int totalFollowers, String? associatedCampaignId
+ String shopName, String shopPhone, String shopAddress, String shopOwnerId, String shopStatus,@JsonKey(includeIfNull: false) String? shopId, String? shopDescription,@TimestampConverter() DateTime? createdAt,@TimestampConverter() DateTime? updatedAt, String? shopEmail, int giftCycleDay, int bonusIncrementValue, int bonusIncrementDaysRequired, int totalFollowers, String? associatedCampaignId, String? associatedGiftLibraryId
 });
 
 
@@ -68,7 +68,7 @@ class _$ShopDtoCopyWithImpl<$Res>
 
 /// Create a copy of ShopDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? shopName = null,Object? shopPhone = null,Object? shopAddress = null,Object? shopOwnerId = null,Object? shopStatus = null,Object? shopId = freezed,Object? shopDescription = freezed,Object? createdAt = freezed,Object? updatedAt = freezed,Object? shopEmail = freezed,Object? giftCycleDay = null,Object? bonusIncrementValue = null,Object? bonusIncrementDaysRequired = null,Object? totalFollowers = null,Object? associatedCampaignId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? shopName = null,Object? shopPhone = null,Object? shopAddress = null,Object? shopOwnerId = null,Object? shopStatus = null,Object? shopId = freezed,Object? shopDescription = freezed,Object? createdAt = freezed,Object? updatedAt = freezed,Object? shopEmail = freezed,Object? giftCycleDay = null,Object? bonusIncrementValue = null,Object? bonusIncrementDaysRequired = null,Object? totalFollowers = null,Object? associatedCampaignId = freezed,Object? associatedGiftLibraryId = freezed,}) {
   return _then(_self.copyWith(
 shopName: null == shopName ? _self.shopName : shopName // ignore: cast_nullable_to_non_nullable
 as String,shopPhone: null == shopPhone ? _self.shopPhone : shopPhone // ignore: cast_nullable_to_non_nullable
@@ -85,6 +85,7 @@ as int,bonusIncrementValue: null == bonusIncrementValue ? _self.bonusIncrementVa
 as int,bonusIncrementDaysRequired: null == bonusIncrementDaysRequired ? _self.bonusIncrementDaysRequired : bonusIncrementDaysRequired // ignore: cast_nullable_to_non_nullable
 as int,totalFollowers: null == totalFollowers ? _self.totalFollowers : totalFollowers // ignore: cast_nullable_to_non_nullable
 as int,associatedCampaignId: freezed == associatedCampaignId ? _self.associatedCampaignId : associatedCampaignId // ignore: cast_nullable_to_non_nullable
+as String?,associatedGiftLibraryId: freezed == associatedGiftLibraryId ? _self.associatedGiftLibraryId : associatedGiftLibraryId // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -170,10 +171,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String shopName,  String shopPhone,  String shopAddress,  String shopOwnerId,  String shopStatus, @JsonKey(includeIfNull: false)  String? shopId,  String? shopDescription, @TimestampConverter()  DateTime? createdAt, @TimestampConverter()  DateTime? updatedAt,  String? shopEmail,  int giftCycleDay,  int bonusIncrementValue,  int bonusIncrementDaysRequired,  int totalFollowers,  String? associatedCampaignId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String shopName,  String shopPhone,  String shopAddress,  String shopOwnerId,  String shopStatus, @JsonKey(includeIfNull: false)  String? shopId,  String? shopDescription, @TimestampConverter()  DateTime? createdAt, @TimestampConverter()  DateTime? updatedAt,  String? shopEmail,  int giftCycleDay,  int bonusIncrementValue,  int bonusIncrementDaysRequired,  int totalFollowers,  String? associatedCampaignId,  String? associatedGiftLibraryId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ShopDto() when $default != null:
-return $default(_that.shopName,_that.shopPhone,_that.shopAddress,_that.shopOwnerId,_that.shopStatus,_that.shopId,_that.shopDescription,_that.createdAt,_that.updatedAt,_that.shopEmail,_that.giftCycleDay,_that.bonusIncrementValue,_that.bonusIncrementDaysRequired,_that.totalFollowers,_that.associatedCampaignId);case _:
+return $default(_that.shopName,_that.shopPhone,_that.shopAddress,_that.shopOwnerId,_that.shopStatus,_that.shopId,_that.shopDescription,_that.createdAt,_that.updatedAt,_that.shopEmail,_that.giftCycleDay,_that.bonusIncrementValue,_that.bonusIncrementDaysRequired,_that.totalFollowers,_that.associatedCampaignId,_that.associatedGiftLibraryId);case _:
   return orElse();
 
 }
@@ -191,10 +192,10 @@ return $default(_that.shopName,_that.shopPhone,_that.shopAddress,_that.shopOwner
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String shopName,  String shopPhone,  String shopAddress,  String shopOwnerId,  String shopStatus, @JsonKey(includeIfNull: false)  String? shopId,  String? shopDescription, @TimestampConverter()  DateTime? createdAt, @TimestampConverter()  DateTime? updatedAt,  String? shopEmail,  int giftCycleDay,  int bonusIncrementValue,  int bonusIncrementDaysRequired,  int totalFollowers,  String? associatedCampaignId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String shopName,  String shopPhone,  String shopAddress,  String shopOwnerId,  String shopStatus, @JsonKey(includeIfNull: false)  String? shopId,  String? shopDescription, @TimestampConverter()  DateTime? createdAt, @TimestampConverter()  DateTime? updatedAt,  String? shopEmail,  int giftCycleDay,  int bonusIncrementValue,  int bonusIncrementDaysRequired,  int totalFollowers,  String? associatedCampaignId,  String? associatedGiftLibraryId)  $default,) {final _that = this;
 switch (_that) {
 case _ShopDto():
-return $default(_that.shopName,_that.shopPhone,_that.shopAddress,_that.shopOwnerId,_that.shopStatus,_that.shopId,_that.shopDescription,_that.createdAt,_that.updatedAt,_that.shopEmail,_that.giftCycleDay,_that.bonusIncrementValue,_that.bonusIncrementDaysRequired,_that.totalFollowers,_that.associatedCampaignId);case _:
+return $default(_that.shopName,_that.shopPhone,_that.shopAddress,_that.shopOwnerId,_that.shopStatus,_that.shopId,_that.shopDescription,_that.createdAt,_that.updatedAt,_that.shopEmail,_that.giftCycleDay,_that.bonusIncrementValue,_that.bonusIncrementDaysRequired,_that.totalFollowers,_that.associatedCampaignId,_that.associatedGiftLibraryId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -211,10 +212,10 @@ return $default(_that.shopName,_that.shopPhone,_that.shopAddress,_that.shopOwner
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String shopName,  String shopPhone,  String shopAddress,  String shopOwnerId,  String shopStatus, @JsonKey(includeIfNull: false)  String? shopId,  String? shopDescription, @TimestampConverter()  DateTime? createdAt, @TimestampConverter()  DateTime? updatedAt,  String? shopEmail,  int giftCycleDay,  int bonusIncrementValue,  int bonusIncrementDaysRequired,  int totalFollowers,  String? associatedCampaignId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String shopName,  String shopPhone,  String shopAddress,  String shopOwnerId,  String shopStatus, @JsonKey(includeIfNull: false)  String? shopId,  String? shopDescription, @TimestampConverter()  DateTime? createdAt, @TimestampConverter()  DateTime? updatedAt,  String? shopEmail,  int giftCycleDay,  int bonusIncrementValue,  int bonusIncrementDaysRequired,  int totalFollowers,  String? associatedCampaignId,  String? associatedGiftLibraryId)?  $default,) {final _that = this;
 switch (_that) {
 case _ShopDto() when $default != null:
-return $default(_that.shopName,_that.shopPhone,_that.shopAddress,_that.shopOwnerId,_that.shopStatus,_that.shopId,_that.shopDescription,_that.createdAt,_that.updatedAt,_that.shopEmail,_that.giftCycleDay,_that.bonusIncrementValue,_that.bonusIncrementDaysRequired,_that.totalFollowers,_that.associatedCampaignId);case _:
+return $default(_that.shopName,_that.shopPhone,_that.shopAddress,_that.shopOwnerId,_that.shopStatus,_that.shopId,_that.shopDescription,_that.createdAt,_that.updatedAt,_that.shopEmail,_that.giftCycleDay,_that.bonusIncrementValue,_that.bonusIncrementDaysRequired,_that.totalFollowers,_that.associatedCampaignId,_that.associatedGiftLibraryId);case _:
   return null;
 
 }
@@ -226,7 +227,7 @@ return $default(_that.shopName,_that.shopPhone,_that.shopAddress,_that.shopOwner
 @JsonSerializable()
 
 class _ShopDto extends ShopDto {
-  const _ShopDto({required this.shopName, required this.shopPhone, required this.shopAddress, required this.shopOwnerId, this.shopStatus = 'active', @JsonKey(includeIfNull: false) this.shopId, this.shopDescription, @TimestampConverter() this.createdAt, @TimestampConverter() this.updatedAt, this.shopEmail, required this.giftCycleDay, required this.bonusIncrementValue, required this.bonusIncrementDaysRequired, this.totalFollowers = 0, this.associatedCampaignId}): super._();
+  const _ShopDto({required this.shopName, required this.shopPhone, required this.shopAddress, required this.shopOwnerId, this.shopStatus = 'active', @JsonKey(includeIfNull: false) this.shopId, this.shopDescription, @TimestampConverter() this.createdAt, @TimestampConverter() this.updatedAt, this.shopEmail, required this.giftCycleDay, required this.bonusIncrementValue, required this.bonusIncrementDaysRequired, this.totalFollowers = 0, this.associatedCampaignId, this.associatedGiftLibraryId}): super._();
   factory _ShopDto.fromJson(Map<String, dynamic> json) => _$ShopDtoFromJson(json);
 
 @override final  String shopName;
@@ -247,6 +248,7 @@ class _ShopDto extends ShopDto {
 @override final  int bonusIncrementDaysRequired;
 @override@JsonKey() final  int totalFollowers;
 @override final  String? associatedCampaignId;
+@override final  String? associatedGiftLibraryId;
 
 /// Create a copy of ShopDto
 /// with the given fields replaced by the non-null parameter values.
@@ -261,16 +263,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ShopDto&&(identical(other.shopName, shopName) || other.shopName == shopName)&&(identical(other.shopPhone, shopPhone) || other.shopPhone == shopPhone)&&(identical(other.shopAddress, shopAddress) || other.shopAddress == shopAddress)&&(identical(other.shopOwnerId, shopOwnerId) || other.shopOwnerId == shopOwnerId)&&(identical(other.shopStatus, shopStatus) || other.shopStatus == shopStatus)&&(identical(other.shopId, shopId) || other.shopId == shopId)&&(identical(other.shopDescription, shopDescription) || other.shopDescription == shopDescription)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.shopEmail, shopEmail) || other.shopEmail == shopEmail)&&(identical(other.giftCycleDay, giftCycleDay) || other.giftCycleDay == giftCycleDay)&&(identical(other.bonusIncrementValue, bonusIncrementValue) || other.bonusIncrementValue == bonusIncrementValue)&&(identical(other.bonusIncrementDaysRequired, bonusIncrementDaysRequired) || other.bonusIncrementDaysRequired == bonusIncrementDaysRequired)&&(identical(other.totalFollowers, totalFollowers) || other.totalFollowers == totalFollowers)&&(identical(other.associatedCampaignId, associatedCampaignId) || other.associatedCampaignId == associatedCampaignId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ShopDto&&(identical(other.shopName, shopName) || other.shopName == shopName)&&(identical(other.shopPhone, shopPhone) || other.shopPhone == shopPhone)&&(identical(other.shopAddress, shopAddress) || other.shopAddress == shopAddress)&&(identical(other.shopOwnerId, shopOwnerId) || other.shopOwnerId == shopOwnerId)&&(identical(other.shopStatus, shopStatus) || other.shopStatus == shopStatus)&&(identical(other.shopId, shopId) || other.shopId == shopId)&&(identical(other.shopDescription, shopDescription) || other.shopDescription == shopDescription)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.shopEmail, shopEmail) || other.shopEmail == shopEmail)&&(identical(other.giftCycleDay, giftCycleDay) || other.giftCycleDay == giftCycleDay)&&(identical(other.bonusIncrementValue, bonusIncrementValue) || other.bonusIncrementValue == bonusIncrementValue)&&(identical(other.bonusIncrementDaysRequired, bonusIncrementDaysRequired) || other.bonusIncrementDaysRequired == bonusIncrementDaysRequired)&&(identical(other.totalFollowers, totalFollowers) || other.totalFollowers == totalFollowers)&&(identical(other.associatedCampaignId, associatedCampaignId) || other.associatedCampaignId == associatedCampaignId)&&(identical(other.associatedGiftLibraryId, associatedGiftLibraryId) || other.associatedGiftLibraryId == associatedGiftLibraryId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,shopName,shopPhone,shopAddress,shopOwnerId,shopStatus,shopId,shopDescription,createdAt,updatedAt,shopEmail,giftCycleDay,bonusIncrementValue,bonusIncrementDaysRequired,totalFollowers,associatedCampaignId);
+int get hashCode => Object.hash(runtimeType,shopName,shopPhone,shopAddress,shopOwnerId,shopStatus,shopId,shopDescription,createdAt,updatedAt,shopEmail,giftCycleDay,bonusIncrementValue,bonusIncrementDaysRequired,totalFollowers,associatedCampaignId,associatedGiftLibraryId);
 
 @override
 String toString() {
-  return 'ShopDto(shopName: $shopName, shopPhone: $shopPhone, shopAddress: $shopAddress, shopOwnerId: $shopOwnerId, shopStatus: $shopStatus, shopId: $shopId, shopDescription: $shopDescription, createdAt: $createdAt, updatedAt: $updatedAt, shopEmail: $shopEmail, giftCycleDay: $giftCycleDay, bonusIncrementValue: $bonusIncrementValue, bonusIncrementDaysRequired: $bonusIncrementDaysRequired, totalFollowers: $totalFollowers, associatedCampaignId: $associatedCampaignId)';
+  return 'ShopDto(shopName: $shopName, shopPhone: $shopPhone, shopAddress: $shopAddress, shopOwnerId: $shopOwnerId, shopStatus: $shopStatus, shopId: $shopId, shopDescription: $shopDescription, createdAt: $createdAt, updatedAt: $updatedAt, shopEmail: $shopEmail, giftCycleDay: $giftCycleDay, bonusIncrementValue: $bonusIncrementValue, bonusIncrementDaysRequired: $bonusIncrementDaysRequired, totalFollowers: $totalFollowers, associatedCampaignId: $associatedCampaignId, associatedGiftLibraryId: $associatedGiftLibraryId)';
 }
 
 
@@ -281,7 +283,7 @@ abstract mixin class _$ShopDtoCopyWith<$Res> implements $ShopDtoCopyWith<$Res> {
   factory _$ShopDtoCopyWith(_ShopDto value, $Res Function(_ShopDto) _then) = __$ShopDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String shopName, String shopPhone, String shopAddress, String shopOwnerId, String shopStatus,@JsonKey(includeIfNull: false) String? shopId, String? shopDescription,@TimestampConverter() DateTime? createdAt,@TimestampConverter() DateTime? updatedAt, String? shopEmail, int giftCycleDay, int bonusIncrementValue, int bonusIncrementDaysRequired, int totalFollowers, String? associatedCampaignId
+ String shopName, String shopPhone, String shopAddress, String shopOwnerId, String shopStatus,@JsonKey(includeIfNull: false) String? shopId, String? shopDescription,@TimestampConverter() DateTime? createdAt,@TimestampConverter() DateTime? updatedAt, String? shopEmail, int giftCycleDay, int bonusIncrementValue, int bonusIncrementDaysRequired, int totalFollowers, String? associatedCampaignId, String? associatedGiftLibraryId
 });
 
 
@@ -298,7 +300,7 @@ class __$ShopDtoCopyWithImpl<$Res>
 
 /// Create a copy of ShopDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? shopName = null,Object? shopPhone = null,Object? shopAddress = null,Object? shopOwnerId = null,Object? shopStatus = null,Object? shopId = freezed,Object? shopDescription = freezed,Object? createdAt = freezed,Object? updatedAt = freezed,Object? shopEmail = freezed,Object? giftCycleDay = null,Object? bonusIncrementValue = null,Object? bonusIncrementDaysRequired = null,Object? totalFollowers = null,Object? associatedCampaignId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? shopName = null,Object? shopPhone = null,Object? shopAddress = null,Object? shopOwnerId = null,Object? shopStatus = null,Object? shopId = freezed,Object? shopDescription = freezed,Object? createdAt = freezed,Object? updatedAt = freezed,Object? shopEmail = freezed,Object? giftCycleDay = null,Object? bonusIncrementValue = null,Object? bonusIncrementDaysRequired = null,Object? totalFollowers = null,Object? associatedCampaignId = freezed,Object? associatedGiftLibraryId = freezed,}) {
   return _then(_ShopDto(
 shopName: null == shopName ? _self.shopName : shopName // ignore: cast_nullable_to_non_nullable
 as String,shopPhone: null == shopPhone ? _self.shopPhone : shopPhone // ignore: cast_nullable_to_non_nullable
@@ -315,6 +317,7 @@ as int,bonusIncrementValue: null == bonusIncrementValue ? _self.bonusIncrementVa
 as int,bonusIncrementDaysRequired: null == bonusIncrementDaysRequired ? _self.bonusIncrementDaysRequired : bonusIncrementDaysRequired // ignore: cast_nullable_to_non_nullable
 as int,totalFollowers: null == totalFollowers ? _self.totalFollowers : totalFollowers // ignore: cast_nullable_to_non_nullable
 as int,associatedCampaignId: freezed == associatedCampaignId ? _self.associatedCampaignId : associatedCampaignId // ignore: cast_nullable_to_non_nullable
+as String?,associatedGiftLibraryId: freezed == associatedGiftLibraryId ? _self.associatedGiftLibraryId : associatedGiftLibraryId // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

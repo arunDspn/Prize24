@@ -77,6 +77,7 @@ class _ShopActivityLogDetailPageState
     ShopCheckInSuccessPayload() => Icons.check_circle_outline_rounded,
     ShopCheckInFailedPayload() => Icons.cancel_outlined,
     ShopFollowerAddedPayload() => Icons.person_add_alt_1_rounded,
+    ShopRewardEventPayload() => Icons.redeem_rounded,
     UnknownShopPayload() => Icons.swap_horiz_rounded,
   };
 
@@ -85,6 +86,7 @@ class _ShopActivityLogDetailPageState
     ShopCheckInSuccessPayload p => p.customerId,
     ShopCheckInFailedPayload p => p.customerId,
     ShopFollowerAddedPayload p => p.customerId,
+    ShopRewardEventPayload p => p.customerId ?? '',
     UnknownShopPayload() => '',
   };
 
@@ -593,6 +595,120 @@ class _ShopActivityLogDetailPageState
             label: 'Initial Streak',
             value: p.initialStreak.toString(),
           ),
+        ],
+      ),
+      ShopRewardEventPayload p => _DetailCard(
+        children: [
+          if (customerNameState != null) ...[
+            _DetailRow(
+              icon: Icons.person_outline_rounded,
+              label: 'Customer',
+              valueWidget: _nameWidget(
+                customerNameState,
+                fallbackId: p.customerId,
+              ),
+            ),
+          ],
+          if (p.shopId != null) ...[
+            if (customerNameState != null) const _CardDivider(),
+            _DetailRow(
+              icon: Icons.store_outlined,
+              label: 'Shop ID',
+              value: p.shopId!,
+              monospace: true,
+            ),
+          ],
+          if (p.rewardOpportunityId != null) ...[
+            const _CardDivider(),
+            _DetailRow(
+              icon: Icons.fingerprint_rounded,
+              label: 'Reward Opportunity',
+              value: p.rewardOpportunityId!,
+              monospace: true,
+            ),
+          ],
+          if (p.availableSources.isNotEmpty) ...[
+            const _CardDivider(),
+            _DetailRow(
+              icon: Icons.account_tree_outlined,
+              label: 'Available Sources',
+              value: p.availableSources.join(', ').replaceAll('_', ' '),
+            ),
+          ],
+          if (p.selectedSource != null) ...[
+            const _CardDivider(),
+            _DetailRow(
+              icon: Icons.check_circle_outline_rounded,
+              label: 'Selected Source',
+              value: p.selectedSource!.replaceAll('_', ' '),
+            ),
+          ],
+          if (p.crossedMilestone != null) ...[
+            const _CardDivider(),
+            _DetailRow(
+              icon: Icons.flag_outlined,
+              label: 'Crossed Milestone',
+              value: p.crossedMilestone.toString(),
+            ),
+          ],
+          if (p.cumulativeBillSum != null) ...[
+            const _CardDivider(),
+            _DetailRow(
+              icon: Icons.account_balance_wallet_outlined,
+              label: 'Lifetime Spend',
+              value: p.cumulativeBillSum!.toStringAsFixed(2),
+            ),
+          ],
+          if (p.milestoneCycleBillSum != null) ...[
+            const _CardDivider(),
+            _DetailRow(
+              icon: Icons.autorenew_rounded,
+              label: 'Milestone-cycle Spend',
+              value: p.milestoneCycleBillSum!.toStringAsFixed(2),
+            ),
+          ],
+          if (p.giftName != null || p.giftId != null) ...[
+            const _CardDivider(),
+            _DetailRow(
+              icon: Icons.card_giftcard_rounded,
+              label: 'Gift',
+              value: p.giftName ?? p.giftId!,
+            ),
+          ],
+          if (p.assignmentMode != null) ...[
+            const _CardDivider(),
+            _DetailRow(
+              icon: Icons.assignment_outlined,
+              label: 'Assignment Mode',
+              value: p.assignmentMode!,
+            ),
+          ],
+          if (p.outcome != null) ...[
+            const _CardDivider(),
+            _DetailRow(
+              icon: Icons.info_outline_rounded,
+              label: 'Outcome',
+              value: p.outcome!,
+            ),
+          ],
+          if (p.campaignId != null) ...[
+            const _CardDivider(),
+            _DetailRow(
+              icon: Icons.campaign_outlined,
+              label: 'Campaign ID',
+              value: p.campaignId!,
+              monospace: true,
+            ),
+          ],
+          if (p.giftLibraryId != null) ...[
+            const _CardDivider(),
+            _DetailRow(
+              icon: Icons.collections_bookmark_outlined,
+              label: 'Gift Library ID',
+              value: p.giftLibraryId!,
+              monospace: true,
+            ),
+          ],
         ],
       ),
       UnknownShopPayload() => _DetailCard(

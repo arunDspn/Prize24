@@ -25,6 +25,7 @@ abstract class ShopModel with _$ShopModel {
     required int bonusIncrementDaysRequired,
     required int totalFollowers,
     String? associatedCampaignId,
+    String? associatedGiftLibraryId,
     DateTime? createdAt,
     DateTime? updatedAt,
     // required double shopRating,
@@ -51,6 +52,7 @@ abstract class ShopModel with _$ShopModel {
     required int bonusIncrement,
     required int daysRequired,
     String? associatedCampaignId,
+    String? associatedGiftLibraryId,
   }) {
     return ShopModel(
       shopName: shopName,
@@ -58,13 +60,15 @@ abstract class ShopModel with _$ShopModel {
       shopAddress: shopAddress,
       shopDescription: shopDescription,
       // shopCategory: shopCategory,
-      shopOwnerId: shopVendorId, id: '',
+      shopOwnerId: shopVendorId,
+      id: '',
       shopEmail: shopEmail,
       giftCycleDay: giftCycleDay,
       bonusIncrementValue: bonusIncrement,
       bonusIncrementDaysRequired: daysRequired,
       totalFollowers: 0,
       associatedCampaignId: associatedCampaignId,
+      associatedGiftLibraryId: associatedGiftLibraryId,
     );
   }
 }

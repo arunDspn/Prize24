@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:prize24_app/common_widgets/show_toast.dart';
 import 'package:prize24_app/configs/theme_config.dart';
+import 'package:prize24_app/features/gift_library/presentation/gift_reward_flow.dart';
 import 'package:prize24_app/features/campaign/presentation/vendor_campaign_detail/components/vendor_scan_user/view_model/vendor_scan_user_controller.dart';
 import 'package:prize24_app/features/shop/presentation/staff_scan_loyality/view_model/user_checkin_by_staff_controller.dart';
 import 'package:prize24_app/features/shop/presentation/widgets/check_in_bill_dialog.dart';
@@ -321,7 +322,19 @@ class _StaffScanLoyalityPageState extends ConsumerState<StaffScanLoyalityPage>
               if (data.success) {
                 // Gift Day check
                 if (data.data != null && data.data!.isGiftDay) {
-                  if (widget.campaignId == null) {
+                  if (data.data!.rewardOpportunity != null) {
+                    unawaited(
+                      showMilestoneRewardFlow(
+                        context: context,
+                        ref: ref,
+                        shopId: widget.shopId,
+                        data: RewardFlowData.fromCheckIn(
+                          userId: scannedCode!,
+                          data: data.data!,
+                        ),
+                      ),
+                    );
+                  } else if (widget.campaignId == null) {
                     // Show gift dialog since no campaign, just sucess information
                     _showGiftDialog(
                       ' Gift Day! Check-in successful with ${data.data!.cumulativeStreak} points! No campaign associated, so no gift details available.',

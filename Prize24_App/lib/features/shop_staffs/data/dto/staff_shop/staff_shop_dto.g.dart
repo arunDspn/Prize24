@@ -11,6 +11,7 @@ _StaffShopDto _$StaffShopDtoFromJson(Map<String, dynamic> json) =>
       shopName: json['shopName'] as String,
       id: json['id'] as String?,
       associatedCampaignId: json['associatedCampaignId'] as String?,
+      associatedGiftLibraryId: json['associatedGiftLibraryId'] as String?,
     );
 
 Map<String, dynamic> _$StaffShopDtoToJson(_StaffShopDto instance) =>
@@ -18,4 +19,5 @@ Map<String, dynamic> _$StaffShopDtoToJson(_StaffShopDto instance) =>
       'shopName': instance.shopName,
       'id': instance.id,
       'associatedCampaignId': instance.associatedCampaignId,
+      'associatedGiftLibraryId': instance.associatedGiftLibraryId,
     };

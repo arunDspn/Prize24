@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 mixin _$StaffShopDto {
 
  String get shopName;// Shop ID
- String? get id; String? get associatedCampaignId;
+ String? get id; String? get associatedCampaignId; String? get associatedGiftLibraryId;
 /// Create a copy of StaffShopDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,16 +29,16 @@ $StaffShopDtoCopyWith<StaffShopDto> get copyWith => _$StaffShopDtoCopyWithImpl<S
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is StaffShopDto&&(identical(other.shopName, shopName) || other.shopName == shopName)&&(identical(other.id, id) || other.id == id)&&(identical(other.associatedCampaignId, associatedCampaignId) || other.associatedCampaignId == associatedCampaignId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StaffShopDto&&(identical(other.shopName, shopName) || other.shopName == shopName)&&(identical(other.id, id) || other.id == id)&&(identical(other.associatedCampaignId, associatedCampaignId) || other.associatedCampaignId == associatedCampaignId)&&(identical(other.associatedGiftLibraryId, associatedGiftLibraryId) || other.associatedGiftLibraryId == associatedGiftLibraryId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,shopName,id,associatedCampaignId);
+int get hashCode => Object.hash(runtimeType,shopName,id,associatedCampaignId,associatedGiftLibraryId);
 
 @override
 String toString() {
-  return 'StaffShopDto(shopName: $shopName, id: $id, associatedCampaignId: $associatedCampaignId)';
+  return 'StaffShopDto(shopName: $shopName, id: $id, associatedCampaignId: $associatedCampaignId, associatedGiftLibraryId: $associatedGiftLibraryId)';
 }
 
 
@@ -49,7 +49,7 @@ abstract mixin class $StaffShopDtoCopyWith<$Res>  {
   factory $StaffShopDtoCopyWith(StaffShopDto value, $Res Function(StaffShopDto) _then) = _$StaffShopDtoCopyWithImpl;
 @useResult
 $Res call({
- String shopName, String? id, String? associatedCampaignId
+ String shopName, String? id, String? associatedCampaignId, String? associatedGiftLibraryId
 });
 
 
@@ -66,11 +66,12 @@ class _$StaffShopDtoCopyWithImpl<$Res>
 
 /// Create a copy of StaffShopDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? shopName = null,Object? id = freezed,Object? associatedCampaignId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? shopName = null,Object? id = freezed,Object? associatedCampaignId = freezed,Object? associatedGiftLibraryId = freezed,}) {
   return _then(_self.copyWith(
 shopName: null == shopName ? _self.shopName : shopName // ignore: cast_nullable_to_non_nullable
 as String,id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String?,associatedCampaignId: freezed == associatedCampaignId ? _self.associatedCampaignId : associatedCampaignId // ignore: cast_nullable_to_non_nullable
+as String?,associatedGiftLibraryId: freezed == associatedGiftLibraryId ? _self.associatedGiftLibraryId : associatedGiftLibraryId // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -156,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String shopName,  String? id,  String? associatedCampaignId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String shopName,  String? id,  String? associatedCampaignId,  String? associatedGiftLibraryId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _StaffShopDto() when $default != null:
-return $default(_that.shopName,_that.id,_that.associatedCampaignId);case _:
+return $default(_that.shopName,_that.id,_that.associatedCampaignId,_that.associatedGiftLibraryId);case _:
   return orElse();
 
 }
@@ -177,10 +178,10 @@ return $default(_that.shopName,_that.id,_that.associatedCampaignId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String shopName,  String? id,  String? associatedCampaignId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String shopName,  String? id,  String? associatedCampaignId,  String? associatedGiftLibraryId)  $default,) {final _that = this;
 switch (_that) {
 case _StaffShopDto():
-return $default(_that.shopName,_that.id,_that.associatedCampaignId);case _:
+return $default(_that.shopName,_that.id,_that.associatedCampaignId,_that.associatedGiftLibraryId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +198,10 @@ return $default(_that.shopName,_that.id,_that.associatedCampaignId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String shopName,  String? id,  String? associatedCampaignId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String shopName,  String? id,  String? associatedCampaignId,  String? associatedGiftLibraryId)?  $default,) {final _that = this;
 switch (_that) {
 case _StaffShopDto() when $default != null:
-return $default(_that.shopName,_that.id,_that.associatedCampaignId);case _:
+return $default(_that.shopName,_that.id,_that.associatedCampaignId,_that.associatedGiftLibraryId);case _:
   return null;
 
 }
@@ -212,13 +213,14 @@ return $default(_that.shopName,_that.id,_that.associatedCampaignId);case _:
 @JsonSerializable()
 
 class _StaffShopDto extends StaffShopDto {
-  const _StaffShopDto({required this.shopName, this.id, this.associatedCampaignId}): super._();
+  const _StaffShopDto({required this.shopName, this.id, this.associatedCampaignId, this.associatedGiftLibraryId}): super._();
   factory _StaffShopDto.fromJson(Map<String, dynamic> json) => _$StaffShopDtoFromJson(json);
 
 @override final  String shopName;
 // Shop ID
 @override final  String? id;
 @override final  String? associatedCampaignId;
+@override final  String? associatedGiftLibraryId;
 
 /// Create a copy of StaffShopDto
 /// with the given fields replaced by the non-null parameter values.
@@ -233,16 +235,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StaffShopDto&&(identical(other.shopName, shopName) || other.shopName == shopName)&&(identical(other.id, id) || other.id == id)&&(identical(other.associatedCampaignId, associatedCampaignId) || other.associatedCampaignId == associatedCampaignId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StaffShopDto&&(identical(other.shopName, shopName) || other.shopName == shopName)&&(identical(other.id, id) || other.id == id)&&(identical(other.associatedCampaignId, associatedCampaignId) || other.associatedCampaignId == associatedCampaignId)&&(identical(other.associatedGiftLibraryId, associatedGiftLibraryId) || other.associatedGiftLibraryId == associatedGiftLibraryId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,shopName,id,associatedCampaignId);
+int get hashCode => Object.hash(runtimeType,shopName,id,associatedCampaignId,associatedGiftLibraryId);
 
 @override
 String toString() {
-  return 'StaffShopDto(shopName: $shopName, id: $id, associatedCampaignId: $associatedCampaignId)';
+  return 'StaffShopDto(shopName: $shopName, id: $id, associatedCampaignId: $associatedCampaignId, associatedGiftLibraryId: $associatedGiftLibraryId)';
 }
 
 
@@ -253,7 +255,7 @@ abstract mixin class _$StaffShopDtoCopyWith<$Res> implements $StaffShopDtoCopyWi
   factory _$StaffShopDtoCopyWith(_StaffShopDto value, $Res Function(_StaffShopDto) _then) = __$StaffShopDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String shopName, String? id, String? associatedCampaignId
+ String shopName, String? id, String? associatedCampaignId, String? associatedGiftLibraryId
 });
 
 
@@ -270,11 +272,12 @@ class __$StaffShopDtoCopyWithImpl<$Res>
 
 /// Create a copy of StaffShopDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? shopName = null,Object? id = freezed,Object? associatedCampaignId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? shopName = null,Object? id = freezed,Object? associatedCampaignId = freezed,Object? associatedGiftLibraryId = freezed,}) {
   return _then(_StaffShopDto(
 shopName: null == shopName ? _self.shopName : shopName // ignore: cast_nullable_to_non_nullable
 as String,id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String?,associatedCampaignId: freezed == associatedCampaignId ? _self.associatedCampaignId : associatedCampaignId // ignore: cast_nullable_to_non_nullable
+as String?,associatedGiftLibraryId: freezed == associatedGiftLibraryId ? _self.associatedGiftLibraryId : associatedGiftLibraryId // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

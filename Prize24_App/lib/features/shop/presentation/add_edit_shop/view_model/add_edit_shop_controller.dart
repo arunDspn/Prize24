@@ -26,6 +26,7 @@ class AddEditShopController extends _$AddEditShopController {
     required int bonusIncrement,
     required int daysRequired,
     required String? associatedCampaignId,
+    required String? associatedGiftLibraryId,
   }) async {
     final userId = (ref.read(authControllerProvider).requireValue!).userId;
 
@@ -40,6 +41,7 @@ class AddEditShopController extends _$AddEditShopController {
       bonusIncrement: bonusIncrement,
       daysRequired: daysRequired,
       associatedCampaignId: associatedCampaignId,
+      associatedGiftLibraryId: associatedGiftLibraryId,
     );
 
     state = const AsyncValue.loading();

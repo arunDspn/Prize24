@@ -27,10 +27,7 @@ class _DesignColors {
 }
 
 class StaffShopDetailPage extends ConsumerStatefulWidget {
-  const StaffShopDetailPage({
-    required this.staffShopModel,
-    super.key,
-  });
+  const StaffShopDetailPage({required this.staffShopModel, super.key});
 
   final StaffShopModel staffShopModel;
 
@@ -88,9 +85,7 @@ class _StaffShopDetailPageState extends ConsumerState<StaffShopDetailPage>
               flexibleSpace: ClipRect(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    color: Colors.transparent,
-                  ),
+                  child: Container(color: Colors.transparent),
                 ),
               ),
             ),
@@ -104,6 +99,7 @@ class _StaffShopDetailPageState extends ConsumerState<StaffShopDetailPage>
             // Clubs Tab
             ShopClubsView(
               campaignId: widget.staffShopModel.associatedCampaignId,
+              giftLibraryId: widget.staffShopModel.associatedGiftLibraryId,
               shopId: widget.staffShopModel.id,
             ),
           ],
@@ -119,9 +115,7 @@ class _StaffShopDetailPageState extends ConsumerState<StaffShopDetailPage>
         margin: const EdgeInsets.only(left: 8),
         width: 40,
         height: 40,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
         child: const Center(
           child: Icon(
             Icons.arrow_back_ios_new_rounded,
@@ -137,10 +131,7 @@ class _StaffShopDetailPageState extends ConsumerState<StaffShopDetailPage>
     return Container(
       decoration: const BoxDecoration(
         border: Border(
-          bottom: BorderSide(
-            color: _DesignColors.slate200,
-            width: 1,
-          ),
+          bottom: BorderSide(color: _DesignColors.slate200, width: 1),
         ),
       ),
       child: Stack(
@@ -261,8 +252,11 @@ Widget buildLoadingState() {
 }
 
 // Error State Widget
-Widget buildErrorState(String type, BuildContext context,
-    {VoidCallback? onRetry}) {
+Widget buildErrorState(
+  String type,
+  BuildContext context, {
+  VoidCallback? onRetry,
+}) {
   return Center(
     child: Padding(
       padding: const EdgeInsets.only(top: 40),
@@ -352,11 +346,7 @@ Widget buildEmptyState({
               color: _DesignColors.slate100,
               borderRadius: BorderRadius.circular(40),
             ),
-            child: Icon(
-              icon,
-              size: 40,
-              color: _DesignColors.slate300,
-            ),
+            child: Icon(icon, size: 40, color: _DesignColors.slate300),
           ),
           const SizedBox(height: 24),
           Text(

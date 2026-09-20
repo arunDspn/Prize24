@@ -56,6 +56,15 @@ sealed class ShopActivityLogDto extends ActivityLogBaseDto {
       'check_in_success' => CheckInSuccessLogDto._fromMap(doc.id, d),
       'check_in_failed' => CheckInFailedLogDto._fromMap(doc.id, d),
       'follower_added' => FollowerAddedLogDto._fromMap(doc.id, d),
+      'reward_opportunity_created' ||
+      'reward_source_selected' ||
+      'campaign_reward_completed' ||
+      'library_gift_assignment_success' ||
+      'library_gift_assignment_failed' ||
+      'manual_library_gift_assignment_success' ||
+      'manual_library_gift_assignment_failed' ||
+      'library_gift_redemption_success' ||
+      'library_gift_redemption_failed' => RewardEventLogDto._fromMap(doc.id, d),
       _ => UnknownShopLogDto._fromMap(doc.id, d),
     };
   }
@@ -367,6 +376,112 @@ final class FollowerAddedLogDto extends ShopActivityLogDto {
         shopId: d['shopId'] as String? ?? '',
         addedMethod: d['addedMethod'] as String? ?? '',
         initialStreak: (d['initialStreak'] as num?)?.toInt() ?? 1,
+        phoneNumber: d['phoneNumber'] as String?,
+      );
+}
+
+// ---------------------------------------------------------------------------
+// Reward opportunity, assignment, and redemption events
+// ---------------------------------------------------------------------------
+
+const _kRewardEventKeys = <String>{
+  ...kActivityLogBaseKnownKeys,
+  'customerId',
+  'shopId',
+  'rewardOpportunityId',
+  'selectedSource',
+  'availableSources',
+  'crossedMilestone',
+  'cumulativeBillSum',
+  'milestoneCycleBillSum',
+  'campaignId',
+  'giftLibraryId',
+  'giftId',
+  'giftName',
+  'userGiftId',
+  'requestId',
+  'assignmentMode',
+  'outcome',
+};
+
+final class RewardEventLogDto extends ShopActivityLogDto {
+  const RewardEventLogDto._({
+    required super.logId,
+    required super.action,
+    required super.timestamp,
+    required super.success,
+    required super.actorId,
+    required super.actorRole,
+    required super.functionName,
+    super.errorCode,
+    super.errorMessage,
+    required super.extras,
+    this.customerId,
+    this.shopId,
+    this.rewardOpportunityId,
+    this.selectedSource,
+    this.availableSources = const [],
+    this.crossedMilestone,
+    this.cumulativeBillSum,
+    this.milestoneCycleBillSum,
+    this.campaignId,
+    this.giftLibraryId,
+    this.giftId,
+    this.giftName,
+    this.userGiftId,
+    this.requestId,
+    this.assignmentMode,
+    this.outcome,
+    super.phoneNumber,
+  });
+
+  final String? customerId;
+  final String? shopId;
+  final String? rewardOpportunityId;
+  final String? selectedSource;
+  final List<String> availableSources;
+  final int? crossedMilestone;
+  final double? cumulativeBillSum;
+  final double? milestoneCycleBillSum;
+  final String? campaignId;
+  final String? giftLibraryId;
+  final String? giftId;
+  final String? giftName;
+  final String? userGiftId;
+  final String? requestId;
+  final String? assignmentMode;
+  final String? outcome;
+
+  factory RewardEventLogDto._fromMap(String docId, Map<String, dynamic> d) =>
+      RewardEventLogDto._(
+        logId: d['logId'] as String? ?? docId,
+        action: d['action'] as String? ?? '',
+        timestamp: d['timestamp'] as Timestamp? ?? Timestamp.now(),
+        success: d['success'] as bool? ?? false,
+        actorId: d['actorId'] as String? ?? '',
+        actorRole: ActivityLogBaseDto.parseRole(d),
+        functionName: d['functionName'] as String? ?? '',
+        errorCode: d['errorCode'] as String?,
+        errorMessage: d['errorMessage'] as String?,
+        extras: ActivityLogBaseDto.parseExtras(d, _kRewardEventKeys),
+        customerId: d['customerId'] as String?,
+        shopId: d['shopId'] as String?,
+        rewardOpportunityId: d['rewardOpportunityId'] as String?,
+        selectedSource: d['selectedSource'] as String?,
+        availableSources: (d['availableSources'] as List<dynamic>? ?? const [])
+            .whereType<String>()
+            .toList(growable: false),
+        crossedMilestone: (d['crossedMilestone'] as num?)?.toInt(),
+        cumulativeBillSum: (d['cumulativeBillSum'] as num?)?.toDouble(),
+        milestoneCycleBillSum: (d['milestoneCycleBillSum'] as num?)?.toDouble(),
+        campaignId: d['campaignId'] as String?,
+        giftLibraryId: d['giftLibraryId'] as String?,
+        giftId: d['giftId'] as String?,
+        giftName: d['giftName'] as String?,
+        userGiftId: d['userGiftId'] as String?,
+        requestId: d['requestId'] as String?,
+        assignmentMode: d['assignmentMode'] as String?,
+        outcome: d['outcome'] as String?,
         phoneNumber: d['phoneNumber'] as String?,
       );
 }

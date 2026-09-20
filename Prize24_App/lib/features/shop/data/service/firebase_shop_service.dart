@@ -458,6 +458,7 @@ class FirebaseShopService implements IShopService {
       'userId': userId,
       'billNumber': billNumber,
       'billAmount': billAmount,
+      'rewardFlowVersion': 1,
     });
 
     final mapData = CFSpecificConvertors.convertCFMapToStringDynamic(
@@ -480,6 +481,7 @@ class FirebaseShopService implements IShopService {
       'userId': userId,
       'billNumber': billNumber,
       'billAmount': billAmount,
+      'rewardFlowVersion': 1,
     });
 
     final mapData = CFSpecificConvertors.convertCFMapToStringDynamic(

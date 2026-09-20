@@ -224,7 +224,7 @@ return $default(_that.success,_that.message,_that.error,_that.data);case _:
 
 class _CheckInResponseModel implements CheckInResponseModel {
   const _CheckInResponseModel({required this.success, required this.message, this.error, this.data});
-  
+
 
 @override final  bool success;
 @override final  String message;
@@ -308,7 +308,7 @@ $CheckInRepsponseDataModelCopyWith<$Res>? get data {
 /// @nodoc
 mixin _$CheckInRepsponseDataModel {
 
- int get cumulativeStreak; int get consecutiveDays; bool get bonusApplied; bool get isGiftDay; bool get isNewUser;
+ int get cumulativeStreak; int get consecutiveDays; bool get bonusApplied; bool get isGiftDay; bool get isNewUser; double get cumulativeBillSum; double get milestoneCycleBillSum; int? get crossedMilestone; RewardOpportunityModel? get rewardOpportunity;
 /// Create a copy of CheckInRepsponseDataModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -319,16 +319,16 @@ $CheckInRepsponseDataModelCopyWith<CheckInRepsponseDataModel> get copyWith => _$
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CheckInRepsponseDataModel&&(identical(other.cumulativeStreak, cumulativeStreak) || other.cumulativeStreak == cumulativeStreak)&&(identical(other.consecutiveDays, consecutiveDays) || other.consecutiveDays == consecutiveDays)&&(identical(other.bonusApplied, bonusApplied) || other.bonusApplied == bonusApplied)&&(identical(other.isGiftDay, isGiftDay) || other.isGiftDay == isGiftDay)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CheckInRepsponseDataModel&&(identical(other.cumulativeStreak, cumulativeStreak) || other.cumulativeStreak == cumulativeStreak)&&(identical(other.consecutiveDays, consecutiveDays) || other.consecutiveDays == consecutiveDays)&&(identical(other.bonusApplied, bonusApplied) || other.bonusApplied == bonusApplied)&&(identical(other.isGiftDay, isGiftDay) || other.isGiftDay == isGiftDay)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser)&&(identical(other.cumulativeBillSum, cumulativeBillSum) || other.cumulativeBillSum == cumulativeBillSum)&&(identical(other.milestoneCycleBillSum, milestoneCycleBillSum) || other.milestoneCycleBillSum == milestoneCycleBillSum)&&(identical(other.crossedMilestone, crossedMilestone) || other.crossedMilestone == crossedMilestone)&&(identical(other.rewardOpportunity, rewardOpportunity) || other.rewardOpportunity == rewardOpportunity));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,cumulativeStreak,consecutiveDays,bonusApplied,isGiftDay,isNewUser);
+int get hashCode => Object.hash(runtimeType,cumulativeStreak,consecutiveDays,bonusApplied,isGiftDay,isNewUser,cumulativeBillSum,milestoneCycleBillSum,crossedMilestone,rewardOpportunity);
 
 @override
 String toString() {
-  return 'CheckInRepsponseDataModel(cumulativeStreak: $cumulativeStreak, consecutiveDays: $consecutiveDays, bonusApplied: $bonusApplied, isGiftDay: $isGiftDay, isNewUser: $isNewUser)';
+  return 'CheckInRepsponseDataModel(cumulativeStreak: $cumulativeStreak, consecutiveDays: $consecutiveDays, bonusApplied: $bonusApplied, isGiftDay: $isGiftDay, isNewUser: $isNewUser, cumulativeBillSum: $cumulativeBillSum, milestoneCycleBillSum: $milestoneCycleBillSum, crossedMilestone: $crossedMilestone, rewardOpportunity: $rewardOpportunity)';
 }
 
 
@@ -339,11 +339,11 @@ abstract mixin class $CheckInRepsponseDataModelCopyWith<$Res>  {
   factory $CheckInRepsponseDataModelCopyWith(CheckInRepsponseDataModel value, $Res Function(CheckInRepsponseDataModel) _then) = _$CheckInRepsponseDataModelCopyWithImpl;
 @useResult
 $Res call({
- int cumulativeStreak, int consecutiveDays, bool bonusApplied, bool isGiftDay, bool isNewUser
+ int cumulativeStreak, int consecutiveDays, bool bonusApplied, bool isGiftDay, bool isNewUser, double cumulativeBillSum, double milestoneCycleBillSum, int? crossedMilestone, RewardOpportunityModel? rewardOpportunity
 });
 
 
-
+$RewardOpportunityModelCopyWith<$Res>? get rewardOpportunity;
 
 }
 /// @nodoc
@@ -356,17 +356,33 @@ class _$CheckInRepsponseDataModelCopyWithImpl<$Res>
 
 /// Create a copy of CheckInRepsponseDataModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? cumulativeStreak = null,Object? consecutiveDays = null,Object? bonusApplied = null,Object? isGiftDay = null,Object? isNewUser = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? cumulativeStreak = null,Object? consecutiveDays = null,Object? bonusApplied = null,Object? isGiftDay = null,Object? isNewUser = null,Object? cumulativeBillSum = null,Object? milestoneCycleBillSum = null,Object? crossedMilestone = freezed,Object? rewardOpportunity = freezed,}) {
   return _then(_self.copyWith(
 cumulativeStreak: null == cumulativeStreak ? _self.cumulativeStreak : cumulativeStreak // ignore: cast_nullable_to_non_nullable
 as int,consecutiveDays: null == consecutiveDays ? _self.consecutiveDays : consecutiveDays // ignore: cast_nullable_to_non_nullable
 as int,bonusApplied: null == bonusApplied ? _self.bonusApplied : bonusApplied // ignore: cast_nullable_to_non_nullable
 as bool,isGiftDay: null == isGiftDay ? _self.isGiftDay : isGiftDay // ignore: cast_nullable_to_non_nullable
 as bool,isNewUser: null == isNewUser ? _self.isNewUser : isNewUser // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,cumulativeBillSum: null == cumulativeBillSum ? _self.cumulativeBillSum : cumulativeBillSum // ignore: cast_nullable_to_non_nullable
+as double,milestoneCycleBillSum: null == milestoneCycleBillSum ? _self.milestoneCycleBillSum : milestoneCycleBillSum // ignore: cast_nullable_to_non_nullable
+as double,crossedMilestone: freezed == crossedMilestone ? _self.crossedMilestone : crossedMilestone // ignore: cast_nullable_to_non_nullable
+as int?,rewardOpportunity: freezed == rewardOpportunity ? _self.rewardOpportunity : rewardOpportunity // ignore: cast_nullable_to_non_nullable
+as RewardOpportunityModel?,
   ));
 }
+/// Create a copy of CheckInRepsponseDataModel
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$RewardOpportunityModelCopyWith<$Res>? get rewardOpportunity {
+    if (_self.rewardOpportunity == null) {
+    return null;
+  }
 
+  return $RewardOpportunityModelCopyWith<$Res>(_self.rewardOpportunity!, (value) {
+    return _then(_self.copyWith(rewardOpportunity: value));
+  });
+}
 }
 
 
@@ -448,10 +464,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int cumulativeStreak,  int consecutiveDays,  bool bonusApplied,  bool isGiftDay,  bool isNewUser)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int cumulativeStreak,  int consecutiveDays,  bool bonusApplied,  bool isGiftDay,  bool isNewUser,  double cumulativeBillSum,  double milestoneCycleBillSum,  int? crossedMilestone,  RewardOpportunityModel? rewardOpportunity)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CheckInRepsponseDataModel() when $default != null:
-return $default(_that.cumulativeStreak,_that.consecutiveDays,_that.bonusApplied,_that.isGiftDay,_that.isNewUser);case _:
+return $default(_that.cumulativeStreak,_that.consecutiveDays,_that.bonusApplied,_that.isGiftDay,_that.isNewUser,_that.cumulativeBillSum,_that.milestoneCycleBillSum,_that.crossedMilestone,_that.rewardOpportunity);case _:
   return orElse();
 
 }
@@ -469,10 +485,10 @@ return $default(_that.cumulativeStreak,_that.consecutiveDays,_that.bonusApplied,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int cumulativeStreak,  int consecutiveDays,  bool bonusApplied,  bool isGiftDay,  bool isNewUser)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int cumulativeStreak,  int consecutiveDays,  bool bonusApplied,  bool isGiftDay,  bool isNewUser,  double cumulativeBillSum,  double milestoneCycleBillSum,  int? crossedMilestone,  RewardOpportunityModel? rewardOpportunity)  $default,) {final _that = this;
 switch (_that) {
 case _CheckInRepsponseDataModel():
-return $default(_that.cumulativeStreak,_that.consecutiveDays,_that.bonusApplied,_that.isGiftDay,_that.isNewUser);case _:
+return $default(_that.cumulativeStreak,_that.consecutiveDays,_that.bonusApplied,_that.isGiftDay,_that.isNewUser,_that.cumulativeBillSum,_that.milestoneCycleBillSum,_that.crossedMilestone,_that.rewardOpportunity);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -489,10 +505,10 @@ return $default(_that.cumulativeStreak,_that.consecutiveDays,_that.bonusApplied,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int cumulativeStreak,  int consecutiveDays,  bool bonusApplied,  bool isGiftDay,  bool isNewUser)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int cumulativeStreak,  int consecutiveDays,  bool bonusApplied,  bool isGiftDay,  bool isNewUser,  double cumulativeBillSum,  double milestoneCycleBillSum,  int? crossedMilestone,  RewardOpportunityModel? rewardOpportunity)?  $default,) {final _that = this;
 switch (_that) {
 case _CheckInRepsponseDataModel() when $default != null:
-return $default(_that.cumulativeStreak,_that.consecutiveDays,_that.bonusApplied,_that.isGiftDay,_that.isNewUser);case _:
+return $default(_that.cumulativeStreak,_that.consecutiveDays,_that.bonusApplied,_that.isGiftDay,_that.isNewUser,_that.cumulativeBillSum,_that.milestoneCycleBillSum,_that.crossedMilestone,_that.rewardOpportunity);case _:
   return null;
 
 }
@@ -504,7 +520,7 @@ return $default(_that.cumulativeStreak,_that.consecutiveDays,_that.bonusApplied,
 
 
 class _CheckInRepsponseDataModel implements CheckInRepsponseDataModel {
-  const _CheckInRepsponseDataModel({required this.cumulativeStreak, required this.consecutiveDays, required this.bonusApplied, required this.isGiftDay, required this.isNewUser});
+  const _CheckInRepsponseDataModel({required this.cumulativeStreak, required this.consecutiveDays, required this.bonusApplied, required this.isGiftDay, required this.isNewUser, this.cumulativeBillSum = 0, this.milestoneCycleBillSum = 0, this.crossedMilestone, this.rewardOpportunity});
   
 
 @override final  int cumulativeStreak;
@@ -512,6 +528,10 @@ class _CheckInRepsponseDataModel implements CheckInRepsponseDataModel {
 @override final  bool bonusApplied;
 @override final  bool isGiftDay;
 @override final  bool isNewUser;
+@override@JsonKey() final  double cumulativeBillSum;
+@override@JsonKey() final  double milestoneCycleBillSum;
+@override final  int? crossedMilestone;
+@override final  RewardOpportunityModel? rewardOpportunity;
 
 /// Create a copy of CheckInRepsponseDataModel
 /// with the given fields replaced by the non-null parameter values.
@@ -523,16 +543,16 @@ _$CheckInRepsponseDataModelCopyWith<_CheckInRepsponseDataModel> get copyWith => 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CheckInRepsponseDataModel&&(identical(other.cumulativeStreak, cumulativeStreak) || other.cumulativeStreak == cumulativeStreak)&&(identical(other.consecutiveDays, consecutiveDays) || other.consecutiveDays == consecutiveDays)&&(identical(other.bonusApplied, bonusApplied) || other.bonusApplied == bonusApplied)&&(identical(other.isGiftDay, isGiftDay) || other.isGiftDay == isGiftDay)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CheckInRepsponseDataModel&&(identical(other.cumulativeStreak, cumulativeStreak) || other.cumulativeStreak == cumulativeStreak)&&(identical(other.consecutiveDays, consecutiveDays) || other.consecutiveDays == consecutiveDays)&&(identical(other.bonusApplied, bonusApplied) || other.bonusApplied == bonusApplied)&&(identical(other.isGiftDay, isGiftDay) || other.isGiftDay == isGiftDay)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser)&&(identical(other.cumulativeBillSum, cumulativeBillSum) || other.cumulativeBillSum == cumulativeBillSum)&&(identical(other.milestoneCycleBillSum, milestoneCycleBillSum) || other.milestoneCycleBillSum == milestoneCycleBillSum)&&(identical(other.crossedMilestone, crossedMilestone) || other.crossedMilestone == crossedMilestone)&&(identical(other.rewardOpportunity, rewardOpportunity) || other.rewardOpportunity == rewardOpportunity));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,cumulativeStreak,consecutiveDays,bonusApplied,isGiftDay,isNewUser);
+int get hashCode => Object.hash(runtimeType,cumulativeStreak,consecutiveDays,bonusApplied,isGiftDay,isNewUser,cumulativeBillSum,milestoneCycleBillSum,crossedMilestone,rewardOpportunity);
 
 @override
 String toString() {
-  return 'CheckInRepsponseDataModel(cumulativeStreak: $cumulativeStreak, consecutiveDays: $consecutiveDays, bonusApplied: $bonusApplied, isGiftDay: $isGiftDay, isNewUser: $isNewUser)';
+  return 'CheckInRepsponseDataModel(cumulativeStreak: $cumulativeStreak, consecutiveDays: $consecutiveDays, bonusApplied: $bonusApplied, isGiftDay: $isGiftDay, isNewUser: $isNewUser, cumulativeBillSum: $cumulativeBillSum, milestoneCycleBillSum: $milestoneCycleBillSum, crossedMilestone: $crossedMilestone, rewardOpportunity: $rewardOpportunity)';
 }
 
 
@@ -543,11 +563,11 @@ abstract mixin class _$CheckInRepsponseDataModelCopyWith<$Res> implements $Check
   factory _$CheckInRepsponseDataModelCopyWith(_CheckInRepsponseDataModel value, $Res Function(_CheckInRepsponseDataModel) _then) = __$CheckInRepsponseDataModelCopyWithImpl;
 @override @useResult
 $Res call({
- int cumulativeStreak, int consecutiveDays, bool bonusApplied, bool isGiftDay, bool isNewUser
+ int cumulativeStreak, int consecutiveDays, bool bonusApplied, bool isGiftDay, bool isNewUser, double cumulativeBillSum, double milestoneCycleBillSum, int? crossedMilestone, RewardOpportunityModel? rewardOpportunity
 });
 
 
-
+@override $RewardOpportunityModelCopyWith<$Res>? get rewardOpportunity;
 
 }
 /// @nodoc
@@ -560,14 +580,302 @@ class __$CheckInRepsponseDataModelCopyWithImpl<$Res>
 
 /// Create a copy of CheckInRepsponseDataModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? cumulativeStreak = null,Object? consecutiveDays = null,Object? bonusApplied = null,Object? isGiftDay = null,Object? isNewUser = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? cumulativeStreak = null,Object? consecutiveDays = null,Object? bonusApplied = null,Object? isGiftDay = null,Object? isNewUser = null,Object? cumulativeBillSum = null,Object? milestoneCycleBillSum = null,Object? crossedMilestone = freezed,Object? rewardOpportunity = freezed,}) {
   return _then(_CheckInRepsponseDataModel(
 cumulativeStreak: null == cumulativeStreak ? _self.cumulativeStreak : cumulativeStreak // ignore: cast_nullable_to_non_nullable
 as int,consecutiveDays: null == consecutiveDays ? _self.consecutiveDays : consecutiveDays // ignore: cast_nullable_to_non_nullable
 as int,bonusApplied: null == bonusApplied ? _self.bonusApplied : bonusApplied // ignore: cast_nullable_to_non_nullable
 as bool,isGiftDay: null == isGiftDay ? _self.isGiftDay : isGiftDay // ignore: cast_nullable_to_non_nullable
 as bool,isNewUser: null == isNewUser ? _self.isNewUser : isNewUser // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,cumulativeBillSum: null == cumulativeBillSum ? _self.cumulativeBillSum : cumulativeBillSum // ignore: cast_nullable_to_non_nullable
+as double,milestoneCycleBillSum: null == milestoneCycleBillSum ? _self.milestoneCycleBillSum : milestoneCycleBillSum // ignore: cast_nullable_to_non_nullable
+as double,crossedMilestone: freezed == crossedMilestone ? _self.crossedMilestone : crossedMilestone // ignore: cast_nullable_to_non_nullable
+as int?,rewardOpportunity: freezed == rewardOpportunity ? _self.rewardOpportunity : rewardOpportunity // ignore: cast_nullable_to_non_nullable
+as RewardOpportunityModel?,
+  ));
+}
+
+/// Create a copy of CheckInRepsponseDataModel
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$RewardOpportunityModelCopyWith<$Res>? get rewardOpportunity {
+    if (_self.rewardOpportunity == null) {
+    return null;
+  }
+
+  return $RewardOpportunityModelCopyWith<$Res>(_self.rewardOpportunity!, (value) {
+    return _then(_self.copyWith(rewardOpportunity: value));
+  });
+}
+}
+
+/// @nodoc
+mixin _$RewardOpportunityModel {
+
+ String get id; String get status; List<String> get availableSources; String? get selectedSource;
+/// Create a copy of RewardOpportunityModel
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RewardOpportunityModelCopyWith<RewardOpportunityModel> get copyWith => _$RewardOpportunityModelCopyWithImpl<RewardOpportunityModel>(this as RewardOpportunityModel, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RewardOpportunityModel&&(identical(other.id, id) || other.id == id)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.availableSources, availableSources)&&(identical(other.selectedSource, selectedSource) || other.selectedSource == selectedSource));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,id,status,const DeepCollectionEquality().hash(availableSources),selectedSource);
+
+@override
+String toString() {
+  return 'RewardOpportunityModel(id: $id, status: $status, availableSources: $availableSources, selectedSource: $selectedSource)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RewardOpportunityModelCopyWith<$Res>  {
+  factory $RewardOpportunityModelCopyWith(RewardOpportunityModel value, $Res Function(RewardOpportunityModel) _then) = _$RewardOpportunityModelCopyWithImpl;
+@useResult
+$Res call({
+ String id, String status, List<String> availableSources, String? selectedSource
+});
+
+
+
+
+}
+/// @nodoc
+class _$RewardOpportunityModelCopyWithImpl<$Res>
+    implements $RewardOpportunityModelCopyWith<$Res> {
+  _$RewardOpportunityModelCopyWithImpl(this._self, this._then);
+
+  final RewardOpportunityModel _self;
+  final $Res Function(RewardOpportunityModel) _then;
+
+/// Create a copy of RewardOpportunityModel
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? status = null,Object? availableSources = null,Object? selectedSource = freezed,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String,availableSources: null == availableSources ? _self.availableSources : availableSources // ignore: cast_nullable_to_non_nullable
+as List<String>,selectedSource: freezed == selectedSource ? _self.selectedSource : selectedSource // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RewardOpportunityModel].
+extension RewardOpportunityModelPatterns on RewardOpportunityModel {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RewardOpportunityModel value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RewardOpportunityModel() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RewardOpportunityModel value)  $default,){
+final _that = this;
+switch (_that) {
+case _RewardOpportunityModel():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RewardOpportunityModel value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RewardOpportunityModel() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String status,  List<String> availableSources,  String? selectedSource)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RewardOpportunityModel() when $default != null:
+return $default(_that.id,_that.status,_that.availableSources,_that.selectedSource);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String status,  List<String> availableSources,  String? selectedSource)  $default,) {final _that = this;
+switch (_that) {
+case _RewardOpportunityModel():
+return $default(_that.id,_that.status,_that.availableSources,_that.selectedSource);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String status,  List<String> availableSources,  String? selectedSource)?  $default,) {final _that = this;
+switch (_that) {
+case _RewardOpportunityModel() when $default != null:
+return $default(_that.id,_that.status,_that.availableSources,_that.selectedSource);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _RewardOpportunityModel implements RewardOpportunityModel {
+  const _RewardOpportunityModel({required this.id, required this.status, final  List<String> availableSources = const <String>[], this.selectedSource}): _availableSources = availableSources;
+
+
+@override final  String id;
+@override final  String status;
+ final  List<String> _availableSources;
+@override@JsonKey() List<String> get availableSources {
+  if (_availableSources is EqualUnmodifiableListView) return _availableSources;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_availableSources);
+}
+
+@override final  String? selectedSource;
+
+/// Create a copy of RewardOpportunityModel
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RewardOpportunityModelCopyWith<_RewardOpportunityModel> get copyWith => __$RewardOpportunityModelCopyWithImpl<_RewardOpportunityModel>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RewardOpportunityModel&&(identical(other.id, id) || other.id == id)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._availableSources, _availableSources)&&(identical(other.selectedSource, selectedSource) || other.selectedSource == selectedSource));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,id,status,const DeepCollectionEquality().hash(_availableSources),selectedSource);
+
+@override
+String toString() {
+  return 'RewardOpportunityModel(id: $id, status: $status, availableSources: $availableSources, selectedSource: $selectedSource)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RewardOpportunityModelCopyWith<$Res> implements $RewardOpportunityModelCopyWith<$Res> {
+  factory _$RewardOpportunityModelCopyWith(_RewardOpportunityModel value, $Res Function(_RewardOpportunityModel) _then) = __$RewardOpportunityModelCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String status, List<String> availableSources, String? selectedSource
+});
+
+
+
+
+}
+/// @nodoc
+class __$RewardOpportunityModelCopyWithImpl<$Res>
+    implements _$RewardOpportunityModelCopyWith<$Res> {
+  __$RewardOpportunityModelCopyWithImpl(this._self, this._then);
+
+  final _RewardOpportunityModel _self;
+  final $Res Function(_RewardOpportunityModel) _then;
+
+/// Create a copy of RewardOpportunityModel
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? status = null,Object? availableSources = null,Object? selectedSource = freezed,}) {
+  return _then(_RewardOpportunityModel(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String,availableSources: null == availableSources ? _self._availableSources : availableSources // ignore: cast_nullable_to_non_nullable
+as List<String>,selectedSource: freezed == selectedSource ? _self.selectedSource : selectedSource // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

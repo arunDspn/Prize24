@@ -59,6 +59,15 @@ export {
   addOfferToShop,
 } from "./shop_user_relationship/shopCheckIn";
 
+export {
+  getAttachedGiftLibrary,
+  resolveShopReward,
+  assignManualLibraryGift,
+  redeemShopGift,
+  archiveGiftLibrary,
+  getGiftLibraryUsage,
+} from "./gift_library/giftLibrary";
+
 // Import scan to redeem functions
 export {
   scanToRedeemByOwner,
@@ -108,4 +117,3 @@ setGlobalOptions({maxInstances: 10});
 // / We have publicSlug in both campaigns and gifts, you  may standardize that all functions with convention
 
 // / codeGiftCodes yes its stored under  subcollection of a gift
-

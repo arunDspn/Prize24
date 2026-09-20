@@ -17,7 +17,7 @@ mixin _$StaffShopModel {
 /// Shop ID
  String get id;/// Shop Name
  String get shopName;/// Associated Club ID (if any)
- String? get associatedCampaignId;
+ String? get associatedCampaignId; String? get associatedGiftLibraryId;
 /// Create a copy of StaffShopModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $StaffShopModelCopyWith<StaffShopModel> get copyWith => _$StaffShopModelCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is StaffShopModel&&(identical(other.id, id) || other.id == id)&&(identical(other.shopName, shopName) || other.shopName == shopName)&&(identical(other.associatedCampaignId, associatedCampaignId) || other.associatedCampaignId == associatedCampaignId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StaffShopModel&&(identical(other.id, id) || other.id == id)&&(identical(other.shopName, shopName) || other.shopName == shopName)&&(identical(other.associatedCampaignId, associatedCampaignId) || other.associatedCampaignId == associatedCampaignId)&&(identical(other.associatedGiftLibraryId, associatedGiftLibraryId) || other.associatedGiftLibraryId == associatedGiftLibraryId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,shopName,associatedCampaignId);
+int get hashCode => Object.hash(runtimeType,id,shopName,associatedCampaignId,associatedGiftLibraryId);
 
 @override
 String toString() {
-  return 'StaffShopModel(id: $id, shopName: $shopName, associatedCampaignId: $associatedCampaignId)';
+  return 'StaffShopModel(id: $id, shopName: $shopName, associatedCampaignId: $associatedCampaignId, associatedGiftLibraryId: $associatedGiftLibraryId)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $StaffShopModelCopyWith<$Res>  {
   factory $StaffShopModelCopyWith(StaffShopModel value, $Res Function(StaffShopModel) _then) = _$StaffShopModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String shopName, String? associatedCampaignId
+ String id, String shopName, String? associatedCampaignId, String? associatedGiftLibraryId
 });
 
 
@@ -65,11 +65,12 @@ class _$StaffShopModelCopyWithImpl<$Res>
 
 /// Create a copy of StaffShopModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? shopName = null,Object? associatedCampaignId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? shopName = null,Object? associatedCampaignId = freezed,Object? associatedGiftLibraryId = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,shopName: null == shopName ? _self.shopName : shopName // ignore: cast_nullable_to_non_nullable
 as String,associatedCampaignId: freezed == associatedCampaignId ? _self.associatedCampaignId : associatedCampaignId // ignore: cast_nullable_to_non_nullable
+as String?,associatedGiftLibraryId: freezed == associatedGiftLibraryId ? _self.associatedGiftLibraryId : associatedGiftLibraryId // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -155,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String shopName,  String? associatedCampaignId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String shopName,  String? associatedCampaignId,  String? associatedGiftLibraryId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _StaffShopModel() when $default != null:
-return $default(_that.id,_that.shopName,_that.associatedCampaignId);case _:
+return $default(_that.id,_that.shopName,_that.associatedCampaignId,_that.associatedGiftLibraryId);case _:
   return orElse();
 
 }
@@ -176,10 +177,10 @@ return $default(_that.id,_that.shopName,_that.associatedCampaignId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String shopName,  String? associatedCampaignId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String shopName,  String? associatedCampaignId,  String? associatedGiftLibraryId)  $default,) {final _that = this;
 switch (_that) {
 case _StaffShopModel():
-return $default(_that.id,_that.shopName,_that.associatedCampaignId);case _:
+return $default(_that.id,_that.shopName,_that.associatedCampaignId,_that.associatedGiftLibraryId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +197,10 @@ return $default(_that.id,_that.shopName,_that.associatedCampaignId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String shopName,  String? associatedCampaignId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String shopName,  String? associatedCampaignId,  String? associatedGiftLibraryId)?  $default,) {final _that = this;
 switch (_that) {
 case _StaffShopModel() when $default != null:
-return $default(_that.id,_that.shopName,_that.associatedCampaignId);case _:
+return $default(_that.id,_that.shopName,_that.associatedCampaignId,_that.associatedGiftLibraryId);case _:
   return null;
 
 }
@@ -211,7 +212,7 @@ return $default(_that.id,_that.shopName,_that.associatedCampaignId);case _:
 
 
 class _StaffShopModel implements StaffShopModel {
-  const _StaffShopModel({required this.id, required this.shopName, this.associatedCampaignId});
+  const _StaffShopModel({required this.id, required this.shopName, this.associatedCampaignId, this.associatedGiftLibraryId});
   
 
 /// Shop ID
@@ -220,6 +221,7 @@ class _StaffShopModel implements StaffShopModel {
 @override final  String shopName;
 /// Associated Club ID (if any)
 @override final  String? associatedCampaignId;
+@override final  String? associatedGiftLibraryId;
 
 /// Create a copy of StaffShopModel
 /// with the given fields replaced by the non-null parameter values.
@@ -231,16 +233,16 @@ _$StaffShopModelCopyWith<_StaffShopModel> get copyWith => __$StaffShopModelCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StaffShopModel&&(identical(other.id, id) || other.id == id)&&(identical(other.shopName, shopName) || other.shopName == shopName)&&(identical(other.associatedCampaignId, associatedCampaignId) || other.associatedCampaignId == associatedCampaignId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StaffShopModel&&(identical(other.id, id) || other.id == id)&&(identical(other.shopName, shopName) || other.shopName == shopName)&&(identical(other.associatedCampaignId, associatedCampaignId) || other.associatedCampaignId == associatedCampaignId)&&(identical(other.associatedGiftLibraryId, associatedGiftLibraryId) || other.associatedGiftLibraryId == associatedGiftLibraryId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,shopName,associatedCampaignId);
+int get hashCode => Object.hash(runtimeType,id,shopName,associatedCampaignId,associatedGiftLibraryId);
 
 @override
 String toString() {
-  return 'StaffShopModel(id: $id, shopName: $shopName, associatedCampaignId: $associatedCampaignId)';
+  return 'StaffShopModel(id: $id, shopName: $shopName, associatedCampaignId: $associatedCampaignId, associatedGiftLibraryId: $associatedGiftLibraryId)';
 }
 
 
@@ -251,7 +253,7 @@ abstract mixin class _$StaffShopModelCopyWith<$Res> implements $StaffShopModelCo
   factory _$StaffShopModelCopyWith(_StaffShopModel value, $Res Function(_StaffShopModel) _then) = __$StaffShopModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String shopName, String? associatedCampaignId
+ String id, String shopName, String? associatedCampaignId, String? associatedGiftLibraryId
 });
 
 
@@ -268,11 +270,12 @@ class __$StaffShopModelCopyWithImpl<$Res>
 
 /// Create a copy of StaffShopModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? shopName = null,Object? associatedCampaignId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? shopName = null,Object? associatedCampaignId = freezed,Object? associatedGiftLibraryId = freezed,}) {
   return _then(_StaffShopModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,shopName: null == shopName ? _self.shopName : shopName // ignore: cast_nullable_to_non_nullable
 as String,associatedCampaignId: freezed == associatedCampaignId ? _self.associatedCampaignId : associatedCampaignId // ignore: cast_nullable_to_non_nullable
+as String?,associatedGiftLibraryId: freezed == associatedGiftLibraryId ? _self.associatedGiftLibraryId : associatedGiftLibraryId // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

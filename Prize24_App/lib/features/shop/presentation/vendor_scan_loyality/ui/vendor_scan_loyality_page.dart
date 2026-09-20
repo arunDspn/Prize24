@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:prize24_app/common_widgets/show_toast.dart';
+import 'package:prize24_app/features/gift_library/presentation/gift_reward_flow.dart';
 import 'package:prize24_app/features/campaign/presentation/vendor_campaign_detail/components/vendor_scan_user/view_model/vendor_scan_user_controller.dart';
 import 'package:prize24_app/features/shop/domain/model/shop_model.dart';
 import 'package:prize24_app/features/shop/presentation/vendor_scan_loyality/view_model/user_checkin_by_vendor_controller.dart';
@@ -292,16 +293,28 @@ class _VendorScanLoyalityPageState
                     true,
                   );
 
-                  // Call for gift avail
-                  ref
-                      .read(vendorScanUserControllerProvider.notifier)
-                      .handleScannedCodeByOwner(
-                        // shopId: widget.shop.id!,
-                        userId: scannedCode!,
-                        campaignId: widget.shop.associatedCampaignId!,
-                        availedViaStreak: true,
-                        shopId: widget.shop.id,
-                      );
+                  if (data.data!.rewardOpportunity != null) {
+                    unawaited(
+                      showMilestoneRewardFlow(
+                        context: context,
+                        ref: ref,
+                        shopId: widget.shop.id!,
+                        data: RewardFlowData.fromCheckIn(
+                          userId: scannedCode!,
+                          data: data.data!,
+                        ),
+                      ),
+                    );
+                  } else if (widget.shop.associatedCampaignId != null) {
+                    ref
+                        .read(vendorScanUserControllerProvider.notifier)
+                        .handleScannedCodeByOwner(
+                          userId: scannedCode!,
+                          campaignId: widget.shop.associatedCampaignId!,
+                          availedViaStreak: true,
+                          shopId: widget.shop.id,
+                        );
+                  }
                 } else {
                   showToastAtTop(
                     context,
