@@ -33,7 +33,7 @@ abstract class RewardOpportunityModel with _$RewardOpportunityModel {
   const factory RewardOpportunityModel({
     required String id,
     required String status,
-    @Default(<String>[]) List<String> availableSources,
+    @Default(<String>[]) List<String> eligibleSources,
     String? selectedSource,
   }) = _RewardOpportunityModel;
 }

@@ -13,6 +13,7 @@ class GiftLibraryModel {
     required this.description,
     required this.ownerVendorId,
     required this.status,
+    required this.activeBucketCount,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -27,6 +28,7 @@ class GiftLibraryModel {
       description: data['description'] as String? ?? '',
       ownerVendorId: data['ownerVendorId'] as String? ?? '',
       status: data['status'] as String? ?? 'active',
+      activeBucketCount: (data['activeBucketCount'] as num?)?.toInt() ?? 0,
       createdAt: _readDate(data['createdAt']),
       updatedAt: _readDate(data['updatedAt']),
     );
@@ -39,6 +41,7 @@ class GiftLibraryModel {
       description: data['description'] as String? ?? '',
       ownerVendorId: data['ownerVendorId'] as String? ?? '',
       status: data['status'] as String? ?? 'active',
+      activeBucketCount: (data['activeBucketCount'] as num?)?.toInt() ?? 0,
       createdAt: _readDate(data['createdAt']),
       updatedAt: _readDate(data['updatedAt']),
     );
@@ -49,37 +52,40 @@ class GiftLibraryModel {
   final String description;
   final String ownerVendorId;
   final String status;
+  final int activeBucketCount;
   final DateTime createdAt;
   final DateTime updatedAt;
 
   bool get isActive => status == 'active';
 }
 
-class LibraryGiftModel {
-  const LibraryGiftModel({
+class GiftLibraryBucketModel {
+  const GiftLibraryBucketModel({
     required this.id,
     required this.name,
     required this.description,
     required this.status,
+    required this.remainingCount,
     required this.createdAt,
     required this.updatedAt,
   });
 
-  factory LibraryGiftModel.fromFirestore(
+  factory GiftLibraryBucketModel.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> document,
   ) {
-    return LibraryGiftModel.fromMap(<String, dynamic>{
+    return GiftLibraryBucketModel.fromMap(<String, dynamic>{
       'id': document.id,
       ...?document.data(),
     });
   }
 
-  factory LibraryGiftModel.fromMap(Map<String, dynamic> data) {
-    return LibraryGiftModel(
+  factory GiftLibraryBucketModel.fromMap(Map<String, dynamic> data) {
+    return GiftLibraryBucketModel(
       id: data['id'] as String? ?? '',
       name: data['name'] as String? ?? '',
       description: data['description'] as String? ?? '',
       status: data['status'] as String? ?? 'active',
+      remainingCount: (data['remainingCount'] as num?)?.toInt() ?? 0,
       createdAt: _readDate(data['createdAt']),
       updatedAt: _readDate(data['updatedAt']),
     );
@@ -89,17 +95,24 @@ class LibraryGiftModel {
   final String name;
   final String description;
   final String status;
+  final int remainingCount;
   final DateTime createdAt;
   final DateTime updatedAt;
 
   bool get isActive => status == 'active';
+  bool get isAvailable => isActive && remainingCount > 0;
 }
 
 class AttachedGiftLibraryModel {
-  const AttachedGiftLibraryModel({required this.library, required this.gifts});
+  const AttachedGiftLibraryModel({
+    required this.library,
+    required this.buckets,
+    required this.hasAvailableBuckets,
+  });
 
   final GiftLibraryModel? library;
-  final List<LibraryGiftModel> gifts;
+  final List<GiftLibraryBucketModel> buckets;
+  final bool hasAvailableBuckets;
 }
 
 class GiftLibraryUsage {
@@ -128,7 +141,7 @@ class RewardOpportunityListItem {
     required this.userId,
     required this.milestone,
     required this.cumulativeStreak,
-    required this.availableSources,
+    required this.eligibleSources,
     required this.cumulativeBillSum,
     required this.milestoneCycleBillSum,
     required this.createdAt,
@@ -147,7 +160,7 @@ class RewardOpportunityListItem {
           (data['cumulativeStreak'] as num?)?.toInt() ??
           (data['milestone'] as num?)?.toInt() ??
           0,
-      availableSources: (data['availableSources'] as List<dynamic>? ?? const [])
+      eligibleSources: (data['eligibleSources'] as List<dynamic>? ?? const [])
           .whereType<String>()
           .toList(),
       selectedSource: data['selectedSource'] as String?,
@@ -162,7 +175,7 @@ class RewardOpportunityListItem {
   final String userId;
   final int milestone;
   final int cumulativeStreak;
-  final List<String> availableSources;
+  final List<String> eligibleSources;
   final String? selectedSource;
   final double cumulativeBillSum;
   final double milestoneCycleBillSum;

@@ -20,20 +20,38 @@ interface ResolveShopRewardRequest {
   userId: string;
   opportunityId: string;
   source: RewardSource;
-  giftId?: string;
+  bucketId?: string;
 }
 
 interface ManualGiftRequest {
   shopId: string;
   userId: string;
-  giftId: string;
+  bucketId: string;
   requestId: string;
+}
+
+interface CreateBucketRequest {
+  giftLibraryId: string;
+  name: string;
+  description: string;
+  remainingCount: number;
+}
+
+interface UpdateBucketRequest extends CreateBucketRequest {
+  bucketId: string;
+}
+
+interface ArchiveBucketRequest {
+  giftLibraryId: string;
+  bucketId: string;
 }
 
 interface ShopGiftRequest {
   shopId: string;
   userGiftId: string;
 }
+
+export const MAX_ACTIVE_BUCKETS = 20;
 
 /**
  * Validates a required callable string field.
@@ -46,6 +64,52 @@ function requiredString(value: unknown, field: string): string {
     throw new HttpsError("invalid-argument", `${field} is required`);
   }
   return value.trim();
+}
+
+/**
+ * Validates a Firestore-safe non-negative integer.
+ * @param {unknown} value Raw field value
+ * @param {string} field Field name for errors
+ * @param {number} minimum Minimum accepted value
+ * @return {number} Validated integer
+ */
+export function requiredInventoryCount(value: unknown, field: string, minimum = 0): number {
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < minimum) {
+    throw new HttpsError(
+      "invalid-argument",
+      `${field} must be a whole number greater than or equal to ${minimum}`
+    );
+  }
+  return value;
+}
+
+/**
+ * Guards the active-bucket limit.
+ * @param {unknown} value Current active bucket count
+ * @return {number} Normalized active bucket count
+ */
+export function requireBucketSlot(value: unknown): number {
+  const activeBucketCount = typeof value === "number" && Number.isSafeInteger(value) ? value : 0;
+  if (activeBucketCount >= MAX_ACTIVE_BUCKETS) {
+    throw new HttpsError(
+      "resource-exhausted",
+      `A Gift Library can have at most ${MAX_ACTIVE_BUCKETS} active buckets`
+    );
+  }
+  return Math.max(activeBucketCount, 0);
+}
+
+/**
+ * Validates that an active bucket can satisfy one assignment.
+ * @param {unknown} value Stored remaining quantity
+ * @return {number} Available quantity before assignment
+ */
+export function requireAvailableBucketCount(value: unknown): number {
+  const remainingCount = requiredInventoryCount(value, "remainingCount");
+  if (remainingCount === 0) {
+    throw new HttpsError("resource-exhausted", "Bucket is out of stock");
+  }
+  return remainingCount;
 }
 
 /**
@@ -109,7 +173,7 @@ function rewardAuditFields(opportunity: FirebaseFirestore.DocumentData) {
     milestoneCycleBillSum: opportunity.milestoneCycleBillSum ?? null,
     campaignId: opportunity.campaignId ?? null,
     giftLibraryId: opportunity.giftLibraryId ?? null,
-    availableSources: opportunity.availableSources ?? [],
+    eligibleSources: opportunity.eligibleSources ?? [],
   };
 }
 
@@ -170,7 +234,7 @@ async function lockRewardSource(
         opportunity,
       };
     }
-    const sources = Array.isArray(opportunity.availableSources) ? opportunity.availableSources : [];
+    const sources = Array.isArray(opportunity.eligibleSources) ? opportunity.eligibleSources : [];
     if (!sources.includes(source)) {
       throw new HttpsError("failed-precondition", "Reward source is not available for this milestone");
     }
@@ -184,6 +248,113 @@ async function lockRewardSource(
     return {completedResult: null, didSelect, opportunity};
   });
 }
+
+export const createGiftLibraryBucket = onCall<CreateBucketRequest>(async (request) => {
+  if (!request.auth) throw new HttpsError("unauthenticated", "Authentication required");
+  const giftLibraryId = requiredString(request.data.giftLibraryId, "giftLibraryId");
+  const name = requiredString(request.data.name, "name");
+  const description = requiredString(request.data.description, "description");
+  const remainingCount = requiredInventoryCount(request.data.remainingCount, "remainingCount", 1);
+  const libraryRef = db.collection("giftLibraries").doc(giftLibraryId);
+  const bucketRef = libraryRef.collection("buckets").doc();
+  const now = Timestamp.now();
+
+  const activeBucketCount = await db.runTransaction(async (transaction) => {
+    const libraryDoc = await transaction.get(libraryRef);
+    if (!libraryDoc.exists) throw new HttpsError("not-found", "Gift Library not found");
+    const library = libraryDoc.data() ?? {};
+    if (library.ownerVendorId !== request.auth!.uid) {
+      throw new HttpsError("permission-denied", "Only the library owner can create buckets");
+    }
+    if (library.status !== "active") {
+      throw new HttpsError("failed-precondition", "Gift Library is archived");
+    }
+    const currentCount = requireBucketSlot(library.activeBucketCount);
+    transaction.create(bucketRef, {
+      name,
+      description,
+      remainingCount,
+      status: "active",
+      createdAt: now,
+      updatedAt: now,
+    });
+    transaction.update(libraryRef, {
+      activeBucketCount: currentCount + 1,
+      updatedAt: now,
+    });
+    return currentCount + 1;
+  });
+
+  return {
+    bucket: {
+      id: bucketRef.id,
+      name,
+      description,
+      remainingCount,
+      status: "active",
+      createdAt: now,
+      updatedAt: now,
+    },
+    activeBucketCount,
+  };
+});
+
+export const updateGiftLibraryBucket = onCall<UpdateBucketRequest>(async (request) => {
+  if (!request.auth) throw new HttpsError("unauthenticated", "Authentication required");
+  const giftLibraryId = requiredString(request.data.giftLibraryId, "giftLibraryId");
+  const bucketId = requiredString(request.data.bucketId, "bucketId");
+  const name = requiredString(request.data.name, "name");
+  const description = requiredString(request.data.description, "description");
+  const remainingCount = requiredInventoryCount(request.data.remainingCount, "remainingCount");
+  const libraryRef = db.collection("giftLibraries").doc(giftLibraryId);
+  const bucketRef = libraryRef.collection("buckets").doc(bucketId);
+  const now = Timestamp.now();
+
+  await db.runTransaction(async (transaction) => {
+    const [libraryDoc, bucketDoc] = await transaction.getAll(libraryRef, bucketRef);
+    if (!libraryDoc.exists) throw new HttpsError("not-found", "Gift Library not found");
+    if (libraryDoc.data()?.ownerVendorId !== request.auth!.uid) {
+      throw new HttpsError("permission-denied", "Only the library owner can update buckets");
+    }
+    if (libraryDoc.data()?.status !== "active") {
+      throw new HttpsError("failed-precondition", "Gift Library is archived");
+    }
+    if (!bucketDoc.exists) throw new HttpsError("not-found", "Bucket not found");
+    if (bucketDoc.data()?.status !== "active") {
+      throw new HttpsError("failed-precondition", "Archived buckets cannot be edited");
+    }
+    transaction.update(bucketRef, {name, description, remainingCount, updatedAt: now});
+  });
+
+  return {success: true};
+});
+
+export const archiveGiftLibraryBucket = onCall<ArchiveBucketRequest>(async (request) => {
+  if (!request.auth) throw new HttpsError("unauthenticated", "Authentication required");
+  const giftLibraryId = requiredString(request.data.giftLibraryId, "giftLibraryId");
+  const bucketId = requiredString(request.data.bucketId, "bucketId");
+  const libraryRef = db.collection("giftLibraries").doc(giftLibraryId);
+  const bucketRef = libraryRef.collection("buckets").doc(bucketId);
+
+  const activeBucketCount = await db.runTransaction(async (transaction) => {
+    const [libraryDoc, bucketDoc] = await transaction.getAll(libraryRef, bucketRef);
+    if (!libraryDoc.exists) throw new HttpsError("not-found", "Gift Library not found");
+    const library = libraryDoc.data() ?? {};
+    if (library.ownerVendorId !== request.auth!.uid) {
+      throw new HttpsError("permission-denied", "Only the library owner can archive buckets");
+    }
+    if (!bucketDoc.exists) throw new HttpsError("not-found", "Bucket not found");
+    const currentCount = Math.max(Number(library.activeBucketCount) || 0, 0);
+    if (bucketDoc.data()?.status === "archived") return currentCount;
+    const nextCount = Math.max(currentCount - 1, 0);
+    const now = Timestamp.now();
+    transaction.update(bucketRef, {status: "archived", updatedAt: now});
+    transaction.update(libraryRef, {activeBucketCount: nextCount, updatedAt: now});
+    return nextCount;
+  });
+
+  return {success: true, activeBucketCount};
+});
 
 export const getAttachedGiftLibrary = onCall<{
   shopId: string;
@@ -223,21 +394,25 @@ export const getAttachedGiftLibrary = onCall<{
     libraryId = opportunityDoc.data()?.giftLibraryId;
   }
   if (typeof libraryId !== "string" || libraryId.length === 0) {
-    return {library: null, gifts: []};
+    return {library: null, buckets: [], hasAvailableBuckets: false};
   }
   const libraryRef = db.collection("giftLibraries").doc(libraryId);
-  const [libraryDoc, giftsSnapshot] = await Promise.all([
+  const [libraryDoc, bucketsSnapshot] = await Promise.all([
     libraryRef.get(),
-    libraryRef.collection("gifts").where("status", "==", "active").get(),
+    libraryRef.collection("buckets").where("status", "==", "active").get(),
   ]);
   const library = libraryDoc.data();
   if (!libraryDoc.exists || library?.status !== "active" ||
     library.ownerVendorId !== access.shop.shopOwnerId) {
-    return {library: null, gifts: []};
+    return {library: null, buckets: [], hasAvailableBuckets: false};
   }
+  const buckets = bucketsSnapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
   return {
     library: {id: libraryDoc.id, ...libraryDoc.data()},
-    gifts: giftsSnapshot.docs.map((doc) => ({id: doc.id, ...doc.data()})),
+    buckets,
+    hasAvailableBuckets: bucketsSnapshot.docs.some(
+      (bucket) => Number(bucket.data().remainingCount) > 0
+    ),
   };
 });
 
@@ -271,7 +446,7 @@ export const resolveShopReward = onCall<ResolveShopRewardRequest>(async (request
   }
 
   if (source === "gift_library") {
-    const giftId = requiredString(request.data.giftId, "giftId");
+    const bucketId = requiredString(request.data.bucketId, "bucketId");
     const opportunityRef = db.collection("shops").doc(shopId)
       .collection("rewardOpportunities").doc(opportunityId);
     const userGiftRef = db.collection("user_gifts").doc();
@@ -283,24 +458,28 @@ export const resolveShopReward = onCall<ResolveShopRewardRequest>(async (request
         if (opportunity.status === "completed") return opportunity.result;
         const libraryId = requiredString(opportunity.giftLibraryId, "giftLibraryId");
         const libraryRef = db.collection("giftLibraries").doc(libraryId);
-        const giftRef = libraryRef.collection("gifts").doc(giftId);
+        const bucketRef = libraryRef.collection("buckets").doc(bucketId);
         const userRef = db.collection("users").doc(userId);
-        const [libraryDoc, giftDoc, userDoc] = await transaction.getAll(libraryRef, giftRef, userRef);
+        const [libraryDoc, bucketDoc, userDoc] = await transaction.getAll(libraryRef, bucketRef, userRef);
         if (!libraryDoc.exists || libraryDoc.data()?.status !== "active" ||
           libraryDoc.data()?.ownerVendorId !== access.shop.shopOwnerId) {
           throw new HttpsError("failed-precondition", "Gift Library is unavailable");
         }
-        if (!giftDoc.exists || giftDoc.data()?.status !== "active") {
-          throw new HttpsError("failed-precondition", "Gift is unavailable");
+        if (!bucketDoc.exists || bucketDoc.data()?.status !== "active") {
+          throw new HttpsError("failed-precondition", "Bucket is unavailable");
         }
         if (!userDoc.exists) throw new HttpsError("not-found", "Customer not found");
-        const gift = giftDoc.data() ?? {};
+        const bucket = bucketDoc.data() ?? {};
+        const remainingCountBefore = requireAvailableBucketCount(bucket.remainingCount);
+        const remainingCountAfter = remainingCountBefore - 1;
         const now = Timestamp.now();
+        transaction.update(bucketRef, {remainingCount: FieldValue.increment(-1), updatedAt: now});
         transaction.set(userGiftRef, {
           userId,
-          giftId,
-          giftName: gift.name,
-          giftDescription: gift.description,
+          giftId: bucketId,
+          bucketId,
+          giftName: bucket.name,
+          giftDescription: bucket.description,
           isRedeemable: true,
           isRedeemed: false,
           redeemedAt: null,
@@ -321,15 +500,17 @@ export const resolveShopReward = onCall<ResolveShopRewardRequest>(async (request
           outcome: "awarded",
           source,
           userGiftId: userGiftRef.id,
-          giftId,
-          giftName: gift.name,
-          giftDescription: gift.description,
+          bucketId,
+          giftName: bucket.name,
+          giftDescription: bucket.description,
+          remainingCountBefore,
+          remainingCountAfter,
         };
         transaction.update(opportunityRef, {
           status: "completed",
           outcome: "awarded",
           userGiftId: userGiftRef.id,
-          giftId,
+          bucketId,
           completedAt: now,
           updatedAt: now,
           result: storedResult,
@@ -346,7 +527,7 @@ export const resolveShopReward = onCall<ResolveShopRewardRequest>(async (request
         customerId: userId,
         shopId,
         rewardOpportunityId: opportunityId,
-        giftId,
+        bucketId,
         assignmentMode: "milestone",
         selectedSource: source,
         ...rewardAuditFields(sourceLock.opportunity),
@@ -536,7 +717,7 @@ export const assignManualLibraryGift = onCall<ManualGiftRequest>(async (request)
   if (!request.auth) throw new HttpsError("unauthenticated", "Authentication required");
   const shopId = requiredString(request.data.shopId, "shopId");
   const userId = requiredString(request.data.userId, "userId");
-  const giftId = requiredString(request.data.giftId, "giftId");
+  const bucketId = requiredString(request.data.bucketId, "bucketId");
   const requestId = requiredString(request.data.requestId, "requestId");
   if (requestId.includes("/")) throw new HttpsError("invalid-argument", "Invalid requestId");
   const access = await validateShopAccess(request.auth.uid, shopId);
@@ -549,14 +730,14 @@ export const assignManualLibraryGift = onCall<ManualGiftRequest>(async (request)
     const result = await db.runTransaction(async (transaction) => {
       const followerRef = db.collection("shops").doc(shopId).collection("followers").doc(userId);
       const libraryRef = db.collection("giftLibraries").doc(libraryId);
-      const giftRef = libraryRef.collection("gifts").doc(giftId);
+      const bucketRef = libraryRef.collection("buckets").doc(bucketId);
       const userRef = db.collection("users").doc(userId);
-      const [assignmentDoc, followerDoc, libraryDoc, giftDoc, userDoc] = await transaction.getAll(
-        assignmentRef, followerRef, libraryRef, giftRef, userRef
+      const [assignmentDoc, followerDoc, libraryDoc, bucketDoc, userDoc] = await transaction.getAll(
+        assignmentRef, followerRef, libraryRef, bucketRef, userRef
       );
       if (assignmentDoc.exists) {
         const assignment = assignmentDoc.data() ?? {};
-        if (assignment.userId !== userId || assignment.giftId !== giftId ||
+        if (assignment.userId !== userId || assignment.bucketId !== bucketId ||
           assignment.assignedBy !== request.auth!.uid) {
           throw new HttpsError("already-exists", "requestId was already used for another assignment");
         }
@@ -567,15 +748,27 @@ export const assignManualLibraryGift = onCall<ManualGiftRequest>(async (request)
         libraryDoc.data()?.ownerVendorId !== access.shop.shopOwnerId) {
         throw new HttpsError("failed-precondition", "Gift Library is unavailable");
       }
-      if (!giftDoc.exists || giftDoc.data()?.status !== "active") {
-        throw new HttpsError("failed-precondition", "Gift is unavailable");
+      if (!bucketDoc.exists || bucketDoc.data()?.status !== "active") {
+        throw new HttpsError("failed-precondition", "Bucket is unavailable");
       }
       if (!userDoc.exists) throw new HttpsError("not-found", "Customer not found");
-      const gift = giftDoc.data() ?? {};
+      const bucket = bucketDoc.data() ?? {};
+      const remainingCountBefore = requireAvailableBucketCount(bucket.remainingCount);
+      const remainingCountAfter = remainingCountBefore - 1;
       const now = Timestamp.now();
-      const storedResult = {outcome: "awarded", userGiftId: userGiftRef.id, giftId, giftName: gift.name};
+      const storedResult = {
+        outcome: "awarded",
+        userGiftId: userGiftRef.id,
+        bucketId,
+        giftName: bucket.name,
+        giftDescription: bucket.description,
+        remainingCountBefore,
+        remainingCountAfter,
+      };
+      transaction.update(bucketRef, {remainingCount: FieldValue.increment(-1), updatedAt: now});
       transaction.set(userGiftRef, {
-        userId, giftId, giftName: gift.name, giftDescription: gift.description,
+        userId, giftId: bucketId, bucketId,
+        giftName: bucket.name, giftDescription: bucket.description,
         isRedeemable: true, isRedeemed: false, redeemedAt: null, availedAt: now,
         supportedShops: [shopSnapshot(shopId, access.shop)], sourceType: "gift_library",
         giftLibraryId: libraryId, shopId, assignedBy: request.auth!.uid,
@@ -583,7 +776,7 @@ export const assignManualLibraryGift = onCall<ManualGiftRequest>(async (request)
         availedViaStreak: false, streakShopID: shopId, availedViaClub: false,
       });
       transaction.set(assignmentRef, {
-        requestId, userId, shopId, giftLibraryId: libraryId, giftId,
+        requestId, userId, shopId, giftLibraryId: libraryId, bucketId,
         assignedBy: request.auth!.uid, createdAt: now, result: storedResult,
       });
       return storedResult;
@@ -603,7 +796,7 @@ export const assignManualLibraryGift = onCall<ManualGiftRequest>(async (request)
     await createActivityLog(`shops/${shopId}/activityLogs`, {
       action: "manual_library_gift_assignment_failed", success: false,
       actorId: request.auth.uid, actorRole, functionName: "assignManualLibraryGift",
-      customerId: userId, shopId, giftLibraryId: libraryId, giftId, requestId,
+      customerId: userId, shopId, giftLibraryId: libraryId, bucketId, requestId,
       errorCode: error instanceof HttpsError ? error.code : "internal",
       errorMessage: error instanceof Error ? error.message : String(error),
     });
@@ -632,7 +825,7 @@ export const redeemShopGift = onCall<ShopGiftRequest>(async (request) => {
       transaction.update(giftRef, {isRedeemed: true, redeemedAt: now, redeemedBy: request.auth!.uid});
       return {
         userId: gift.userId as string,
-        giftId: gift.giftId as string,
+        bucketId: gift.bucketId as string,
         giftName: gift.giftName as string,
         giftLibraryId: gift.giftLibraryId as string,
         assignmentMode: gift.assignmentMode as string,
@@ -641,7 +834,7 @@ export const redeemShopGift = onCall<ShopGiftRequest>(async (request) => {
     await createActivityLog(`shops/${shopId}/activityLogs`, {
       action: "library_gift_redemption_success", success: true,
       actorId: request.auth.uid, actorRole, functionName: "redeemShopGift",
-      customerId: result.userId, shopId, userGiftId, giftId: result.giftId,
+      customerId: result.userId, shopId, userGiftId, bucketId: result.bucketId,
       giftName: result.giftName, giftLibraryId: result.giftLibraryId,
       assignmentMode: result.assignmentMode,
     });

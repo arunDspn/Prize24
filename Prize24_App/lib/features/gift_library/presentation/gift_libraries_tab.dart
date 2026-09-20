@@ -178,10 +178,11 @@ class _GiftLibrariesTabState extends ConsumerState<GiftLibrariesTab> {
                     title: Text(library.name),
                     subtitle: Text(
                       library.isActive
-                          ? library.description
+                          ? '${library.description}\n'
+                                '${library.activeBucketCount} / 20 active buckets'
                           : '${library.description}\nArchived',
                     ),
-                    isThreeLine: !library.isActive,
+                    isThreeLine: true,
                     onTap: library.isActive
                         ? () async {
                             await Navigator.of(context).push<void>(
@@ -230,39 +231,61 @@ class GiftLibraryDetailPage extends ConsumerStatefulWidget {
 }
 
 class _GiftLibraryDetailPageState extends ConsumerState<GiftLibraryDetailPage> {
-  late Future<List<LibraryGiftModel>> _gifts;
+  late Future<List<GiftLibraryBucketModel>> _buckets;
+  late int _activeBucketCount;
 
   @override
   void initState() {
     super.initState();
+    _activeBucketCount = widget.library.activeBucketCount;
     _reload();
   }
 
   void _reload() {
-    _gifts = ref.read(giftLibraryServiceProvider).listGifts(widget.library.id);
+    _buckets = ref
+        .read(giftLibraryServiceProvider)
+        .listBuckets(widget.library.id);
   }
 
-  Future<void> _openGiftEditor([LibraryGiftModel? gift]) async {
-    final nameController = TextEditingController(text: gift?.name);
+  Future<void> _openBucketEditor([GiftLibraryBucketModel? bucket]) async {
+    if (bucket == null && _activeBucketCount >= 20) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('A Gift Library can have at most 20 active buckets.'),
+        ),
+      );
+      return;
+    }
+    final nameController = TextEditingController(text: bucket?.name);
     final descriptionController = TextEditingController(
-      text: gift?.description,
+      text: bucket?.description,
+    );
+    final countController = TextEditingController(
+      text: bucket?.remainingCount.toString(),
     );
     final saved = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(gift == null ? 'Add Gift' : 'Edit Gift'),
+        title: Text(bucket == null ? 'Add Bucket' : 'Edit Bucket'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(labelText: 'Gift name'),
+              decoration: const InputDecoration(labelText: 'Bucket name'),
             ),
             TextField(
               controller: descriptionController,
               decoration: const InputDecoration(labelText: 'Description'),
               minLines: 2,
               maxLines: 4,
+            ),
+            TextField(
+              controller: countController,
+              decoration: const InputDecoration(
+                labelText: 'Remaining quantity',
+              ),
+              keyboardType: TextInputType.number,
             ),
           ],
         ),
@@ -275,20 +298,37 @@ class _GiftLibraryDetailPageState extends ConsumerState<GiftLibraryDetailPage> {
             onPressed: () async {
               final name = nameController.text.trim();
               final description = descriptionController.text.trim();
-              if (name.isEmpty || description.isEmpty) return;
+              final remainingCount = int.tryParse(countController.text.trim());
+              final minimumCount = bucket == null ? 1 : 0;
+              final validationMessage = bucket == null
+                  ? 'Enter a name, description, and quantity '
+                        'of at least 1.'
+                  : 'Enter a name, description, and '
+                        'non-negative quantity.';
+              if (name.isEmpty ||
+                  description.isEmpty ||
+                  remainingCount == null ||
+                  remainingCount < minimumCount) {
+                ScaffoldMessenger.of(
+                  this.context,
+                ).showSnackBar(SnackBar(content: Text(validationMessage)));
+                return;
+              }
               final service = ref.read(giftLibraryServiceProvider);
-              if (gift == null) {
-                await service.createGift(
+              if (bucket == null) {
+                await service.createBucket(
                   libraryId: widget.library.id,
                   name: name,
                   description: description,
+                  remainingCount: remainingCount,
                 );
               } else {
-                await service.updateGift(
+                await service.updateBucket(
                   libraryId: widget.library.id,
-                  giftId: gift.id,
+                  bucketId: bucket.id,
                   name: name,
                   description: description,
+                  remainingCount: remainingCount,
                 );
               }
               if (context.mounted) Navigator.pop(context, true);
@@ -300,7 +340,13 @@ class _GiftLibraryDetailPageState extends ConsumerState<GiftLibraryDetailPage> {
     );
     nameController.dispose();
     descriptionController.dispose();
-    if ((saved ?? false) && mounted) setState(_reload);
+    countController.dispose();
+    if ((saved ?? false) && mounted) {
+      setState(() {
+        if (bucket == null) _activeBucketCount++;
+        _reload();
+      });
+    }
   }
 
   @override
@@ -308,59 +354,86 @@ class _GiftLibraryDetailPageState extends ConsumerState<GiftLibraryDetailPage> {
     return Scaffold(
       appBar: AppBar(title: Text(widget.library.name)),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _openGiftEditor,
+        onPressed: _activeBucketCount >= 20 ? null : _openBucketEditor,
         icon: const Icon(Icons.add_rounded),
-        label: const Text('Gift'),
+        label: const Text('Bucket'),
       ),
-      body: FutureBuilder<List<LibraryGiftModel>>(
-        future: _gifts,
+      body: FutureBuilder<List<GiftLibraryBucketModel>>(
+        future: _buckets,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(child: CircularProgressIndicator());
           }
-          final gifts = snapshot.data ?? const [];
-          if (gifts.isEmpty) return const Center(child: Text('No gifts yet.'));
-          return ListView.separated(
+          if (snapshot.hasError) {
+            return Center(
+              child: Text('Unable to load buckets: ${snapshot.error}'),
+            );
+          }
+          final buckets = snapshot.data ?? const [];
+          _activeBucketCount = buckets
+              .where((bucket) => bucket.isActive)
+              .length;
+          return ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-            itemCount: gifts.length,
-            separatorBuilder: (_, _) => const Divider(),
-            itemBuilder: (context, index) {
-              final gift = gifts[index];
-              return ListTile(
-                enabled: gift.isActive,
-                leading: const Icon(Icons.redeem_rounded),
-                title: Text(gift.name),
-                subtitle: Text(
-                  gift.isActive
-                      ? gift.description
-                      : '${gift.description}\nArchived',
-                ),
-                isThreeLine: !gift.isActive,
-                trailing: gift.isActive
-                    ? PopupMenuButton<String>(
-                        onSelected: (value) async {
-                          if (value == 'edit') await _openGiftEditor(gift);
-                          if (value == 'archive') {
-                            await ref
-                                .read(giftLibraryServiceProvider)
-                                .archiveGift(
-                                  libraryId: widget.library.id,
-                                  giftId: gift.id,
-                                );
-                            if (mounted) setState(_reload);
-                          }
-                        },
-                        itemBuilder: (_) => const [
-                          PopupMenuItem(value: 'edit', child: Text('Edit')),
-                          PopupMenuItem(
-                            value: 'archive',
-                            child: Text('Archive'),
-                          ),
-                        ],
-                      )
-                    : null,
-              );
-            },
+            children: [
+              Text(
+                'Active buckets: $_activeBucketCount / 20',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 12),
+              if (buckets.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(top: 48),
+                  child: Center(child: Text('No buckets yet.')),
+                )
+              else
+                ...buckets.map((bucket) {
+                  final inventory = bucket.remainingCount == 0
+                      ? 'Out of stock'
+                      : 'Remaining: ${bucket.remainingCount}';
+                  return ListTile(
+                    enabled: bucket.isActive,
+                    leading: const Icon(Icons.inventory_2_rounded),
+                    title: Text(bucket.name),
+                    subtitle: Text(
+                      bucket.isActive
+                          ? '${bucket.description}\n$inventory'
+                          : '${bucket.description}\nArchived',
+                    ),
+                    isThreeLine: true,
+                    trailing: bucket.isActive
+                        ? PopupMenuButton<String>(
+                            onSelected: (value) async {
+                              if (value == 'edit') {
+                                await _openBucketEditor(bucket);
+                              }
+                              if (value == 'archive') {
+                                await ref
+                                    .read(giftLibraryServiceProvider)
+                                    .archiveBucket(
+                                      libraryId: widget.library.id,
+                                      bucketId: bucket.id,
+                                    );
+                                if (mounted) {
+                                  setState(() {
+                                    _activeBucketCount--;
+                                    _reload();
+                                  });
+                                }
+                              }
+                            },
+                            itemBuilder: (_) => const [
+                              PopupMenuItem(value: 'edit', child: Text('Edit')),
+                              PopupMenuItem(
+                                value: 'archive',
+                                child: Text('Archive'),
+                              ),
+                            ],
+                          )
+                        : null,
+                  );
+                }),
+            ],
           );
         },
       ),

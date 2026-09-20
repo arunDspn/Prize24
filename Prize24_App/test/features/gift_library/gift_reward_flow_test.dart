@@ -21,7 +21,7 @@ void main() {
       rewardOpportunity: RewardOpportunityModel(
         id: 'customer-1_15',
         status: 'pending',
-        availableSources: ['campaign', 'gift_library'],
+        eligibleSources: ['campaign', 'gift_library'],
       ),
     );
 
@@ -34,10 +34,10 @@ void main() {
     expect(data.milestone, 15);
     expect(data.cumulativeBillSum, 125.75);
     expect(data.milestoneCycleBillSum, 40.25);
-    expect(data.availableSources, ['campaign', 'gift_library']);
+    expect(data.eligibleSources, ['campaign', 'gift_library']);
   });
 
-  testWidgets('shows guidance when a Gift Library has no active gifts', (
+  testWidgets('shows guidance when a Gift Library has no active buckets', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -45,7 +45,7 @@ void main() {
         home: Builder(
           builder: (context) => Scaffold(
             body: FilledButton(
-              onPressed: () => showGiftLibraryPicker(context, const []),
+              onPressed: () => showGiftLibraryBucketPicker(context, const []),
               child: const Text('Open'),
             ),
           ),
@@ -56,7 +56,10 @@ void main() {
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
 
-    expect(find.text('This Gift Library has no active gifts.'), findsOneWidget);
+    expect(
+      find.text('This Gift Library has no active buckets.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('shows both reward sources and the monetary milestone summary', (
@@ -67,7 +70,7 @@ void main() {
       userId: 'customer-1',
       milestone: 15,
       cumulativeStreak: 16,
-      availableSources: ['campaign', 'gift_library'],
+      eligibleSources: ['campaign', 'gift_library'],
       cumulativeBillSum: 125.75,
       milestoneCycleBillSum: 40.25,
     );
@@ -75,15 +78,17 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
-          home: Consumer(
-            builder: (context, ref, _) => Scaffold(
+          home: Builder(
+            builder: (context) => Scaffold(
               body: FilledButton(
                 onPressed: () => unawaited(
-                  showMilestoneRewardFlow(
+                  showRewardSourceDialog(
                     context: context,
-                    ref: ref,
-                    shopId: 'shop-1',
                     data: data,
+                    lifetimeSpend: '125.75',
+                    milestoneCycleSpend: '40.25',
+                    libraryHasStock: false,
+                    libraryLoadError: null,
                   ),
                 ),
                 child: const Text('Resolve'),
@@ -103,20 +108,25 @@ void main() {
     expect(find.text('Milestone-cycle spend: 40.25'), findsOneWidget);
     expect(find.text('Campaign draw'), findsOneWidget);
     expect(find.text('Gift Library'), findsOneWidget);
+    expect(
+      find.text('Out of stock. Restock a bucket to continue.'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Assign later'));
     await tester.pumpAndSettle();
   });
 
-  testWidgets('confirms both the customer and selected library gift', (
+  testWidgets('confirms both the customer and selected library bucket', (
     tester,
   ) async {
     final now = DateTime(2026);
-    final gift = LibraryGiftModel(
-      id: 'gift-1',
+    final bucket = GiftLibraryBucketModel(
+      id: 'bucket-1',
       name: 'Free Coffee',
       description: 'One regular coffee',
       status: 'active',
+      remainingCount: 3,
       createdAt: now,
       updatedAt: now,
     );
@@ -126,8 +136,8 @@ void main() {
         home: Builder(
           builder: (context) => Scaffold(
             body: FilledButton(
-              onPressed: () => showGiftLibraryPicker(context, [
-                gift,
+              onPressed: () => showGiftLibraryBucketPicker(context, [
+                bucket,
               ], customerId: 'customer-1'),
               child: const Text('Open'),
             ),
@@ -143,5 +153,40 @@ void main() {
 
     expect(find.textContaining('Customer: customer-1'), findsOneWidget);
     expect(find.textContaining('One regular coffee'), findsWidgets);
+  });
+
+  testWidgets('disables an out-of-stock bucket', (tester) async {
+    final now = DateTime(2026);
+    final bucket = GiftLibraryBucketModel(
+      id: 'bucket-empty',
+      name: 'Carrot',
+      description: 'One carrot bundle',
+      status: 'active',
+      remainingCount: 0,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: FilledButton(
+              onPressed: () => showGiftLibraryBucketPicker(context, [bucket]),
+              child: const Text('Open'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Out of stock'), findsOneWidget);
+    final tile = tester.widget<ListTile>(
+      find.widgetWithText(ListTile, 'Carrot'),
+    );
+    expect(tile.enabled, isFalse);
   });
 }

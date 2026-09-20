@@ -30,7 +30,7 @@ export type RewardSource = "campaign" | "gift_library";
  * @param {boolean} supportsGiftLibrary Whether the caller uses reward flow v1
  * @return {RewardSource[]} Available sources in display order
  */
-export function getAvailableRewardSources(
+export function getEligibleRewardSources(
   campaignId: unknown,
   giftLibraryId: unknown,
   supportsGiftLibrary: boolean
@@ -282,7 +282,7 @@ type CheckInTransactionResult = {
   cumulativeBillSum: number;
   milestoneCycleBillSum: number;
   rewardOpportunityId: string | null;
-  availableSources: Array<"campaign" | "gift_library">;
+  eligibleSources: Array<"campaign" | "gift_library">;
 };
 
 /**
@@ -360,7 +360,7 @@ async function handleCheckInUser(
     const shopData = shopDoc.data();
     const associatedCampaignId = shopData?.associatedCampaignId || null;
     const associatedGiftLibraryId = shopData?.associatedGiftLibraryId || null;
-    const availableSources = getAvailableRewardSources(
+    const eligibleSources = getEligibleRewardSources(
       associatedCampaignId,
       associatedGiftLibraryId,
       rewardFlowVersion
@@ -429,7 +429,7 @@ async function handleCheckInUser(
       }
 
       const newCumulativeStreak = currentCumulativeStreak + streakIncrement;
-      const milestone = availableSources.length > 0 ? crossedGiftMilestone(
+      const milestone = eligibleSources.length > 0 ? crossedGiftMilestone(
         currentCumulativeStreak,
         newCumulativeStreak,
         giftCycleDay,
@@ -560,7 +560,7 @@ async function handleCheckInUser(
         previousStreak: currentCumulativeStreak,
         phoneNumber: customerPhoneNumber,
         crossedMilestone: milestone,
-        rewardSources: isGiftDay ? availableSources : [],
+        rewardSources: isGiftDay ? eligibleSources : [],
         ...billLogData,
       });
 
@@ -581,7 +581,7 @@ async function handleCheckInUser(
           status: "pending",
           selectedSource: null,
           outcome: null,
-          availableSources,
+          eligibleSources,
           campaignId: associatedCampaignId,
           giftLibraryId: associatedGiftLibraryId,
           campaignSnapshot: associatedCampaignId ? {
@@ -615,7 +615,7 @@ async function handleCheckInUser(
           shopId,
           rewardOpportunityId,
           crossedMilestone: milestone,
-          availableSources,
+          eligibleSources,
           cumulativeBillSum: newCumulativeBillSum,
           milestoneCycleBillSum: newPreviousCycleBillSum,
           phoneNumber: customerPhoneNumber,
@@ -632,7 +632,7 @@ async function handleCheckInUser(
         cumulativeBillSum: newCumulativeBillSum,
         milestoneCycleBillSum: newPreviousCycleBillSum,
         rewardOpportunityId,
-        availableSources,
+        eligibleSources,
       };
     });
 
@@ -702,7 +702,7 @@ async function handleCheckInUser(
           rewardOpportunity: {
             id: result.rewardOpportunityId,
             status: "pending" as const,
-            availableSources: result.availableSources,
+            eligibleSources: result.eligibleSources,
             selectedSource: null,
           },
         } : {}),

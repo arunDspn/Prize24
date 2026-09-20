@@ -627,12 +627,12 @@ class _ShopActivityLogDetailPageState
               monospace: true,
             ),
           ],
-          if (p.availableSources.isNotEmpty) ...[
+          if (p.eligibleSources.isNotEmpty) ...[
             const _CardDivider(),
             _DetailRow(
               icon: Icons.account_tree_outlined,
-              label: 'Available Sources',
-              value: p.availableSources.join(', ').replaceAll('_', ' '),
+              label: 'Eligible Sources',
+              value: p.eligibleSources.join(', ').replaceAll('_', ' '),
             ),
           ],
           if (p.selectedSource != null) ...[
@@ -673,6 +673,26 @@ class _ShopActivityLogDetailPageState
               icon: Icons.card_giftcard_rounded,
               label: 'Gift',
               value: p.giftName ?? p.giftId!,
+            ),
+          ],
+          if (p.bucketId != null) ...[
+            const _CardDivider(),
+            _DetailRow(
+              icon: Icons.inventory_2_outlined,
+              label: 'Bucket ID',
+              value: p.bucketId!,
+              monospace: true,
+            ),
+          ],
+          if (p.remainingCountBefore != null ||
+              p.remainingCountAfter != null) ...[
+            const _CardDivider(),
+            _DetailRow(
+              icon: Icons.numbers_rounded,
+              label: 'Bucket Inventory',
+              value:
+                  '${p.remainingCountBefore ?? '—'} → '
+                  '${p.remainingCountAfter ?? '—'}',
             ),
           ],
           if (p.assignmentMode != null) ...[

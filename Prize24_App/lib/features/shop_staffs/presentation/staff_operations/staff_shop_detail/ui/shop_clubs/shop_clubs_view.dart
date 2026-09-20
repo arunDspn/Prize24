@@ -45,7 +45,7 @@ class _ShopClubsViewState extends ConsumerState<ShopClubsView>
         ? Future.value(false)
         : GiftLibraryService()
               .getAttachedLibrary(widget.shopId)
-              .then((library) => library.gifts.isNotEmpty);
+              .then((library) => library.hasAvailableBuckets);
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
@@ -98,8 +98,8 @@ class _ShopClubsViewState extends ConsumerState<ShopClubsView>
                     icon: Icons.card_giftcard_rounded,
                     title: 'Assign Library Gift',
                     subtitle: enabled
-                        ? 'Assign a gift to an existing shop follower'
-                        : 'Attach a library with at least one active gift',
+                        ? 'Assign a bucket gift to an existing shop follower'
+                        : 'Attach a library with at least one stocked bucket',
                     gradientColors: const [
                       Color(0xFFEC4899),
                       Color(0xFFF97316),

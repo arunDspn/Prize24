@@ -30,6 +30,7 @@ abstract class UserGiftModel with _$UserGiftModel {
     String? streakShopID,
     String? sourceType,
     String? giftLibraryId,
+    String? bucketId,
     String? shopId,
     String? assignmentMode,
     String? rewardOpportunityId,

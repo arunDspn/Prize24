@@ -14,7 +14,7 @@ class RewardFlowData {
     required this.userId,
     required this.milestone,
     required this.cumulativeStreak,
-    required this.availableSources,
+    required this.eligibleSources,
     required this.cumulativeBillSum,
     required this.milestoneCycleBillSum,
     this.selectedSource,
@@ -30,7 +30,7 @@ class RewardFlowData {
       userId: userId,
       milestone: data.crossedMilestone ?? data.cumulativeStreak,
       cumulativeStreak: data.cumulativeStreak,
-      availableSources: opportunity.availableSources,
+      eligibleSources: opportunity.eligibleSources,
       selectedSource: opportunity.selectedSource,
       cumulativeBillSum: data.cumulativeBillSum,
       milestoneCycleBillSum: data.milestoneCycleBillSum,
@@ -43,7 +43,7 @@ class RewardFlowData {
       userId: item.userId,
       milestone: item.milestone,
       cumulativeStreak: item.cumulativeStreak,
-      availableSources: item.availableSources,
+      eligibleSources: item.eligibleSources,
       selectedSource: item.selectedSource,
       cumulativeBillSum: item.cumulativeBillSum,
       milestoneCycleBillSum: item.milestoneCycleBillSum,
@@ -54,7 +54,7 @@ class RewardFlowData {
   final String userId;
   final int milestone;
   final int cumulativeStreak;
-  final List<String> availableSources;
+  final List<String> eligibleSources;
   final String? selectedSource;
   final double cumulativeBillSum;
   final double milestoneCycleBillSum;
@@ -78,75 +78,59 @@ Future<void> showMilestoneRewardFlow({
 }) async {
   final lifetimeSpend = data.cumulativeBillSum.toStringAsFixed(2);
   final milestoneCycleSpend = data.milestoneCycleBillSum.toStringAsFixed(2);
-  final source =
-      data.selectedSource ??
-      (data.availableSources.length == 1
-          ? data.availableSources.single
-          : await showDialog<String>(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('Milestone reached'),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Current cumulative streak: ${data.cumulativeStreak}'),
-                    Text('Crossed milestone: ${data.milestone}'),
-                    const SizedBox(height: 8),
-                    Text('Lifetime spend: $lifetimeSpend'),
-                    Text('Milestone-cycle spend: $milestoneCycleSpend'),
-                    const SizedBox(height: 20),
-                    if (data.availableSources.contains('campaign'))
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.campaign_rounded),
-                        title: const Text('Campaign draw'),
-                        subtitle: const Text('Use the current campaign draw.'),
-                        onTap: () => Navigator.pop(context, 'campaign'),
-                      ),
-                    if (data.availableSources.contains('gift_library'))
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.card_giftcard_rounded),
-                        title: const Text('Gift Library'),
-                        subtitle: const Text(
-                          'Choose a gift for this customer.',
-                        ),
-                        onTap: () => Navigator.pop(context, 'gift_library'),
-                      ),
-                  ],
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Assign later'),
-                  ),
-                ],
-              ),
-            ));
-  if (source == null || !context.mounted) return;
-
-  String? giftId;
-  if (source == 'gift_library') {
+  AttachedGiftLibraryModel? attachedLibrary;
+  Object? libraryLoadError;
+  if (data.eligibleSources.contains('gift_library')) {
     try {
-      final attached = await ref
+      attachedLibrary = await ref
           .read(giftLibraryServiceProvider)
           .getAttachedLibrary(shopId, opportunityId: data.opportunityId);
-      if (!context.mounted) return;
-      final gift = await showGiftLibraryPicker(
-        context,
-        attached.gifts,
-        customerId: data.userId,
-      );
-      if (gift == null || !context.mounted) return;
-      giftId = gift.id;
     } catch (error) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Reward remains pending: $error')));
+      libraryLoadError = error;
+    }
+  }
+  if (!context.mounted) return;
+
+  final libraryHasStock = attachedLibrary?.hasAvailableBuckets ?? false;
+  var source = data.selectedSource;
+  if (source == null) {
+    final canProceedDirectly =
+        data.eligibleSources.length == 1 &&
+        (data.eligibleSources.single == 'campaign' || libraryHasStock);
+    source = canProceedDirectly
+        ? data.eligibleSources.single
+        : await showRewardSourceDialog(
+            context: context,
+            data: data,
+            lifetimeSpend: lifetimeSpend,
+            milestoneCycleSpend: milestoneCycleSpend,
+            libraryHasStock: libraryHasStock,
+            libraryLoadError: libraryLoadError,
+          );
+  }
+  if (source == null || !context.mounted) return;
+
+  String? bucketId;
+  if (source == 'gift_library') {
+    if (libraryLoadError != null || !libraryHasStock) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            libraryLoadError == null
+                ? 'Reward remains pending until a bucket is restocked.'
+                : 'Reward remains pending: $libraryLoadError',
+          ),
+        ),
+      );
       return;
     }
+    final bucket = await showGiftLibraryBucketPicker(
+      context,
+      attachedLibrary!.buckets,
+      customerId: data.userId,
+    );
+    if (bucket == null || !context.mounted) return;
+    bucketId = bucket.id;
   }
 
   unawaited(
@@ -164,7 +148,7 @@ Future<void> showMilestoneRewardFlow({
           userId: data.userId,
           opportunityId: data.opportunityId,
           source: source,
-          giftId: giftId,
+          bucketId: bucketId,
         );
     if (!context.mounted) return;
     Navigator.of(context, rootNavigator: true).pop();
@@ -203,62 +187,130 @@ Future<void> showMilestoneRewardFlow({
   }
 }
 
-Future<LibraryGiftModel?> showGiftLibraryPicker(
+Future<String?> showRewardSourceDialog({
+  required BuildContext context,
+  required RewardFlowData data,
+  required String lifetimeSpend,
+  required String milestoneCycleSpend,
+  required bool libraryHasStock,
+  required Object? libraryLoadError,
+}) {
+  return showDialog<String>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Milestone reached'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Current cumulative streak: ${data.cumulativeStreak}'),
+          Text('Crossed milestone: ${data.milestone}'),
+          const SizedBox(height: 8),
+          Text('Lifetime spend: $lifetimeSpend'),
+          Text('Milestone-cycle spend: $milestoneCycleSpend'),
+          const SizedBox(height: 20),
+          if (data.eligibleSources.contains('campaign'))
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.campaign_rounded),
+              title: const Text('Campaign draw'),
+              subtitle: const Text('Use the current campaign draw.'),
+              onTap: () => Navigator.pop(context, 'campaign'),
+            ),
+          if (data.eligibleSources.contains('gift_library'))
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              enabled: libraryHasStock,
+              leading: const Icon(Icons.card_giftcard_rounded),
+              title: const Text('Gift Library'),
+              subtitle: Text(
+                libraryHasStock
+                    ? 'Choose a bucket for this customer.'
+                    : libraryLoadError == null
+                    ? 'Out of stock. Restock a bucket to continue.'
+                    : 'Unable to check bucket inventory.',
+              ),
+              onTap: libraryHasStock
+                  ? () => Navigator.pop(context, 'gift_library')
+                  : null,
+            ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Assign later'),
+        ),
+      ],
+    ),
+  );
+}
+
+Future<GiftLibraryBucketModel?> showGiftLibraryBucketPicker(
   BuildContext context,
-  List<LibraryGiftModel> gifts, {
+  List<GiftLibraryBucketModel> buckets, {
   String? customerId,
 }) {
-  return showModalBottomSheet<LibraryGiftModel>(
+  return showModalBottomSheet<GiftLibraryBucketModel>(
     context: context,
     showDragHandle: true,
     builder: (context) => SafeArea(
-      child: gifts.isEmpty
+      child: buckets.isEmpty
           ? const Padding(
               padding: EdgeInsets.all(32),
               child: Text(
-                'This Gift Library has no active gifts.',
+                'This Gift Library has no active buckets.',
                 textAlign: TextAlign.center,
               ),
             )
           : ListView.separated(
               shrinkWrap: true,
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-              itemCount: gifts.length,
+              itemCount: buckets.length,
               separatorBuilder: (_, _) => const Divider(),
               itemBuilder: (context, index) {
-                final gift = gifts[index];
+                final bucket = buckets[index];
                 final customerLine = customerId == null
                     ? ''
                     : '\n\nCustomer: $customerId';
+                final inventoryLine = bucket.isAvailable
+                    ? 'Remaining: ${bucket.remainingCount}'
+                    : 'Out of stock';
                 return ListTile(
                   leading: const Icon(Icons.redeem_rounded),
-                  title: Text(gift.name),
-                  subtitle: Text(gift.description),
-                  onTap: () async {
-                    final confirmed = await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Assign this gift?'),
-                        content: Text(
-                          '${gift.name}\n\n${gift.description}'
-                          '$customerLine',
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: const Text('Cancel'),
-                          ),
-                          FilledButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: const Text('Assign'),
-                          ),
-                        ],
-                      ),
-                    );
-                    if ((confirmed ?? false) && context.mounted) {
-                      Navigator.pop(context, gift);
-                    }
-                  },
+                  title: Text(bucket.name),
+                  subtitle: Text('${bucket.description}\n$inventoryLine'),
+                  isThreeLine: true,
+                  enabled: bucket.isAvailable,
+                  onTap: !bucket.isAvailable
+                      ? null
+                      : () async {
+                          final confirmed = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Assign this gift?'),
+                              content: Text(
+                                '${bucket.name}\n\n${bucket.description}'
+                                '\n\nRemaining: ${bucket.remainingCount}'
+                                '$customerLine',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text('Cancel'),
+                                ),
+                                FilledButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('Assign'),
+                                ),
+                              ],
+                            ),
+                          );
+                          if ((confirmed ?? false) && context.mounted) {
+                            Navigator.pop(context, bucket);
+                          }
+                        },
                 );
               },
             ),
@@ -389,12 +441,12 @@ class _GiftLibraryScannerPageState
             .read(giftLibraryServiceProvider)
             .getAttachedLibrary(widget.shopId, followerUserId: code.trim());
         if (!mounted) return;
-        final gift = await showGiftLibraryPicker(
+        final bucket = await showGiftLibraryBucketPicker(
           context,
-          attached.gifts,
+          attached.buckets,
           customerId: code.trim(),
         );
-        if (gift == null) return;
+        if (bucket == null) return;
         final requestId = FirebaseFirestore.instance
             .collection('_ids')
             .doc()
@@ -404,7 +456,7 @@ class _GiftLibraryScannerPageState
             .assignManualGift(
               shopId: widget.shopId,
               userId: code.trim(),
-              giftId: gift.id,
+              bucketId: bucket.id,
               requestId: requestId,
             );
         if (mounted) {

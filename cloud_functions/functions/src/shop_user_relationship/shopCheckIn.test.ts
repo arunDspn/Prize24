@@ -74,17 +74,17 @@ describe("gift milestone crossing", () => {
 
 describe("reward source compatibility", () => {
   it("supports campaign-only, library-only, both, and neither in reward flow v1", () => {
-    assert.deepEqual(subject.getAvailableRewardSources("campaign-1", null, true), ["campaign"]);
-    assert.deepEqual(subject.getAvailableRewardSources(null, "library-1", true), ["gift_library"]);
-    assert.deepEqual(subject.getAvailableRewardSources("campaign-1", "library-1", true), [
+    assert.deepEqual(subject.getEligibleRewardSources("campaign-1", null, true), ["campaign"]);
+    assert.deepEqual(subject.getEligibleRewardSources(null, "library-1", true), ["gift_library"]);
+    assert.deepEqual(subject.getEligibleRewardSources("campaign-1", "library-1", true), [
       "campaign",
       "gift_library",
     ]);
-    assert.deepEqual(subject.getAvailableRewardSources(null, null, true), []);
+    assert.deepEqual(subject.getEligibleRewardSources(null, null, true), []);
   });
 
   it("hides Gift Libraries from legacy callers", () => {
-    assert.deepEqual(subject.getAvailableRewardSources(null, "library-1", false), []);
-    assert.deepEqual(subject.getAvailableRewardSources("campaign-1", "library-1", false), ["campaign"]);
+    assert.deepEqual(subject.getEligibleRewardSources(null, "library-1", false), []);
+    assert.deepEqual(subject.getEligibleRewardSources("campaign-1", "library-1", false), ["campaign"]);
   });
 });

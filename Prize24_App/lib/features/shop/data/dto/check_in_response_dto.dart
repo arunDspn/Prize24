@@ -85,7 +85,7 @@ abstract class RewardOpportunityDto with _$RewardOpportunityDto {
   const factory RewardOpportunityDto({
     required String id,
     required String status,
-    @Default(<String>[]) List<String> availableSources,
+    @Default(<String>[]) List<String> eligibleSources,
     String? selectedSource,
   }) = _RewardOpportunityDto;
 
@@ -97,7 +97,7 @@ abstract class RewardOpportunityDto with _$RewardOpportunityDto {
   RewardOpportunityModel toDomain() => RewardOpportunityModel(
     id: id,
     status: status,
-    availableSources: availableSources,
+    eligibleSources: eligibleSources,
     selectedSource: selectedSource,
   );
 }

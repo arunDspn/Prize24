@@ -64,8 +64,8 @@ _RewardOpportunityDto _$RewardOpportunityDtoFromJson(
 ) => _RewardOpportunityDto(
   id: json['id'] as String,
   status: json['status'] as String,
-  availableSources:
-      (json['availableSources'] as List<dynamic>?)
+  eligibleSources:
+      (json['eligibleSources'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList() ??
       const <String>[],
@@ -77,6 +77,6 @@ Map<String, dynamic> _$RewardOpportunityDtoToJson(
 ) => <String, dynamic>{
   'id': instance.id,
   'status': instance.status,
-  'availableSources': instance.availableSources,
+  'eligibleSources': instance.eligibleSources,
   'selectedSource': instance.selectedSource,
 };

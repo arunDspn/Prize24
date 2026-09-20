@@ -57,7 +57,7 @@ class _VendorShopDetailsPageState extends State<VendorShopDetailsPage>
         ? Future.value(false)
         : GiftLibraryService()
               .getAttachedLibrary(currentShop.id!)
-              .then((library) => library.gifts.isNotEmpty);
+              .then((library) => library.hasAvailableBuckets);
     _scrollController = ScrollController()..addListener(_onScroll);
 
     _animationController = AnimationController(

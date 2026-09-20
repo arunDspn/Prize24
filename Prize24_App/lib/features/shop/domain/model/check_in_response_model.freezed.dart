@@ -521,7 +521,7 @@ return $default(_that.cumulativeStreak,_that.consecutiveDays,_that.bonusApplied,
 
 class _CheckInRepsponseDataModel implements CheckInRepsponseDataModel {
   const _CheckInRepsponseDataModel({required this.cumulativeStreak, required this.consecutiveDays, required this.bonusApplied, required this.isGiftDay, required this.isNewUser, this.cumulativeBillSum = 0, this.milestoneCycleBillSum = 0, this.crossedMilestone, this.rewardOpportunity});
-  
+
 
 @override final  int cumulativeStreak;
 @override final  int consecutiveDays;
@@ -613,7 +613,7 @@ $RewardOpportunityModelCopyWith<$Res>? get rewardOpportunity {
 /// @nodoc
 mixin _$RewardOpportunityModel {
 
- String get id; String get status; List<String> get availableSources; String? get selectedSource;
+ String get id; String get status; List<String> get eligibleSources; String? get selectedSource;
 /// Create a copy of RewardOpportunityModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -624,16 +624,16 @@ $RewardOpportunityModelCopyWith<RewardOpportunityModel> get copyWith => _$Reward
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RewardOpportunityModel&&(identical(other.id, id) || other.id == id)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.availableSources, availableSources)&&(identical(other.selectedSource, selectedSource) || other.selectedSource == selectedSource));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RewardOpportunityModel&&(identical(other.id, id) || other.id == id)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.eligibleSources, eligibleSources)&&(identical(other.selectedSource, selectedSource) || other.selectedSource == selectedSource));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,status,const DeepCollectionEquality().hash(availableSources),selectedSource);
+int get hashCode => Object.hash(runtimeType,id,status,const DeepCollectionEquality().hash(eligibleSources),selectedSource);
 
 @override
 String toString() {
-  return 'RewardOpportunityModel(id: $id, status: $status, availableSources: $availableSources, selectedSource: $selectedSource)';
+  return 'RewardOpportunityModel(id: $id, status: $status, eligibleSources: $eligibleSources, selectedSource: $selectedSource)';
 }
 
 
@@ -644,7 +644,7 @@ abstract mixin class $RewardOpportunityModelCopyWith<$Res>  {
   factory $RewardOpportunityModelCopyWith(RewardOpportunityModel value, $Res Function(RewardOpportunityModel) _then) = _$RewardOpportunityModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String status, List<String> availableSources, String? selectedSource
+ String id, String status, List<String> eligibleSources, String? selectedSource
 });
 
 
@@ -661,11 +661,11 @@ class _$RewardOpportunityModelCopyWithImpl<$Res>
 
 /// Create a copy of RewardOpportunityModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? status = null,Object? availableSources = null,Object? selectedSource = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? status = null,Object? eligibleSources = null,Object? selectedSource = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as String,availableSources: null == availableSources ? _self.availableSources : availableSources // ignore: cast_nullable_to_non_nullable
+as String,eligibleSources: null == eligibleSources ? _self.eligibleSources : eligibleSources // ignore: cast_nullable_to_non_nullable
 as List<String>,selectedSource: freezed == selectedSource ? _self.selectedSource : selectedSource // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
@@ -752,10 +752,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String status,  List<String> availableSources,  String? selectedSource)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String status,  List<String> eligibleSources,  String? selectedSource)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RewardOpportunityModel() when $default != null:
-return $default(_that.id,_that.status,_that.availableSources,_that.selectedSource);case _:
+return $default(_that.id,_that.status,_that.eligibleSources,_that.selectedSource);case _:
   return orElse();
 
 }
@@ -773,10 +773,10 @@ return $default(_that.id,_that.status,_that.availableSources,_that.selectedSourc
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String status,  List<String> availableSources,  String? selectedSource)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String status,  List<String> eligibleSources,  String? selectedSource)  $default,) {final _that = this;
 switch (_that) {
 case _RewardOpportunityModel():
-return $default(_that.id,_that.status,_that.availableSources,_that.selectedSource);case _:
+return $default(_that.id,_that.status,_that.eligibleSources,_that.selectedSource);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -793,10 +793,10 @@ return $default(_that.id,_that.status,_that.availableSources,_that.selectedSourc
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String status,  List<String> availableSources,  String? selectedSource)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String status,  List<String> eligibleSources,  String? selectedSource)?  $default,) {final _that = this;
 switch (_that) {
 case _RewardOpportunityModel() when $default != null:
-return $default(_that.id,_that.status,_that.availableSources,_that.selectedSource);case _:
+return $default(_that.id,_that.status,_that.eligibleSources,_that.selectedSource);case _:
   return null;
 
 }
@@ -808,16 +808,16 @@ return $default(_that.id,_that.status,_that.availableSources,_that.selectedSourc
 
 
 class _RewardOpportunityModel implements RewardOpportunityModel {
-  const _RewardOpportunityModel({required this.id, required this.status, final  List<String> availableSources = const <String>[], this.selectedSource}): _availableSources = availableSources;
+  const _RewardOpportunityModel({required this.id, required this.status, final  List<String> eligibleSources = const <String>[], this.selectedSource}): _eligibleSources = eligibleSources;
 
 
 @override final  String id;
 @override final  String status;
- final  List<String> _availableSources;
-@override@JsonKey() List<String> get availableSources {
-  if (_availableSources is EqualUnmodifiableListView) return _availableSources;
+ final  List<String> _eligibleSources;
+@override@JsonKey() List<String> get eligibleSources {
+  if (_eligibleSources is EqualUnmodifiableListView) return _eligibleSources;
   // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_availableSources);
+  return EqualUnmodifiableListView(_eligibleSources);
 }
 
 @override final  String? selectedSource;
@@ -832,16 +832,16 @@ _$RewardOpportunityModelCopyWith<_RewardOpportunityModel> get copyWith => __$Rew
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RewardOpportunityModel&&(identical(other.id, id) || other.id == id)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._availableSources, _availableSources)&&(identical(other.selectedSource, selectedSource) || other.selectedSource == selectedSource));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RewardOpportunityModel&&(identical(other.id, id) || other.id == id)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._eligibleSources, _eligibleSources)&&(identical(other.selectedSource, selectedSource) || other.selectedSource == selectedSource));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,status,const DeepCollectionEquality().hash(_availableSources),selectedSource);
+int get hashCode => Object.hash(runtimeType,id,status,const DeepCollectionEquality().hash(_eligibleSources),selectedSource);
 
 @override
 String toString() {
-  return 'RewardOpportunityModel(id: $id, status: $status, availableSources: $availableSources, selectedSource: $selectedSource)';
+  return 'RewardOpportunityModel(id: $id, status: $status, eligibleSources: $eligibleSources, selectedSource: $selectedSource)';
 }
 
 
@@ -852,7 +852,7 @@ abstract mixin class _$RewardOpportunityModelCopyWith<$Res> implements $RewardOp
   factory _$RewardOpportunityModelCopyWith(_RewardOpportunityModel value, $Res Function(_RewardOpportunityModel) _then) = __$RewardOpportunityModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String status, List<String> availableSources, String? selectedSource
+ String id, String status, List<String> eligibleSources, String? selectedSource
 });
 
 
@@ -869,11 +869,11 @@ class __$RewardOpportunityModelCopyWithImpl<$Res>
 
 /// Create a copy of RewardOpportunityModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? status = null,Object? availableSources = null,Object? selectedSource = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? status = null,Object? eligibleSources = null,Object? selectedSource = freezed,}) {
   return _then(_RewardOpportunityModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as String,availableSources: null == availableSources ? _self._availableSources : availableSources // ignore: cast_nullable_to_non_nullable
+as String,eligibleSources: null == eligibleSources ? _self._eligibleSources : eligibleSources // ignore: cast_nullable_to_non_nullable
 as List<String>,selectedSource: freezed == selectedSource ? _self.selectedSource : selectedSource // ignore: cast_nullable_to_non_nullable
 as String?,
   ));

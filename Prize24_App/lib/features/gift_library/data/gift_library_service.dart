@@ -43,6 +43,7 @@ class GiftLibraryService {
       'name': name.trim(),
       'description': description.trim(),
       'status': 'active',
+      'activeBucketCount': 0,
       'createdAt': now,
       'updatedAt': now,
     });
@@ -76,49 +77,62 @@ class GiftLibraryService {
     );
   }
 
-  Future<List<LibraryGiftModel>> listGifts(String libraryId) async {
-    final snapshot = await _libraries.doc(libraryId).collection('gifts').get();
-    final gifts = snapshot.docs.map(LibraryGiftModel.fromFirestore).toList()
-      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-    return gifts;
+  Future<List<GiftLibraryBucketModel>> listBuckets(String libraryId) async {
+    final snapshot = await _libraries
+        .doc(libraryId)
+        .collection('buckets')
+        .get();
+    final buckets =
+        snapshot.docs.map(GiftLibraryBucketModel.fromFirestore).toList()
+          ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    return buckets;
   }
 
-  Future<LibraryGiftModel> createGift({
+  Future<GiftLibraryBucketModel> createBucket({
     required String libraryId,
     required String name,
     required String description,
+    required int remainingCount,
   }) async {
-    final now = Timestamp.now();
-    final reference = await _libraries.doc(libraryId).collection('gifts').add({
-      'name': name.trim(),
-      'description': description.trim(),
-      'status': 'active',
-      'createdAt': now,
-      'updatedAt': now,
-    });
-    return LibraryGiftModel.fromFirestore(await reference.get());
+    final response = await _functions
+        .httpsCallable('createGiftLibraryBucket')
+        .call<dynamic>({
+          'giftLibraryId': libraryId,
+          'name': name.trim(),
+          'description': description.trim(),
+          'remainingCount': remainingCount,
+        });
+    final data = CFSpecificConvertors.convertCFMapToStringDynamic(
+      response.data,
+    );
+    return GiftLibraryBucketModel.fromMap(
+      CFSpecificConvertors.convertCFMapToStringDynamic(data['bucket']),
+    );
   }
 
-  Future<void> updateGift({
+  Future<void> updateBucket({
     required String libraryId,
-    required String giftId,
+    required String bucketId,
     required String name,
     required String description,
-  }) {
-    return _libraries.doc(libraryId).collection('gifts').doc(giftId).update({
+    required int remainingCount,
+  }) async {
+    await _functions.httpsCallable('updateGiftLibraryBucket').call<dynamic>({
+      'giftLibraryId': libraryId,
+      'bucketId': bucketId,
       'name': name.trim(),
       'description': description.trim(),
-      'updatedAt': Timestamp.now(),
+      'remainingCount': remainingCount,
     });
   }
 
-  Future<void> archiveGift({
+  Future<void> archiveBucket({
     required String libraryId,
-    required String giftId,
-  }) {
-    return _libraries.doc(libraryId).collection('gifts').doc(giftId).update({
-      'status': 'archived',
-      'updatedAt': Timestamp.now(),
+    required String bucketId,
+  }) async {
+    await _functions.httpsCallable('archiveGiftLibraryBucket').call<dynamic>({
+      'giftLibraryId': libraryId,
+      'bucketId': bucketId,
     });
   }
 
@@ -136,17 +150,18 @@ class GiftLibraryService {
         });
     final data = CFSpecificConvertors.convertCFMapToStringDynamic(result.data);
     final libraryData = data['library'];
-    final giftsData = data['gifts'] as List<dynamic>? ?? const [];
+    final bucketsData = data['buckets'] as List<dynamic>? ?? const [];
     return AttachedGiftLibraryModel(
       library: libraryData is Map
           ? GiftLibraryModel.fromMap(
               CFSpecificConvertors.convertCFMapToStringDynamic(libraryData),
             )
           : null,
-      gifts: giftsData
+      buckets: bucketsData
           .map(CFSpecificConvertors.convertCFMapToStringDynamic)
-          .map(LibraryGiftModel.fromMap)
+          .map(GiftLibraryBucketModel.fromMap)
           .toList(),
+      hasAvailableBuckets: data['hasAvailableBuckets'] as bool? ?? false,
     );
   }
 
@@ -168,7 +183,7 @@ class GiftLibraryService {
     required String userId,
     required String opportunityId,
     required String source,
-    String? giftId,
+    String? bucketId,
   }) async {
     final result = await _functions
         .httpsCallable('resolveShopReward')
@@ -177,7 +192,7 @@ class GiftLibraryService {
           'userId': userId,
           'opportunityId': opportunityId,
           'source': source,
-          if (giftId != null) 'giftId': giftId,
+          if (bucketId != null) 'bucketId': bucketId,
         });
     return RewardResolutionResult.fromMap(
       CFSpecificConvertors.convertCFMapToStringDynamic(result.data),
@@ -187,7 +202,7 @@ class GiftLibraryService {
   Future<RewardResolutionResult> assignManualGift({
     required String shopId,
     required String userId,
-    required String giftId,
+    required String bucketId,
     required String requestId,
   }) async {
     final result = await _functions
@@ -195,7 +210,7 @@ class GiftLibraryService {
         .call<dynamic>({
           'shopId': shopId,
           'userId': userId,
-          'giftId': giftId,
+          'bucketId': bucketId,
           'requestId': requestId,
         });
     return RewardResolutionResult.fromMap(

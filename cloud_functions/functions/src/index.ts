@@ -60,6 +60,9 @@ export {
 } from "./shop_user_relationship/shopCheckIn";
 
 export {
+  createGiftLibraryBucket,
+  updateGiftLibraryBucket,
+  archiveGiftLibraryBucket,
   getAttachedGiftLibrary,
   resolveShopReward,
   assignManualLibraryGift,

@@ -390,18 +390,21 @@ const _kRewardEventKeys = <String>{
   'shopId',
   'rewardOpportunityId',
   'selectedSource',
-  'availableSources',
+  'eligibleSources',
   'crossedMilestone',
   'cumulativeBillSum',
   'milestoneCycleBillSum',
   'campaignId',
   'giftLibraryId',
   'giftId',
+  'bucketId',
   'giftName',
   'userGiftId',
   'requestId',
   'assignmentMode',
   'outcome',
+  'remainingCountBefore',
+  'remainingCountAfter',
 };
 
 final class RewardEventLogDto extends ShopActivityLogDto {
@@ -420,18 +423,21 @@ final class RewardEventLogDto extends ShopActivityLogDto {
     this.shopId,
     this.rewardOpportunityId,
     this.selectedSource,
-    this.availableSources = const [],
+    this.eligibleSources = const [],
     this.crossedMilestone,
     this.cumulativeBillSum,
     this.milestoneCycleBillSum,
     this.campaignId,
     this.giftLibraryId,
     this.giftId,
+    this.bucketId,
     this.giftName,
     this.userGiftId,
     this.requestId,
     this.assignmentMode,
     this.outcome,
+    this.remainingCountBefore,
+    this.remainingCountAfter,
     super.phoneNumber,
   });
 
@@ -439,18 +445,21 @@ final class RewardEventLogDto extends ShopActivityLogDto {
   final String? shopId;
   final String? rewardOpportunityId;
   final String? selectedSource;
-  final List<String> availableSources;
+  final List<String> eligibleSources;
   final int? crossedMilestone;
   final double? cumulativeBillSum;
   final double? milestoneCycleBillSum;
   final String? campaignId;
   final String? giftLibraryId;
   final String? giftId;
+  final String? bucketId;
   final String? giftName;
   final String? userGiftId;
   final String? requestId;
   final String? assignmentMode;
   final String? outcome;
+  final int? remainingCountBefore;
+  final int? remainingCountAfter;
 
   factory RewardEventLogDto._fromMap(String docId, Map<String, dynamic> d) =>
       RewardEventLogDto._(
@@ -468,7 +477,7 @@ final class RewardEventLogDto extends ShopActivityLogDto {
         shopId: d['shopId'] as String?,
         rewardOpportunityId: d['rewardOpportunityId'] as String?,
         selectedSource: d['selectedSource'] as String?,
-        availableSources: (d['availableSources'] as List<dynamic>? ?? const [])
+        eligibleSources: (d['eligibleSources'] as List<dynamic>? ?? const [])
             .whereType<String>()
             .toList(growable: false),
         crossedMilestone: (d['crossedMilestone'] as num?)?.toInt(),
@@ -477,11 +486,14 @@ final class RewardEventLogDto extends ShopActivityLogDto {
         campaignId: d['campaignId'] as String?,
         giftLibraryId: d['giftLibraryId'] as String?,
         giftId: d['giftId'] as String?,
+        bucketId: d['bucketId'] as String?,
         giftName: d['giftName'] as String?,
         userGiftId: d['userGiftId'] as String?,
         requestId: d['requestId'] as String?,
         assignmentMode: d['assignmentMode'] as String?,
         outcome: d['outcome'] as String?,
+        remainingCountBefore: (d['remainingCountBefore'] as num?)?.toInt(),
+        remainingCountAfter: (d['remainingCountAfter'] as num?)?.toInt(),
         phoneNumber: d['phoneNumber'] as String?,
       );
 }

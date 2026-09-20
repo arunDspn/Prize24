@@ -547,7 +547,7 @@ export interface CheckInResponse {
         rewardOpportunity?: {
             id: string;
             status: "pending" | "completed";
-            availableSources: Array<"campaign" | "gift_library">;
+            eligibleSources: Array<"campaign" | "gift_library">;
             selectedSource: "campaign" | "gift_library" | null;
         };
         giftInfo?: {

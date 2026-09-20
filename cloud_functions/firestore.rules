@@ -253,41 +253,24 @@ service cloud.firestore {
 					request.resource.data.name.size() > 0 &&
 					request.resource.data.description is string &&
 					request.resource.data.description.size() > 0 &&
+					request.resource.data.activeBucketCount == 0 &&
 					request.resource.data.status == 'active');
 			allow update: if isSuperAdmin() ||
 				(isAuthenticated() && resource.data.ownerVendorId == uid() &&
 					request.resource.data.ownerVendorId == resource.data.ownerVendorId &&
 					request.resource.data.status == resource.data.status &&
+					request.resource.data.activeBucketCount == resource.data.activeBucketCount &&
 					request.resource.data.name is string &&
 					request.resource.data.name.size() > 0 &&
 					request.resource.data.description is string &&
 					request.resource.data.description.size() > 0);
 			allow delete: if false;
 
-			match /gifts/{giftId} {
+			match /buckets/{bucketId} {
 				allow read: if isSuperAdmin() ||
 					(isAuthenticated() &&
 						get(/databases/$(database)/documents/giftLibraries/$(libraryId)).data.ownerVendorId == uid());
-				allow create: if isSuperAdmin() ||
-					(isAuthenticated() &&
-						get(/databases/$(database)/documents/giftLibraries/$(libraryId)).data.ownerVendorId == uid() &&
-						get(/databases/$(database)/documents/giftLibraries/$(libraryId)).data.status == 'active' &&
-						request.resource.data.name is string &&
-						request.resource.data.name.size() > 0 &&
-						request.resource.data.description is string &&
-						request.resource.data.description.size() > 0 &&
-						request.resource.data.status == 'active');
-				allow update: if isSuperAdmin() ||
-					(isAuthenticated() &&
-						get(/databases/$(database)/documents/giftLibraries/$(libraryId)).data.ownerVendorId == uid() &&
-						request.resource.data.name is string &&
-						request.resource.data.name.size() > 0 &&
-						request.resource.data.description is string &&
-						request.resource.data.description.size() > 0 &&
-						request.resource.data.status in ['active', 'archived'] &&
-						(resource.data.status == request.resource.data.status ||
-							(resource.data.status == 'active' && request.resource.data.status == 'archived')));
-				allow delete: if false;
+				allow create, update, delete: if false;
 			}
 		}
 
@@ -302,7 +285,7 @@ service cloud.firestore {
 					request.resource.data.vendorId == uid() ||
 					request.resource.data.partnerId == uid() ||
 					request.resource.data.shopOwnerId == uid()
-				)));
+				));
 
 			allow update: if isSuperAdmin() || isCampaignOwnerFromData(resource.data);
 
