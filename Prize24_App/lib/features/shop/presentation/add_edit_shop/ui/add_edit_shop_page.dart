@@ -853,38 +853,142 @@ class _AddOrEditShopPageState extends ConsumerState<AddOrEditShopPage>
             ),
             const SizedBox(height: 8),
             InkWell(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
               onTap: snapshot.connectionState != ConnectionState.done
                   ? null
                   : () async {
                       final selected = await showModalBottomSheet<GiftLibraryModel>(
                         context: context,
-                        showDragHandle: true,
-                        builder: (context) => SafeArea(
-                          child: libraries.isEmpty
-                              ? const Padding(
-                                  padding: EdgeInsets.all(32),
-                                  child: Text(
-                                    'Create a Gift Library from the vendor Libraries tab first.',
-                                    textAlign: TextAlign.center,
+                        isScrollControlled: true,
+                        useSafeArea: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => Container(
+                          constraints: BoxConstraints(
+                            maxHeight: MediaQuery.sizeOf(context).height * .78,
+                          ),
+                          padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+                          decoration: const BoxDecoration(
+                            color: _slate50,
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(28),
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 42,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: _slate300,
+                                  borderRadius: BorderRadius.circular(99),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              const Row(
+                                children: [
+                                  Icon(
+                                    Icons.card_giftcard_rounded,
+                                    color: _brandStart,
+                                    size: 28,
+                                  ),
+                                  SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'Select Gift Library',
+                                      style: TextStyle(
+                                        fontFamily: 'Inter',
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w800,
+                                        color: _slate900,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              if (libraries.isEmpty)
+                                const Padding(
+                                  padding: EdgeInsets.all(24),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.inventory_2_outlined,
+                                        size: 40,
+                                        color: _slate400,
+                                      ),
+                                      SizedBox(height: 12),
+                                      Text(
+                                        'No Gift Libraries available',
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.w700,
+                                          color: _slate900,
+                                        ),
+                                      ),
+                                      SizedBox(height: 6),
+                                      Text(
+                                        'Create a Gift Library from the vendor '
+                                        'Libraries tab first.',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(color: _slate500),
+                                      ),
+                                    ],
                                   ),
                                 )
-                              : ListView(
-                                  shrinkWrap: true,
-                                  children: libraries
-                                      .map(
-                                        (library) => ListTile(
-                                          leading: const Icon(
-                                            Icons.card_giftcard_rounded,
+                              else
+                                Flexible(
+                                  child: ListView.separated(
+                                    shrinkWrap: true,
+                                    itemCount: libraries.length,
+                                    separatorBuilder: (_, _) =>
+                                        const SizedBox(height: 10),
+                                    itemBuilder: (context, index) {
+                                      final library = libraries[index];
+                                      return Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            16,
                                           ),
-                                          title: Text(library.name),
+                                          border: Border.all(color: _slate200),
+                                        ),
+                                        child: ListTile(
+                                          leading: Container(
+                                            width: 42,
+                                            height: 42,
+                                            decoration: BoxDecoration(
+                                              color: _brandStart.withValues(
+                                                alpha: .1,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(13),
+                                            ),
+                                            child: const Icon(
+                                              Icons.card_giftcard_rounded,
+                                              color: _brandStart,
+                                            ),
+                                          ),
+                                          title: Text(
+                                            library.name,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              color: _slate900,
+                                            ),
+                                          ),
                                           subtitle: Text(library.description),
+                                          trailing: const Icon(
+                                            Icons.chevron_right_rounded,
+                                          ),
                                           onTap: () =>
                                               Navigator.pop(context, library),
                                         ),
-                                      )
-                                      .toList(),
+                                      );
+                                    },
+                                  ),
                                 ),
+                            ],
+                          ),
                         ),
                       );
                       if (selected != null && mounted) {
@@ -897,16 +1001,31 @@ class _AddOrEditShopPageState extends ConsumerState<AddOrEditShopPage>
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: _selectedGiftLibrary == null
                         ? _slate200
-                        : _brandStart.withOpacity(0.5),
+                        : _brandStart.withValues(alpha: .5),
                   ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.card_giftcard_rounded, color: _slate400),
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: _selectedGiftLibrary == null
+                            ? _slate100
+                            : _brandStart.withValues(alpha: .1),
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      child: Icon(
+                        Icons.card_giftcard_rounded,
+                        color: _selectedGiftLibrary == null
+                            ? _slate400
+                            : _brandStart,
+                      ),
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(

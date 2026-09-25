@@ -267,4 +267,57 @@ void main() {
     );
     expect(tile.enabled, isFalse);
   });
+
+  testWidgets('milestone dialog remains usable on a compact scaled viewport', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const data = RewardFlowData(
+      opportunityId: 'opportunity-compact',
+      userId: 'customer-compact',
+      milestone: 15,
+      cumulativeStreak: 16,
+      eligibleSources: ['campaign', 'gift_library'],
+      cumulativeBillSum: 125.75,
+      milestoneCycleBillSum: 40.25,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: const TextScaler.linear(1.4)),
+            child: Scaffold(
+              body: FilledButton(
+                onPressed: () => unawaited(
+                  showRewardSourceDialog(
+                    context: context,
+                    data: data,
+                    lifetimeSpend: '125.75',
+                    milestoneCycleSpend: '40.25',
+                    libraryHasStock: false,
+                    libraryLoadError: null,
+                  ),
+                ),
+                child: const Text('Resolve compact'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Resolve compact'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Milestone reached'), findsOneWidget);
+    expect(find.byType(SingleChildScrollView), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
 }
