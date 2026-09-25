@@ -37,6 +37,34 @@ void main() {
     expect(data.eligibleSources, ['campaign', 'gift_library']);
   });
 
+  test('automatically selects Campaign-only rewards', () {
+    const data = RewardFlowData(
+      opportunityId: 'opportunity-1',
+      userId: 'customer-1',
+      milestone: 15,
+      cumulativeStreak: 15,
+      eligibleSources: ['campaign'],
+      cumulativeBillSum: 100,
+      milestoneCycleBillSum: 25,
+    );
+
+    expect(automaticallySelectedRewardSource(data), 'campaign');
+  });
+
+  test('does not automatically select Gift-Library-only rewards', () {
+    const data = RewardFlowData(
+      opportunityId: 'opportunity-1',
+      userId: 'customer-1',
+      milestone: 15,
+      cumulativeStreak: 15,
+      eligibleSources: ['gift_library'],
+      cumulativeBillSum: 100,
+      milestoneCycleBillSum: 25,
+    );
+
+    expect(automaticallySelectedRewardSource(data), isNull);
+  });
+
   testWidgets('shows guidance when a Gift Library has no active buckets', (
     tester,
   ) async {
@@ -116,6 +144,56 @@ void main() {
     await tester.tap(find.text('Assign later'));
     await tester.pumpAndSettle();
   });
+
+  testWidgets(
+    'shows the monetary milestone summary for a Gift-Library-only reward',
+    (tester) async {
+      const data = RewardFlowData(
+        opportunityId: 'opportunity-1',
+        userId: 'customer-1',
+        milestone: 15,
+        cumulativeStreak: 16,
+        eligibleSources: ['gift_library'],
+        cumulativeBillSum: 125.75,
+        milestoneCycleBillSum: 40.25,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: FilledButton(
+                onPressed: () => unawaited(
+                  showRewardSourceDialog(
+                    context: context,
+                    data: data,
+                    lifetimeSpend: '125.75',
+                    milestoneCycleSpend: '40.25',
+                    libraryHasStock: true,
+                    libraryLoadError: null,
+                  ),
+                ),
+                child: const Text('Resolve'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Resolve'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Current cumulative streak: 16'), findsOneWidget);
+      expect(find.text('Crossed milestone: 15'), findsOneWidget);
+      expect(find.text('Lifetime spend: 125.75'), findsOneWidget);
+      expect(find.text('Milestone-cycle spend: 40.25'), findsOneWidget);
+      expect(find.text('Gift Library'), findsOneWidget);
+      expect(find.text('Campaign draw'), findsNothing);
+
+      await tester.tap(find.text('Assign later'));
+      await tester.pumpAndSettle();
+    },
+  );
 
   testWidgets('confirms both the customer and selected library bucket', (
     tester,

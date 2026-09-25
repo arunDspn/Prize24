@@ -70,6 +70,15 @@ Stream<int> watchPendingRewardCount(String shopId) {
       .map((snapshot) => snapshot.size);
 }
 
+String? automaticallySelectedRewardSource(RewardFlowData data) {
+  if (data.selectedSource != null) return data.selectedSource;
+  if (data.eligibleSources.length == 1 &&
+      data.eligibleSources.single == 'campaign') {
+    return 'campaign';
+  }
+  return null;
+}
+
 Future<void> showMilestoneRewardFlow({
   required BuildContext context,
   required WidgetRef ref,
@@ -92,22 +101,15 @@ Future<void> showMilestoneRewardFlow({
   if (!context.mounted) return;
 
   final libraryHasStock = attachedLibrary?.hasAvailableBuckets ?? false;
-  var source = data.selectedSource;
-  if (source == null) {
-    final canProceedDirectly =
-        data.eligibleSources.length == 1 &&
-        (data.eligibleSources.single == 'campaign' || libraryHasStock);
-    source = canProceedDirectly
-        ? data.eligibleSources.single
-        : await showRewardSourceDialog(
-            context: context,
-            data: data,
-            lifetimeSpend: lifetimeSpend,
-            milestoneCycleSpend: milestoneCycleSpend,
-            libraryHasStock: libraryHasStock,
-            libraryLoadError: libraryLoadError,
-          );
-  }
+  var source = automaticallySelectedRewardSource(data);
+  source ??= await showRewardSourceDialog(
+    context: context,
+    data: data,
+    lifetimeSpend: lifetimeSpend,
+    milestoneCycleSpend: milestoneCycleSpend,
+    libraryHasStock: libraryHasStock,
+    libraryLoadError: libraryLoadError,
+  );
   if (source == null || !context.mounted) return;
 
   String? bucketId;
