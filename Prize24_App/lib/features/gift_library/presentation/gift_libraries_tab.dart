@@ -28,10 +28,8 @@ class _GiftLibrariesTabState extends ConsumerState<GiftLibrariesTab> {
   }
 
   Future<void> _openEditor([GiftLibraryModel? library]) async {
-    final nameController = TextEditingController(text: library?.name);
-    final descriptionController = TextEditingController(
-      text: library?.description,
-    );
+    var name = library?.name ?? '';
+    var description = library?.description ?? '';
     final saved = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -41,12 +39,14 @@ class _GiftLibrariesTabState extends ConsumerState<GiftLibrariesTab> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
-              controller: nameController,
+            TextFormField(
+              initialValue: name,
+              onChanged: (value) => name = value,
               decoration: const InputDecoration(labelText: 'Library name'),
             ),
-            TextField(
-              controller: descriptionController,
+            TextFormField(
+              initialValue: description,
+              onChanged: (value) => description = value,
               decoration: const InputDecoration(labelText: 'Description'),
               minLines: 2,
               maxLines: 4,
@@ -60,9 +60,11 @@ class _GiftLibrariesTabState extends ConsumerState<GiftLibrariesTab> {
           ),
           FilledButton(
             onPressed: () async {
-              final name = nameController.text.trim();
-              final description = descriptionController.text.trim();
-              if (name.isEmpty || description.isEmpty) return;
+              final submittedName = name.trim();
+              final submittedDescription = description.trim();
+              if (submittedName.isEmpty || submittedDescription.isEmpty) {
+                return;
+              }
               final service = ref.read(giftLibraryServiceProvider);
               if (library == null) {
                 final userId = ref
@@ -71,14 +73,14 @@ class _GiftLibrariesTabState extends ConsumerState<GiftLibrariesTab> {
                     .userId;
                 await service.createLibrary(
                   ownerVendorId: userId,
-                  name: name,
-                  description: description,
+                  name: submittedName,
+                  description: submittedDescription,
                 );
               } else {
                 await service.updateLibrary(
                   libraryId: library.id,
-                  name: name,
-                  description: description,
+                  name: submittedName,
+                  description: submittedDescription,
                 );
               }
               if (context.mounted) Navigator.pop(context, true);
@@ -88,8 +90,6 @@ class _GiftLibrariesTabState extends ConsumerState<GiftLibrariesTab> {
         ],
       ),
     );
-    nameController.dispose();
-    descriptionController.dispose();
     if ((saved ?? false) && mounted) setState(_reload);
   }
 
@@ -139,10 +139,13 @@ class _GiftLibrariesTabState extends ConsumerState<GiftLibrariesTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _openEditor,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Gift Library'),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 75),
+        child: FloatingActionButton.extended(
+          onPressed: _openEditor,
+          icon: const Icon(Icons.add_rounded),
+          label: const Text('Gift Library'),
+        ),
       ),
       body: FutureBuilder<List<GiftLibraryModel>>(
         future: _libraries,
@@ -256,13 +259,9 @@ class _GiftLibraryDetailPageState extends ConsumerState<GiftLibraryDetailPage> {
       );
       return;
     }
-    final nameController = TextEditingController(text: bucket?.name);
-    final descriptionController = TextEditingController(
-      text: bucket?.description,
-    );
-    final countController = TextEditingController(
-      text: bucket?.remainingCount.toString(),
-    );
+    var name = bucket?.name ?? '';
+    var description = bucket?.description ?? '';
+    var count = bucket?.remainingCount.toString() ?? '';
     final saved = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -270,18 +269,21 @@ class _GiftLibraryDetailPageState extends ConsumerState<GiftLibraryDetailPage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
-              controller: nameController,
+            TextFormField(
+              initialValue: name,
+              onChanged: (value) => name = value,
               decoration: const InputDecoration(labelText: 'Bucket name'),
             ),
-            TextField(
-              controller: descriptionController,
+            TextFormField(
+              initialValue: description,
+              onChanged: (value) => description = value,
               decoration: const InputDecoration(labelText: 'Description'),
               minLines: 2,
               maxLines: 4,
             ),
-            TextField(
-              controller: countController,
+            TextFormField(
+              initialValue: count,
+              onChanged: (value) => count = value,
               decoration: const InputDecoration(
                 labelText: 'Remaining quantity',
               ),
@@ -296,17 +298,17 @@ class _GiftLibraryDetailPageState extends ConsumerState<GiftLibraryDetailPage> {
           ),
           FilledButton(
             onPressed: () async {
-              final name = nameController.text.trim();
-              final description = descriptionController.text.trim();
-              final remainingCount = int.tryParse(countController.text.trim());
+              final submittedName = name.trim();
+              final submittedDescription = description.trim();
+              final remainingCount = int.tryParse(count.trim());
               final minimumCount = bucket == null ? 1 : 0;
               final validationMessage = bucket == null
                   ? 'Enter a name, description, and quantity '
                         'of at least 1.'
                   : 'Enter a name, description, and '
                         'non-negative quantity.';
-              if (name.isEmpty ||
-                  description.isEmpty ||
+              if (submittedName.isEmpty ||
+                  submittedDescription.isEmpty ||
                   remainingCount == null ||
                   remainingCount < minimumCount) {
                 ScaffoldMessenger.of(
@@ -318,16 +320,16 @@ class _GiftLibraryDetailPageState extends ConsumerState<GiftLibraryDetailPage> {
               if (bucket == null) {
                 await service.createBucket(
                   libraryId: widget.library.id,
-                  name: name,
-                  description: description,
+                  name: submittedName,
+                  description: submittedDescription,
                   remainingCount: remainingCount,
                 );
               } else {
                 await service.updateBucket(
                   libraryId: widget.library.id,
                   bucketId: bucket.id,
-                  name: name,
-                  description: description,
+                  name: submittedName,
+                  description: submittedDescription,
                   remainingCount: remainingCount,
                 );
               }
@@ -338,9 +340,6 @@ class _GiftLibraryDetailPageState extends ConsumerState<GiftLibraryDetailPage> {
         ],
       ),
     );
-    nameController.dispose();
-    descriptionController.dispose();
-    countController.dispose();
     if ((saved ?? false) && mounted) {
       setState(() {
         if (bucket == null) _activeBucketCount++;
@@ -353,10 +352,13 @@ class _GiftLibraryDetailPageState extends ConsumerState<GiftLibraryDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(widget.library.name)),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _activeBucketCount >= 20 ? null : _openBucketEditor,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Bucket'),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 75),
+        child: FloatingActionButton.extended(
+          onPressed: _activeBucketCount >= 20 ? null : _openBucketEditor,
+          icon: const Icon(Icons.add_rounded),
+          label: const Text('Bucket'),
+        ),
       ),
       body: FutureBuilder<List<GiftLibraryBucketModel>>(
         future: _buckets,
