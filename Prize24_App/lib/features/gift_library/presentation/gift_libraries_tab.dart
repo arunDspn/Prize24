@@ -213,7 +213,10 @@ class _GiftLibrariesTabState extends ConsumerState<GiftLibrariesTab> {
                   library: library,
                   onTap: library.isActive
                       ? () async {
-                          await Navigator.of(context).push<void>(
+                          await Navigator.of(
+                            context,
+                            rootNavigator: true,
+                          ).push<void>(
                             MaterialPageRoute(
                               builder: (_) =>
                                   GiftLibraryDetailPage(library: library),
